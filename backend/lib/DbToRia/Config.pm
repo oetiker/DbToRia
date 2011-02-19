@@ -1,122 +1,201 @@
 package DbToRia::Config;
-
 use strict;
-
-use DBI;
-use Qooxdoo::JSONRPC;
-use Data::Dumper;
-
-my $singleton;
-
-sub new {
-    my $class = shift;
-    $singleton ||= bless {}, $class;
-}
-
-sub getConfig 
-{
-    my $this = shift;
-    
-    # generate config if not already present
-    if (!exists $this->{config}) {
-	
-	my $configDir = "../etc/";
-	my %config;
-	
-	open (CONFIG, $configDir . "dbtoria.conf") or die "Failed opening file " . $configDir . "dbtoria.conf";
-    
-	# read config into hash, strip comments, trim keys and values
-	while (<CONFIG>) {
-	    
-	    chomp ($_);
-	    
-	    # skip comments
-	    if($_ =~ /^#/) {
-		next;
-	    }
-	    
-	    # limit character set and trim
-	    if($_ =~ m/^([a-z_0-9]*) = (.*)$/i) {
-		my $key = $1;
-		my $value = $2;
-		
-		$key =~ s/^\s+//;
-		$key =~ s/\s+$//;
-		$value =~ s/^\s+//;
-		$value =~ s/\s+$//;
-		
-		$config{$key} = $value;
-	    }
-	}
-	close (CONFIG);
-	
-	# see if we have a database specific configuration to load
-	if($config{'db_type'}) {
-	    
-	    open (DBCONFIG, $configDir . $config{'db_type'} . ".conf") or die "Failed opening file " . $configDir . $config{'db_type'} . ".conf";
-	    
-	    while (<DBCONFIG>) {
-		chomp ($_);
-		
-		# skip comments
-		if($_ =~ /^#/) {
-		    next;
-		}
-		
-		# limit character set and trim
-		if($_ =~ m/^([a-z_0-9]*) = (.*)$/i) {
-		    my $key = $1;
-		    my $value = $2;
-		    
-		    $key =~ s/^\s+//;
-		    $key =~ s/\s+$//;
-		    $value =~ s/^\s+//;
-		    $value =~ s/\s+$//;
-		    
-		    $config{$key} = $value;
-		}
-	    }
-	    close (DBCONFIG);
-	}
-	
-	$this->{config} = {%config};
-	return $this->{config};
-    }
-    else {
-	return $this->{config};
-    }
-}
-
-1;
-
-
-##############################################################################
 
 =head1 NAME
 
-DbToRia::Config.pm - Simple config reader
+DbToRia::Config - The Configuration File
 
 =head1 SYNOPSIS
 
-This module implements a very simple config reader. Basically it reads the
-file dbtoria.conf in ../config/ and parses key = value pairs into a hash.
-Comments start with a hash key (#).
+ use DbToRia::Config;
 
-After the initial loading of dbtoria.conf an attemept is made to load
-a database specific config file. The filename is determined by the
-configuration value of "db_type".
+ my $parser = DbToRia::Config->new(file=>'/etc/SmokeTracessas/system.cfg');
+ my $cfg = $parser->parse_config();
+ my $pod = $parser->make_pod();
 
-The class is implemented as a singelton so every subsequent request is handled
-by the same instance. This way the configuration file only has to be loaded once.
+=head1 DESCRIPTION
+
+Configuration reader for remOcularssas.
+
+=cut
+
+use vars qw($VERSION);
+$VERSION   = '0.01';
+use Carp;
+use Config::Grammar;
+use base qw(Mojo::Base);
+
+__PACKAGE__->attr('file');
+    
+
+=head1 METHODS
+
+All methods inherited from L<Mojo::Base>. As well as the following:
+
+=cut
+
+=head2 $x->B<parse_config>(I<path_to_config_file>)
+
+Read the configuration file and die if there is a problem.
+
+=cut
+
+sub parse_config {
+    my $self = shift;
+    my $cfg_file = shift;
+    my $parser = $self->_make_parser();
+    my $cfg = $parser->parse($self->file) or croak($parser->{err});
+    return $cfg;
+}
+
+=head2 $x->B<make_config_pod>()
+
+Create a pod documentation file based on the information fro all config actions.
+
+=cut
+
+sub make_pod {
+    my $self = shift;
+    my $parser = $self->_make_parser();
+    my $E = '=';
+    my $footer = <<"FOOTER";
+
+${E}head1 COPYRIGHT
+
+Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
+
+${E}head1 LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+${E}head1 AUTHOR
+
+S<Tobias Oetiker E<lt>tobi\@oetiker.chE<gt>>
+
+${E}head1 HISTORY
+
+ 2011-02-19 to 1.0 first version
+
+FOOTER
+    my $header = $self->_make_pod_header();    
+    return $header.$parser->makepod().$footer;
+}
 
 
-getConfig:
-   Parameters: 
-   Returns: 	config hash
+
+=item $x->B<_make_pod_header>()
+
+Returns the header of the cfg pod file.
+
+=cut
+
+sub _make_pod_header {
+    my $self = shift;
+    my $E = '=';
+    return <<"HEADER";
+${E}head1 NAME
+
+dbtoria.cfg - The DbToRia configuration file
+
+${E}head1 SYNOPSIS
+
+ *** General ***
+ dsn = 
+ secret = MyCookieSecret
+ log_file = /tmp/dbtoria.log
+ log_toppic_filter = .+
+
+${E}head1 DESCRIPTION
+
+Configuration overview
+
+${E}head1 CONFIGURATION
+
+HEADER
+
+}
+
+=item $x->B<_make_parser>()
+
+Create a config parser for dbtoria.
+
+=cut
+
+sub _make_parser {
+    my $self = shift;
+    my $E = '=';
+    my $grammar = {
+        _sections => [ qw(General)],
+        _mandatory => [qw(General)],
+        General => {
+            _doc => 'Global configuration settings for DbToRia',
+            _vars => [ qw(dsn secret log_file log_level) ],
+            _mandatory => [ qw(dsn secret log_file log_level) ],
+            dsn => { _doc => 'DBI connect string', _example=>'dbi:Pg:dbname=testdb' },
+            secret => { _doc => 'secret for signing mojo cookies' },
+            log_file => { _doc => 'write a log file to this location'},
+            log_toppic_filter => { _doc => 'rx to match against log toppics'},        
+        }
+    };
+    my $parser =  Config::Grammar->new ($grammar);
+    return $parser;
+}
+
+1;
+__END__
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =head1 AUTHOR
 
-David Angleitner E<lt>david.angleitner@tet.htwchur.chE<gt>
+S<Tobias Oetiker E<lt>tobi@oetiker.chE<gt>>
+
+=head1 HISTORY
+
+ 2011-02-19 to 1.0 first version
 
 =cut
+
+# Emacs Configuration
+#
+# Local Variables:
+# mode: cperl
+# eval: (cperl-set-style "PerlStyle")
+# mode: flyspell
+# mode: flyspell-prog
+# End:
+#
+# vi: sw=4 et
 
