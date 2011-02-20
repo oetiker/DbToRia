@@ -1,6 +1,27 @@
-=head1 DbToRia - Database to Rich Internet Application
+=head1 NAME
+
+DbToRia - Database to Rich Internet Application
+
+=head1 DESCRIPTION
 
 DbToRia is generic sql database frontend. Just point it to your database and
 get a user friendly web interface. By providing DbToRia with additional
 information about the nature of your database the userinterface can be
 further optimized.
+
+=head1 SETUP
+
+=head2 Quick Start
+
+We assume you have DBI and the respektive DBD module for your database already installed.
+Now get Mojo and the Mojo qooxdoo dispatcher and the config grammar module:
+
+ cd backend/setup
+ ./make_thirdparty.sh
+
+Edit the F<backend/etc/dbtoria.cfg> file to point to the database of your choice.
+
+With this set you are ready to run dbtoria with its build in webserver for testing
+
+ ./backend/bin/dbtoria.pl daemon
+

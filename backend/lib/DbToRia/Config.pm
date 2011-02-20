@@ -113,7 +113,7 @@ ${E}head1 SYNOPSIS
 
  *** General ***
  dsn = 
- secret = MyCookieSecret
+ mojo_secret = MyCookieSecret
  log_file = /tmp/dbtoria.log
  log_toppic_filter = .+
 
@@ -141,10 +141,10 @@ sub _make_parser {
         _mandatory => [qw(General)],
         General => {
             _doc => 'Global configuration settings for DbToRia',
-            _vars => [ qw(dsn secret log_file log_level) ],
-            _mandatory => [ qw(dsn secret log_file log_level) ],
+            _vars => [ qw(dsn mojo_secret log_file log_toppic_filer) ],
+            _mandatory => [ qw(dsn mojo_secret log_file) ],
             dsn => { _doc => 'DBI connect string', _example=>'dbi:Pg:dbname=testdb' },
-            secret => { _doc => 'secret for signing mojo cookies' },
+            mojo_secret => { _doc => 'secret for signing mojo cookies' },
             log_file => { _doc => 'write a log file to this location'},
             log_toppic_filter => { _doc => 'rx to match against log toppics'},        
         }
