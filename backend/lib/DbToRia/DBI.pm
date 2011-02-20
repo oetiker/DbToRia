@@ -18,29 +18,30 @@ DbToRia::DBI - database interface
 =cut
 
 use strict;
-
 use DBI;
 use DbToRia::Exception;
 
 use base qw(Mojo::Base);
 
 __PACKAGE__->attr('dsn');
-__PACKAGE__->attr('user');
-__PACKAGE__->attr('password');
+__PACKAGE__->attr('session');
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    my ($scheme,$driver) = DBI->parse_dsn($self->{dsn});
+    my ($schema,$driver) = DBI->parse_dsn($self->{dsn});
     $self->{schema} = $schema;
     $self->{driver} = $driver;      
     require 'DbToRia/Driver/'.$self->{driver};
     no strict 'refs';
-    $self->{driver} = "DbToRia::Driver::$self->{driver}"->new();
+    $self->{driver_object} = "DbToRia::Driver::$self->{driver}"->new();
 }
+
     
 sub getDbh {
-    my $self;
-    my $dbh = DBI->connect_cached($self->{dsn},$self->{user},$self->{password},{
+    my $self = shift;
+    my $user = $self->session->param('username');
+    my $pass = $self->session->param('password');
+    my $dbh = DBI->connect_cached($self->{dsn},$user,$pass,{
         RaiseError => 1,
         PrintError => 0,
         AutoCommit => 1,
@@ -55,10 +56,10 @@ sub getTables {
     my $self = shift;
     my $type = shift || 'TABLE';
     my $dbh	= $self->getDbh();
-	my $sth = $db->table_info(undef, $self->{schema}, undef, $type) or die("DB Error" . DBI->errstr);
+	my $sth = $dbh->table_info(undef, $self->{schema}, undef, $type) or die("DB Error" . DBI->errstr);
 	my @tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
-	    push(@tables, {
+	    push @tables, {
             id   => $table->{TABLE_NAME},
             name => $table->{REMARKS}
     	}
@@ -73,28 +74,32 @@ This uses the map_type methode from the database driver to map the internal
 datatypes to DbToRia compatible datatypes.
 
 =cut
+
 sub getTableStructure {
     my $self = shift;
-    my $tableName = shift;
+    my $table = shift;
+
+    return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
+
     my $dbh = $self->getDbh();
-	my $fksth = $db->foreign_key_info(undef, undef, undef, undef, $self->{schema}, $tableName);
+	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, $self->{schema}, $table);
 
 	my %foreignKeys;
     while ( my $fk = $fksth->fetchrow_hashref ) {
-        $foreinKeys{$fk->{FK_COLUMN_NAME}} = {
+        $foreignKeys{$fk->{FK_COLUMN_NAME}} = {
             table => $fk->{UK_TABLE_NAME},
             field => $fk->{UK_COLUMN_NAME}
         };    
     }
 
     my %primaryKeys;
-	my $pksth = $db->primary_key_info(undef, $self->{schema}, $tableName);
+	my $pksth = $dbh->primary_key_info(undef, $self->{schema}, $table);
     while ( my $pk = $pksth->fetchrow_hashref ) {
-        $primaryKeys{$fk->{COLUMN_NAME} = 1;
+        $primaryKeys{$pk->{COLUMN_NAME}} = 1;
     }
 
 	# call column_info for metadata on columns
-	my $sth = $db->column_info(undef, $schema, $tableName, undef);
+	my $sth = $dbh->column_info(undef, $self->{schema}, $table, undef);
 
 	my @columns;
 	while( my $col = $sth->fetchrow_hashref ) {
@@ -103,17 +108,19 @@ sub getTableStructure {
         # return structure
         push @columns, {
             id         => $id,
-            type       => $self->{driver}->map_type($col->{TYPE_NAME}),
-            name       => $column->{REMARKS},
-            size       => $column->{COLUMN_SIZE},
-            required   => $column->{NULLABLE} == 0,
+            type       => $self->{driver_object}->map_type($col->{TYPE_NAME}),
+            nativeType => $col->{TYPE_NAME},
+            name       => $col->{REMARKS},
+            size       => $col->{COLUMN_SIZE},
+            required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
             primaryKey => $primaryKeys{$id},
-            pos        => $col->{ORDINAL_POSITION} || 0
+            pos        => $col->{ORDINAL_POSITION} 
         }
     }
     # sort the result
-    return [ sort { $a->{pos} <=> $b->{pos} } @columns ];
+    $self->{tableStructure}{$table} = [ sort { $a->{pos} <=> $b->{pos} } @columns ];
+    return $self->{tableStructure}{$table};
 }
 
 =head2 getTableData(table)
@@ -126,432 +133,240 @@ selection lists (fk)
 sub getTableData {
     my $self = shift;
 
-    my $tableName = shift;
+    my $table = shift;
     my $selection = shift || {};
     
     my $dbh = $self->getDbh();
-	my $query = "SELECT * FROM ". $dbh->quote_identifier($tableName);
+	my $query = "SELECT * FROM ". $dbh->quote_identifier($table);
 	
     my @where;
     for my $key (keys %$selection) {
-        push @where, $dbh->quote_identifier($key) . ' = '  $dbh->quote($selection->{$key});
+        push @where, $dbh->quote_identifier($key) . ' = ' .  $dbh->quote($selection->{$key});
     }
     if (@where){
         $query .= ' WHERE '. join (' AND ',@where);
     }
-	my $data = $sth->selectall_arrayref($query);
+    my $sth = $dbh->prepare($query);
+    $sth->execute;
+    my @data;
 
-	
-	# call column_info for metadata on columns
-	$sth = $db->column_info(undef, undef, $tableName, undef) or die("DB Error" . DBI->errstr);
-	
-	my $index = 0;
-	
-	# for each column create a hash with the needed information
-	while(my $column = $sth->fetchrow_hashref) {
-	    
-	    if($column->{TYPE_NAME} eq "boolean" || $column->{TYPE_NAME} eq "bool") {
-		foreach my $row (@$data) {
-		    
-		    # TODO add additional possible values
-		    if($$row[$index] == "1") {
-			$$row[$index] = "true";
-		    }
-		    else{
-			$$row[$index] = "false";    
-		    }
-		}
-	    }
-	    
-	    if($column->{TYPE_NAME} eq "timestamp without time zone") {
-		foreach my $row (@$data) {
-		    
-		    if($$row[$index] =~ /^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/) {
-			my $year = $1;
-			my $month = $2;
-			my $day = $3;
-			
-			my $hour = $4;
-			my $minute = $5;
-			my $second = $6;
-
-			#$$row[$column->{ORDINAL_POSITION} - 1] = "$day.$month.$year $hour:$minute:$second";
-			$$row[$index] = "$day.$month.$year";
-		    }
-		}
-	    }
-	    
-	    $index++;
-	}
-	    
-	if ($db->errstr) {
-	    die($db->errstr);
-	}
-	
-	return {
-	    messageType => "answer",
-	    data => [@$data]
-	};
-        
-	$db->disconnect;
+    my $structure = $self->getTableStructure($table);
+    while ( my @row = $sth->fetchrow_array ) {
+        my @new_row;
+        for (my $i=0;$i<$#row;$i++){
+            $new_row[$i] = $self->{driver_obj}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
+        }
+        push @data,\@new_row;
     }
-    else {
-	return {
-	    messageType => "error",
-	    message => DBI->errstr
-	};
-    }
+    return \@data;
 }
 
-sub getTableDataChunk
-{
-    my $this	  = shift;
-    my $error 	  = shift;
-    
-    my $tableName = shift;
+=head2 getTableDataChunk(table)
+
+Returns all data from a table. The result can be massive. We only use it for pupulating
+selection lists (fk) ... should merge this code with getTableData above almost the same!
+
+=cut
+
+sub getTableDataChunk {
+    my $self	  = shift;
+
+    my $table = shift;
     my $filter	  = shift;
     my $firstRow  = shift;
     my $lastRow   = shift;
     my $sortId	  = shift;
     my $sortDirection = shift;
-    
-    my $db 	  = $this->connect();
-    
-    if($db) {
-	my $query = "SELECT * FROM \"" . $tableName . "\"";
-	
-	if($filter) {
-	    $query .= " WHERE";
-	    
-	    foreach my $row (@$filter) {
-		for my $key (keys %$row) {
-		    $query .= " \"" . $key . "\" LIKE '" . $row->{$key} . "' AND";
-		}
-	    }
-	    
-	    $query = substr($query, 0, length($query) - 4);
-	}
-	
-	if($sortId) {
-	    $query .= " ORDER BY \"" . $sortId . "\" " . $sortDirection;
-	}
-	
-	$query .= " LIMIT " . ($lastRow - $firstRow) . " OFFSET " . $firstRow;
-	
-	DbToRia::Logger->write($query, "Statement");
 
-	my $sth = $db->prepare($query);
-	$sth->execute();
+    my $dbh = $self->getDbh();
 
-	my $data = $sth->fetchall_arrayref;
+	my $query = 'SELECT * FROM '. $dbh->quote_identifier($table);
 	
-	# call column_info for metadata on columns
-	$sth = $db->column_info(undef, undef, $tableName, undef) or die("DB Error" . DBI->errstr);
-	
-	my $index = 0;
-	
-	# for each column create a hash with the needed information
-	while(my $column = $sth->fetchrow_hashref) {
-
-	    if($column->{TYPE_NAME} eq "boolean" || $column->{TYPE_NAME} eq "bool") {
-		foreach my $row (@$data) {
-		    
-		    # TODO add additional possible values
-		    if($$row[$index] == "1") {
-			$$row[$index] = "true";
-		    }
-		    else{
-			$$row[$index] = "false";    
-		    }
-		}
-	    }
-	    
-	    if($column->{TYPE_NAME} eq "timestamp without time zone") {
-		foreach my $row (@$data) {
-		    
-		    if($$row[$index] =~ /^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/) {
-			my $year = $1;
-			my $month = $2;
-			my $day = $3;
-			
-			my $hour = $4;
-			my $minute = $5;
-			my $second = $6;
-
-			#$$row[$column->{ORDINAL_POSITION} - 1] = "$day.$month.$year $hour:$minute:$second";
-			$$row[$index] = "$day.$month.$year";
-		    }
-		}
-	    }
-	    
-	    $index++;
-	}
-
-	if ($db->errstr) {
-	    die($db->errstr);
-	}
-	
-	return {
-	    messageType => "answer",
-	    data => [@$data]
-	};
-        
-	$db->disconnect;
+    my @where;
+    for my $key (keys %$filter) {
+        my $value = $filter->{$key};
+        my $op = $value =~ /%/ ? ' LIKE ' : ' = ';
+        push @where, $dbh->quote_identifier($key) . $op . $value;
     }
-    else {
-	return {
-	    messageType => "error",
-	    message => DBI->errstr
-	};
+    $query .= ' WHERE '. join (' AND ',@where) if @where;
+	
+    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortId) . $sortDirection if $sortId;
+	
+    $query .= ' LIMIT ' . ($lastRow - $firstRow) . ' OFFSET ' . $firstRow;
+
+    my $sth = $dbh->prepare($query);
+    $sth->execute;
+    my @data;
+
+    my $structure = $self->getTableStructure($table);
+    while ( my @row = $sth->fetchrow_array ) {
+        my @new_row;
+        for (my $i=0;$i<$#row;$i++){
+            $new_row[$i] = $self->{driver_obj}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
+        }
+        push @data,\@new_row;
     }
+    return \@data;
 }
 
-sub updateTableData
-{
+=head2 updateTableData(table,selection,data)
 
-    my $this	  = shift;
-    my $error 	  = shift;
+=cut
+
+sub updateTableData {
+
+    my $self	  = shift;
     
-    my $table	  = shift;
+    my $table = shift;
     my $selection = shift;
     my $data	  = shift;
 
-    my $db 	  = $this->connect();
+    my $dbh = $self->getDbh();
 
-    my $str = "UPDATE \"$table\" SET ";
-    
+    my $update = 'UPDATE '.$dbh->quote_identifier($table);
+
+    my @set;  
     for my $key (keys %$data) {
-	$str .= " \"$key\" = '" . $data->{$key} . "', ";
+        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($data->{$key});
     }
+    $update .= 'SET '.join(', ',@set) if @set;
     
-    $str = substr($str, 0, length($str) - 2);
-    $str .= " WHERE ";
-    
-    for my $key (keys %$selection) {
-	$str .= " \"$key\" = '" . $selection->{$key} . "' AND ";
+    my @where;
+      for my $key (keys %$selection) {
+        push @where, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($selection->{$key});
     }
-    
-    $str = substr($str, 0, length($str) - 4);
+    $update .= ' WHERE '. join (' AND ',@where) if @where;
 
-    my $sth = $db->prepare($str);
+    my $sth = $dbh->prepare($update);
     
-    $sth->execute();
-    
-    DbToRia::Logger->write($str, "Statement");
-    
-    if (!$db->errstr) {
-        return {
-	    messageType => "answer",
-	    message => "ok"
-	}
-    }
-    else {
-	my $errorMessage = "";
-	my @params;
-	
-	if($db->errstr =~ /TODOsyntax error at or near (.*)/) {
-	    $errorMessage = "SyntaxError";
-	    @params = [$1];
-	}
-	else {
-	    $errorMessage = $db->errstr;
-	}
-       
-	return {
-	    messageType => "error",
-	    message => $errorMessage,
-	    params => @params
-	}
-    }
+    return $sth->execute();        
 }
 
-sub insertTableData
-{
+=head2 insertTableData(table,data)
 
-    my $this	  = shift;
-    my $error 	  = shift;
-    
+Insert and return key of new entry
+
+=cut
+
+sub insertTableData {
+
+    my $self	  = shift;
+
     my $table	  = shift;
     my $data	  = shift;
 
-    my $db 	  = $this->connect();
+    my $dbh = $self->getDbh();
+    my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 
-    my $str = "INSERT INTO \"$table\" (";
-    
-    my $str1;
-    my $str2;
+    my @keys;
+    my @values;
     
     for my $key (keys %$data) {
-	$str1 .= "\"$key\", ";
-	$str2 .= "'" . $data->{$key} . "', ";
+        push @keys, $dbh->quote_identifier($key);
+        push @values, $dbh->quote($data->{$key});
     }
     
-    $str1 = substr($str1, 0, length($str1) - 2);
-    $str2 = substr($str2, 0, length($str2) - 2);
-    
-    $str .= $str1 . ") VALUES (" . $str2 . ")";
-    
-    my $sth = $db->prepare($str);
+    $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
+    my $sth = $dbh->prepare($insert);
     
     $sth->execute();
-    
-    DbToRia::Logger->write($str, "Statement");
-    
-    if (!$db->errstr) {
-        return {
-	    messageType => "answer",
-	    message => "ok"
-	}
-    }
-    else {
-	my $errorMessage = "";
-	my @params;
-	
-	
-	if($db->errstr =~ /TODOerror at or near "(.*)/) {
-	    $errorMessage = "SyntaxError";
-	    @params = [$1];
-	}
-	else {
-	    $errorMessage = $db->errstr 
-	}
-       
-	return {
-	    messageType => "error",
-	    message => $errorMessage,
-	    params => @params
-	}
-    }
+
+    my $structure = $self->getTableStructure($table);
+    my $keyCol = (grep { $_->{primaryKey} } @$structure)[0]->{id};
+
+	return  $dbh->last_insert_id(undef,undef,$table,$keyCol);    
 }
 
-sub deleteTableData
-{
-    my $this	  = shift;
-    my $error 	  = shift;
-    
+=head2 deleteTableData(table,selection)
+
+Insert and return key of new entry
+
+=cut
+
+sub deleteTableData {
+    my $self	  = shift;
     my $table	  = shift;
     my $selection = shift;
 
-    my $db 	  = $this->connect();
+    my $dbh = $self->getDbh();
 
-    my $str = "DELETE FROM \"$table\" WHERE ";
-    
-    for my $key (keys %$selection) {
-	$str .= "\"$key\" = '" . $selection->{$key} . "' AND ";
+    my $delete = 'DELETE FROM '. $dbh->quote_identifier($table);
+
+    my @where;
+      for my $key (keys %$selection) {
+        push @where, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($selection->{$key});
     }
-    
-    $str = substr($str, 0, length($str) - 4);
-    
-    my $sth = $db->prepare($str);
-    
-    $sth->execute();
-    
-    DbToRia::Logger->write($str, "Statement");
-    
-    if (!$db->errstr) {
-        return {
-	    messageType => "answer",
-	    message => "ok"
-	}
-    }
-    else {
-	my $errorMessage = "";
-	my @params;
-	
-	if($db->errstr =~ /TODOyntax error at or near "(.*)/) {
-	    $errorMessage = "SyntaxError";
-	    @params = [$1];
-	}
-	else {
-	    $errorMessage = $db->errstr
-	}
-       
-	return {
-	    messageType => "error",
-	    message => $errorMessage,
-	    params => @params
-	}
-    }
+    $delete .= ' WHERE '. join (' AND ',@where) if @where;
+
+    my $sth = $dbh->prepare($delete);
+    return $sth->execute();
 }
 
-sub getNumRows
-{
-    my $this	  = shift;
-    my $error 	  = shift;
-    
-    my $table	  = shift;
-    my $filter	  = shift;
-    
-    my $db 	  = $this->connect();
+=head2 getNumRows(table,filter)
 
-    my $str = "SELECT COUNT(*) FROM \"$table\"";
-    
-    if($filter) {
-	$str .= " WHERE";
-	
-	foreach my $row (@$filter) {
-	    for my $key (keys %$row) {
-		$str .= " \"" . $key . "\" LIKE '" . $row->{$key} . "' AND";
-	    }
-	}
-	
-	$str = substr($str, 0, length($str) - 4);
-    }
-    
-    my $sth = $db->prepare($str);
-    my $numRows = 0;
+Find the number of rows matching the current filter
 
-    DbToRia::Logger->write($str, "Statement");
+=cut
 
-    $sth->execute();
+sub getNumRows {
+    my $self = shift;
+
+    my $table = shift;
+    my $filter = shift || {};
     
-    my @column = $sth->fetchrow_array;
-    $numRows = $column[0];
-    
-    if (!$db->errstr) {
-        return {
-	    messageType => "answer",
-	    numRows => $numRows
-	}
-    }
-    else {
-	my $errorMessage = "";
-	my @params;
+    my $dbh = $self->getDbh();
+	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
 	
-	if($db->errstr =~ /TODOyntax error at or near "(.*)/) {
-	    $errorMessage = "SyntaxError";
-	    @params = [$1];
-	}
-	else {
-	    $errorMessage = $db->errstr
-	}
-       
-	return {
-	    messageType => "error",
-	    message => $errorMessage,
-	    params => @params
-	}
+    my @where;
+    for my $key (keys %$filter) {
+        my $value = $filter->{$key};
+        my $op = $value =~ /%/ ? ' LIKE ' : ' = ';
+        push @where, $dbh->quote_identifier($key) . $op . $value;
     }
+    if (@where){
+        $query .= ' WHERE '. join (' AND ',@where);
+    }
+    return ($dbh->fetchrow_array($query))[0];
 }
 
 1;
 
-##############################################################################
+=head1 COPYRIGHT
 
-=head1 NAME
+Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
 
-DbToRia::Databases::PostgreSQL.pm - PostgreSQL module for DbToRia
+=head1 LICENSE
 
-=head1 SYNOPSIS
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or   
+(at your option) any later version.
 
-This database module provides the PostgreSQL specific implementation for 
-functions used by DbToRIA.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+GNU General Public License for more details.
 
-For detailed information see api documentation.
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
 
 =head1 AUTHOR
 
-David Angleitner E<lt>david.angleitner@tet.htwchur.chE<gt>
+S<Tobias Oetiker E<lt>tobi@oetiker.chE<gt>>,
+S<David Angleitner E<lt>david.angleitner@tet.htwchur.chE<gt>> (Original PostgreSQL module)
+
+=head1 HISTORY
+
+ 2011-02-20 to 1.0 first version
 
 =cut
 
+# Emacs Configuration
+#
+# Local Variables:
+# mode: cperl
+# eval: (cperl-set-style "PerlStyle")
+# mode: flyspell
+# mode: flyspell-prog
+# End:

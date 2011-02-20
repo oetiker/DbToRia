@@ -3,12 +3,13 @@ use strict;
 use warnings;
 
 use DbToRia::JsonRpcService;
+use DbToRia::Config;
 
 use base 'Mojolicious';
 
 __PACKAGE__->attr(cfg => sub {
     my $self = shift;
-    my $conf = remOcular::Config->new( 
+    my $conf = DbToRia::Config->new( 
         file=> $ENV{DBTORIA_CONF} || $self->home->rel_file('etc/dbtoria.cfg')
     );
     return $conf->parse_config();
