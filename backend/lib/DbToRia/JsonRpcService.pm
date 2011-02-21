@@ -1,5 +1,18 @@
 package DbToRia::JsonRpcService;
 
+=head1 NAME
+
+DbToRia::JsonRpcService - RPC Service for DbToRia
+
+=head1 SYNOPSYS
+
+This is used by L<DbToRia::MojoApp> to provide access to DbToRia
+server functions
+
+=head1 DESCRIPTION
+
+=cut
+
 use base qw(Mojo::Base);
 
 __PACKAGE__->attr('cfg');
@@ -10,11 +23,22 @@ use strict;
 
 use DbToRia::DBI;
 
+=head2 new(cfg=>DbToRia::Config)
+
+setup a new serivice
+
+=cut
+
+sub new {
+    my $self = shift->SUPER::new(@_);
+    $self->DBI(DbToRia::DBI->new(dsn=>$self->cfg->{General}{dsn}));
+    return $self;
+}
+
 =head2 _check_access(method)
 
-This gets called before each method call .. we can use it to make sure the
-session settings are correct and users get connected as themselfes to the
-database.
+This gets called before each method call. We use it to make sure the
+session settings are correct and users get connected as with their own login.
 
 =cut
 
@@ -22,64 +46,67 @@ sub _check_access {
     my $self = shift;
     my $method = shift;
     if ($self->DBI){
-        $self->DBI()->session($self->_mojo_stash->{'dbtoria.session'});
+        $self->DBI->session($self->_mojo_stash->{'dbtoria.session'});
     }
 }   
 
  
-sub authenticate {
+sub login {
     my $self = shift;
-    my $username = shift;
-    my $password = shift;
+    my $param = shift;
+    my $username = $param->{username};
+    my $password = $param->{password};
     my $session = $self->_mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
-    $self->DBI(DbToRia::DBI->new(dsn=>$self->cfg->{General}{dsn}));    
+    return 1;
 }
+
+
 
 sub getTables {
     my $self = shift;
-    return $self->DBI()->getTables('TABLE'); 
+    return $self->DBI->getTables('TABLE'); 
 }
 
 sub getViews{
     my $self = shift;
-    return $self->DBI()->getTables('VIEW');
+    return $self->DBI->getTables('VIEW');
 }
 
 sub getTableStructure {
     my $self = shift;
-    return $self->DBI()->getTableStructure(@_); 
+    return $self->DBI->getTableStructure(@_); 
 }
 
 sub getTableData {
     my $self = shift;
-    return $self->DBI()->getTableData(@_); 
+    return $self->DBI->getTableData(@_); 
 }
 
 sub getTableDataChunk {
     my $self = shift;
-    return $self->DBI()->getTableDataChunk(@_); 
+    return $self->DBI->getTableDataChunk(@_); 
 }
 
 sub updateTableData {
     my $self = shift;
-    return $self->DBI()->updateTableData(@_);
+    return $self->DBI->updateTableData(@_);
 }
 
 sub insertTableData{
     my $self = shift;
-    return $self->DBI()->insertTableData(@_);
+    return $self->DBI->insertTableData(@_);
 }
 
 sub deleteTableData{
     my $self = shift;
-    return $self->DBI()->deleteTableData(@_);
+    return $self->DBI->deleteTableData(@_);
 }
 
 sub getNumRows{
     my $self = shift;
-    return $self->DBI()->getNumRows(@_);
+    return $self->DBI->getNumRows(@_);
 }
 
 

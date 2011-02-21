@@ -28,12 +28,12 @@ __PACKAGE__->attr('session');
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    my ($schema,$driver) = DBI->parse_dsn($self->{dsn});
-    $self->{schema} = $schema;
+    my $driver = (DBI->parse_dsn($self->{dsn}))[1];
     $self->{driver} = $driver;      
-    require 'DbToRia/Driver/'.$self->{driver};
+    require 'DbToRia/DBI/'.$self->{driver}.'.pm';
     no strict 'refs';
-    $self->{driver_object} = "DbToRia::Driver::$self->{driver}"->new();
+    $self->{driver_object} = "DbToRia::DBI::$self->{driver}"->new();
+    return $self;
 }
 
     
@@ -46,7 +46,6 @@ sub getDbh {
         PrintError => 0,
         AutoCommit => 1,
         ShowErrorStatement => 1,
-        FetchHashKeyName=>'NAME_lc',
         LongReadLen=> 5*1024*1024,
         pg_enable_utf8=>1
     });
@@ -54,9 +53,9 @@ sub getDbh {
 
 sub getTables {
     my $self = shift;
-    my $type = shift || 'TABLE';
+    my $type = shift;
     my $dbh	= $self->getDbh();
-	my $sth = $dbh->table_info(undef, $self->{schema}, undef, $type) or die("DB Error" . DBI->errstr);
+	my $sth = $dbh->table_info('','','', $type);
 	my @tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
 	    push @tables, {
@@ -67,7 +66,7 @@ sub getTables {
     return \@tables;
 }
 
-=head2 getTableStructur(table)
+=head2 getTableStructure(table)
 
 Returns meta information about the table structure directly from he database
 This uses the map_type methode from the database driver to map the internal
@@ -82,7 +81,8 @@ sub getTableStructure {
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
     my $dbh = $self->getDbh();
-	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, $self->{schema}, $table);
+    warn "table: $table";
+	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table);
 
 	my %foreignKeys;
     while ( my $fk = $fksth->fetchrow_hashref ) {
@@ -93,17 +93,17 @@ sub getTableStructure {
     }
 
     my %primaryKeys;
-	my $pksth = $dbh->primary_key_info(undef, $self->{schema}, $table);
+	my $pksth = $dbh->primary_key_info(undef, undef, $table);
     while ( my $pk = $pksth->fetchrow_hashref ) {
         $primaryKeys{$pk->{COLUMN_NAME}} = 1;
     }
 
 	# call column_info for metadata on columns
-	my $sth = $dbh->column_info(undef, $self->{schema}, $table, undef);
+	my $sth = $dbh->column_info(undef, undef, $table, undef);
 
 	my @columns;
 	while( my $col = $sth->fetchrow_hashref ) {
-        my $id = $col->{COLUMN_NAME};
+        my $id = $col->{column_name};
 
         # return structure
         push @columns, {

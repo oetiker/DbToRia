@@ -15,7 +15,7 @@ qx.Theme.define("dbtoria.theme.Theme",
     color : dbtoria.theme.Color,
     decoration : dbtoria.theme.Decoration,
     font : dbtoria.theme.Font,
-    icon : qx.theme.icon.Oxygen,
+    icon : qx.theme.icon.Tango,
     appearance : dbtoria.theme.Appearance
   }
 });

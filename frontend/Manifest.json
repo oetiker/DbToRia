@@ -3,22 +3,30 @@
   {
     "name" : "DbToRia",
 
-    "summary" : "Custom Application",
-    "description" : "This is a skeleton for a custom application with qooxdoo.",
+    "summary" : "The Generic Database Frontend",
+    "description" : "Provides a userfriendly database frontend.",
     
-    "homepage" : "http://some.homepage.url/",
+    "homepage" : "http://www.dbtoria.org/",
 
-    "license" : "SomeLicense",
+    "license" : "GPL",
     "authors" : 
     [
       {
-        "name" : "First Author (uid)",
-        "email" : "first.author@some.domain"
+        "name" : "David Angleitner",
+        "email" :  "david.angleitner@tet.htwchur.ch"
+      },
+      {
+        "name" : "Matthias Bloch",
+        "email" :  "matthias@puffin.ch"
+      },
+      {
+        "name" : "Tobias Oetiker",
+        "email" :  "tobi@oetiker.ch"
       }
     ],
 
     "version" : "trunk",
-    "qooxdoo-versions": ["0.8.1"]
+    "qooxdoo-versions": ["1.3.0"]
   },
   
   "provides" : 
@@ -31,4 +39,3 @@
     "type"        : "application"
   }
 }
-

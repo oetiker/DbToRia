@@ -18,8 +18,8 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(icon/22/actions/format-justify-left.png)
-#asset(icon/16/status/dialog-error.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
+#asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
 
 ************************************************************************ */
 
@@ -30,7 +30,7 @@
  * located and a taskbar where minimized windows are held.
  */
 qx.Class.define("dbtoria.window.Main", {
-    extend: qx.core.Object,
+    extend: qx.ui.container.Composite,
 
     /*
     *****************************************************************************
@@ -38,113 +38,85 @@ qx.Class.define("dbtoria.window.Main", {
     *****************************************************************************
     */
     
-    construct: function(application) {
+    construct: function() {
+        var containerLayout = new qx.ui.layout.VBox();
+        containerLayout.setSeparator("separator-vertical");
+        this.base(arguments,containerLayout);
 
-	// save reference to application root
-	this.__application = application;
-    
-	// use vertical layout with small separator
-	var containerLayout = new qx.ui.layout.VBox();
-	containerLayout.setSeparator("separator-vertical");
-	
-	var container = new qx.ui.container.Composite(containerLayout);
-    
-	var toolbar = new qx.ui.toolbar.ToolBar();
-	var taskbar = new qx.ui.toolbar.ToolBar();
        
-	// the desktop area is the largest part of dbtoria, make sure it is
-	// scrollable
-	var desktopContainer = new qx.ui.container.Scroll()
+    	// the desktop area is the largest part of dbtoria, make sure it is
+    	// scrollable
+	    var desktopContainer = new qx.ui.container.Scroll()
      
-	// the desktop holds all other windows
-	var desktop = new qx.ui.window.Desktop(new qx.ui.window.Manager());
+    	// the desktop holds all other windows
+	    var desktop = dbtoria.window.Desktop.getInstance();
 
-	desktopContainer.add(desktop, { width: "100%", height: "100%"});
+    	desktopContainer.add(desktop, { width: '100%', height: '100%'});
 	
-	container.add(toolbar);
-	container.add(desktopContainer, { flex: 1 });
-	container.add(taskbar);
+    	var toolbar = new qx.ui.toolbar.ToolBar();
+    	this.add(toolbar);
+
+        this.add(desktopContainer, { flex: 1 });
+
+    	var taskbar = dbtoria.window.Taskbar.getInstance();
+    	this.add(taskbar);
+
+    	// toolbar
+    	var spacer = toolbar.addSpacer();
+    	spacer.setMaxWidth(10);
+	
+    	var tableSelectionBtn = new qx.ui.toolbar.CheckBox(this.tr("Table Selection"), "icon/22/actions/format-justify-left.png");
+    	toolbar.add(tableSelectionBtn);
+	
+    	var viewSelectionBtn = new qx.ui.toolbar.CheckBox(this.tr("View Selection"), "icon/22/actions/format-justify-left.png");
+    	toolbar.add(viewSelectionBtn);
+	
+    	toolbar.addSpacer();
+	
+	    var logoutBtn = new qx.ui.toolbar.Button(this.tr("logout"), "icon/16/status/dialog-error.png");
+	
+    	toolbar.add(logoutBtn);
+	
+	    // on a click on the table selection button the table selection window is shown, on the next
+    	// click it is hidden
+        var tableSelection = new dbtoria.window.TableSelection(false);
+        tableSelection.close();
+        desktop.add(tableSelection);
+
+	    tableSelectionBtn.addListener("changeValue", function(e) {
+	        if ( e.getTarget().isValue()) {
+                tableSelection.open();
+    	    }
+	        else {
+                tableSelection.close();
+	        }
+    	}, this);
+	
+    	// on a click on the view selection button the view selection window is shown, on the next
+	    // click it is hidden
+        var viewSelection = new dbtoria.window.TableSelection(true);
+        viewSelection.close();
+        desktop.add(viewSelection);
+	    viewSelectionBtn.addListener("changeValue", function(e) {
+	        if ( e.getTarget().isValue() ) {
+        		viewSelection.open();
+            }
+    	    else {
+	        	viewSelection.close();
+    	    }
+	    }, this);
     
-	application.setDesktop(desktop);
-	application.setTaskbar(taskbar);
-	application.getRoot().add(container, { edge: 0 } );
-    
-	// toolbar
-	var spacer = toolbar.addSpacer();
-	spacer.setMaxWidth(10);
+    	// call logout on the backend to destroy session
+	    logoutBtn.addListener("execute", function(e) {
+	        var rpc = dbtoria.communication.Rpc.getInstance();
+            rpc.callAsyncSmart(function() {
+                window.location.href = window.location.href;
+            }, 'logout');
+    	}, this);
 	
-	var tableSelection = new qx.ui.toolbar.CheckBox(application.tr("Table Selection"), "icon/22/actions/format-justify-left.png");
-	toolbar.add(tableSelection);
-	
-	var viewSelection = new qx.ui.toolbar.CheckBox(application.tr("View Selection"), "icon/22/actions/format-justify-left.png");
-	toolbar.add(viewSelection);
-	
-	toolbar.addSpacer();
-	
-	var logoutButton = new qx.ui.toolbar.Button(application.tr("logout"), "icon/16/status/dialog-error.png");
-	
-	toolbar.add(logoutButton);
-	
-	// on a click on the table selection button the table selection window is shown, on the next
-	// click it is hidden
-	tableSelection.addListener("changeChecked", function(e) {
-	    if(this.__tableSelection == null) {
-		this.__tableSelection = new dbtoria.window.TableSelection(this.__application, false);
-	    }
-	    if(e.getTarget().isChecked()) {
-		this.__tableSelection.show();
-	    }
-	    else {
-		this.__tableSelection.close();
-	    }
-	}, this);
-	
-	// on a click on the view selection button the view selection window is shown, on the next
-	// click it is hidden
-	viewSelection.addListener("changeChecked", function(e) {
-	    if(this.__viewSelection == null) {
-		this.__viewSelection = new dbtoria.window.TableSelection(this.__application, true);
-	    }
-	    if(e.getTarget().isChecked()) {
-		this.__viewSelection.show();
-	    }
-	    else {
-		this.__viewSelection.close();
-	    }
-	}, this);
-    
-	// call logout on the backend to destroy session
-	logoutButton.addListener("execute", function(e) {
-	    var rpc = dbtoria.communication.Rpc.getInstance();
-	
-	    try {
-		var result = rpc.callSync("logout");
-	    }
-	    catch(e) { alert(e) };
+	    var spacer = toolbar.addSpacer();
+    	spacer.setMaxWidth(10);
 	    
-	    window.location.reload();
-	}, this);
-	
-	var spacer = toolbar.addSpacer();
-	spacer.setMaxWidth(10);
-	
-	tableSelection.setChecked(true);
-    },
-    
-    /*
-    *****************************************************************************
-	MEMBERS
-    *****************************************************************************
-    */
-    
-    members: {
-	
-	// window to select a table from
-	__tableSelection: null,
-	__viewSelection: null,
-	
-	// application reference (root)
-	__application: null
+    	tableSelectionBtn.setValue(true);
     }
-
 });

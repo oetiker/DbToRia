@@ -20,3 +20,10 @@ export PREFIX=$1
 perlmodule Mojolicious
 perlmodule MojoX::Dispatcher::Qooxdoo::Jsonrpc
 perlmodule Config::Grammar
+
+perlmodule DBI
+if [ -d /usr/pack/postgresql-8.4.3-za ]; then
+  export POSTGRES_LIB=/usr/pack/postgresql-8.4.3-za/amd64-linux-ubuntu8.04/lib \
+  export POSTGRES_INCLUDE=/usr/pack/postgresql-8.4.3-za/amd64-linux-ubuntu8.04/include
+fi
+perlmodule DBD::Pg

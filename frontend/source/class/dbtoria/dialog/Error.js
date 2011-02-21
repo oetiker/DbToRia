@@ -18,7 +18,7 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/Tango/32/status/dialog-error.png)
+#asset(qx/icon/${qx.icontheme}/32/status/dialog-error.png)
 
 ************************************************************************ */
 
@@ -72,7 +72,7 @@ qx.Class.define("dbtoria.dialog.Error", {
 	this.setLayout(layout);
     
 	// generate username and password labels and fields
-	this.add(new qx.ui.basic.Image("qx/icon/Tango/32/status/dialog-error.png"), { row: 0, column: 0 });
+	this.add(new qx.ui.basic.Image("icon/32/status/dialog-error.png"), { row: 0, column: 0 });
 	
 	this.__errorLabel = new qx.ui.basic.Label().set({ font: "bold", rich: true });
 	this.add(this.__errorLabel, { row: 0, column: 1 });
@@ -110,13 +110,14 @@ qx.Class.define("dbtoria.dialog.Error", {
 	*/
 	setErrorMessage: function(errorMessage) {
 	    
-	    if(errorMessage.length < 100) {
-		this.__errorLabel.setWidth(null);
-	    }
-	    else {
-		this.__errorLabel.setWidth(400);
-	    }
-	    this.__errorLabel.setContent(errorMessage);
+        // überflüssig, glaube ich :m)
+	    //~ if(errorMessage.length < 100) {
+		//~ this.__errorLabel.setWidth(null);
+	    //~ }
+	    //~ else {
+		//~ this.__errorLabel.setWidth(500);
+	    //~ }
+	    this.__errorLabel.setValue(errorMessage);
 	},
 	
 	/**

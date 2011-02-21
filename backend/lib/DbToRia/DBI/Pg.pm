@@ -26,7 +26,8 @@ Map a native database column type to a DbToRia field type:
 =cut
 
 use base qw(DbToRia::DBI::base);
-use DbToRia::Exception qw(error);
+
+use DbToRia::Exception;
 
 our $map = {
     (map { $_ => 'varchar' } ('bit','bit varying','varbit','character varying','varchar','character','text','char')),

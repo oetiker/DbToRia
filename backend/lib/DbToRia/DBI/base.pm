@@ -1,5 +1,6 @@
 package DbToRia::DBI::base;
 
+
 =head1 NAME
 
 DbToRia::DBI::base - base class for database drivers
@@ -16,6 +17,12 @@ generic bits it uses the services of a databse driver module. This is the base c
 implementing such driver modules.
 
 A driver module must implement the following methods:
+
+=cut
+
+use strict;
+use warnings;
+use base qw(Mojo::Base);
 
 =head2 map_type(type_name)
 

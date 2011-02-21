@@ -18,14 +18,12 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(icon/16/mimetypes/office-calendar.png)
-#asset(icon/22/actions/document-new.png)
-#asset(icon/22/actions/dialog-cancel.png)
-#asset(icon/22/actions/edit-redo.png)
-#asset(icon/22/actions/document-print.png)
-#asset(icon/22/actions/edit-find.png)
-#asset(icon/22/actions/edit-find.png)
-#asset(icon/22/actions/edit-find.png)
+#asset(qx/icon/${qx.icontheme}/16/mimetypes/office-calendar.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/document-new.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/dialog-cancel.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/edit-redo.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/document-print.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/edit-find.png)
 
 ************************************************************************ */
 /**
@@ -45,7 +43,6 @@ qx.Class.define("dbtoria.window.Table", {
 
     @param tableId {String} 	The name of the table in the database
     @param tableName {String} 	The user-friendly name which is displayed
-    @param application {dbtoria.Application} Reference to the application
     @param mode {String} 	Either "default" or "reference".
 				In default mode a double click edits a dataset, in
 				reference mode the selected dataset is returned to
@@ -54,15 +51,14 @@ qx.Class.define("dbtoria.window.Table", {
 				the widget of the column from the calling window.Table
     @param callingWindow {window.Table} In reference mode this contains the calling window
     */
-    construct: function(tableId, tableName, application, mode, selection, callingWindow) {
+    construct: function(tableId, tableName, mode, selection, callingWindow) {
 
 	// call super class
-	this.base(arguments, this.tr("Table") + ": " + tableName);
+	this.base(arguments, this.tr('Table: %1',tableName));
 
 	this.__dbTable = new dbtoria.db.Table(tableId);
 	this.__tableId = tableId;
 	this.__tableName = tableName;
-	this.__application = application;
 	this.__mode = mode || "default";
 	this.__selection = selection;
 	this.__callingWindow = callingWindow;
@@ -90,26 +86,24 @@ qx.Class.define("dbtoria.window.Table", {
 	// generated which allows to restore the window again
 	this.addListener("minimize", function(e) {
 	    var taskbarButton = new qx.ui.toolbar.Button(this.__tableName, "icon/16/mimetypes/office-calendar.png");
-	    application.getTaskbar().add(taskbarButton);
+        var tb = dbtoria.window.Taskbar.getInstance();
+	    tb.add(taskbarButton);
 	    
 	    // on clicking on the taskbarbutton the window is opened again and
 	    // the taskbar button is removed
 	    taskbarButton.addListener("execute", function(e) {
-		this.open();
-		e.getTarget().getLayoutParent().remove(e.getTarget());
+    		this.open();
+	    	e.getTarget().getLayoutParent().remove(e.getTarget());
 	    }, this);
 	    
 	    this.__table.setToolTip(null);
 	    this.__toolTip.setVisibility("excluded");
-	});
+	},this);
 	
 	this.addListener("close", function(e) {
 	    this.__table.setToolTip(null);
 	    this.__toolTip.setVisibility("excluded");
 	});
-	    
-	// show table
-	application.getDesktop().add(this);
 	
 	this.center();
 	this.open();
@@ -180,7 +174,7 @@ qx.Class.define("dbtoria.window.Table", {
 	    var filterButton 	= new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/22/actions/edit-find.png");
 	    
 	    // filter button
-	    filterButton.addListener("changeChecked", function(e) {
+	    filterButton.addListener("execute", function(e) {
 		if(e.getTarget().isChecked()) {
 		    if(!this.__filterWidget) {
 			this.__filterWidget = new dbtoria.window.TableFilter(this, this.__dbTable);
@@ -760,7 +754,8 @@ qx.Class.define("dbtoria.window.Table", {
 				
 				for(var j = 0; j < formElement.options.length; j++) {
 				    var listItem = new qx.ui.form.ListItem(formElement.options[j]);
-				    listItem.setValue(formElement.options[j]);
+				    //~ listItem.setValue(formElement.options[j]);
+                    listItem.setValue("gaga");
 				    
 				    if(values[formElement.id] == formElement.options[j]) {
 					selectBox.setSelected(listItem);

@@ -18,7 +18,7 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/Tango/32/status/dialog-information.png)
+#asset(qx/icon/${qx.icontheme}/32/status/dialog-information.png)
 
 ************************************************************************ */
 
@@ -72,7 +72,7 @@ qx.Class.define("dbtoria.dialog.Choice", {
 	this.setLayout(layout);
     
 	// generate username and password labels and fields
-	this.add(new qx.ui.basic.Image("qx/icon/Tango/32/status/dialog-information.png"), { row: 0, column: 0 });
+	this.add(new qx.ui.basic.Image("icon/32/status/dialog-information.png"), { row: 0, column: 0 });
 	
 	this.__msgLabel = new qx.ui.basic.Label().set({ font: "bold", rich: true });
 	this.add(this.__errorLabel, { row: 0, column: 1 });
