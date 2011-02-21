@@ -1,9 +1,7 @@
-Skeleton - A qooxdoo Application Template
-=========================================
+DbToRia - The generic Database Frontend
+=======================================
 
-This is a qooxdoo application skeleton which is used as a template. The 
-'create-application.py' script (usually under tool/bin/create-application.py)
-will use this and expand it into a self-contained qooxdoo application which 
-can then be further extended. Please refer to the script and other documentation
-for further information.
-
+DbToRia is generic sql database frontend. Just point it to your database and
+get a user friendly web interface. By providing DbToRia with additional
+information about the nature of your database the userinterface can be
+further optimized.

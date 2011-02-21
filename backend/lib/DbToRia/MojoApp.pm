@@ -4,6 +4,7 @@ use warnings;
 
 use DbToRia::JsonRpcService;
 use DbToRia::Config;
+use DbToRia::Session;
 
 use base 'Mojolicious';
 
@@ -66,8 +67,7 @@ sub startup {
             cb => sub {
                 my $self = shift;
                 my $qx_root = $self->stash('qx_root');
-                $qx_static->root('/'.$qx_root);
-                $qx_static->prefix('/'.$qx_root);
+                $qx_static->root('/');
                 return $qx_static->dispatch($self);
             }    
         );

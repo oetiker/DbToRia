@@ -83,13 +83,13 @@ qx.Class.define("dbtoria.db.Table", {
 		    var result = this.__rpc.callSync("getTableStructure", this.__tableName);		
 		    
 		    // if no name is provided fill with id
-		    for(var i = 0; i < result.structure.length; i++) {
-			if(!result.structure[i].name) {
-			    result.structure[i].name = result.structure[i].id
+		    for(var i = 0; i < result.length; i++) {
+			if(!result[i].name) {
+			    result[i].name = result[i].id
 			}
 		    }
 		    
-		    this.__tableStructure = result.structure;
+		    this.__tableStructure = result;
 		    
 		} catch(e) {
 		    var errorDialog = dbtoria.dialog.Error.getInstance();
@@ -176,11 +176,11 @@ qx.Class.define("dbtoria.db.Table", {
 		
 		var data = [];
 
-		for(var i = 0; i < result.data.length; i++) {
+		for(var i = 0; i < result.length; i++) {
 		    var row = {};
 		    
-		    for(var j = 0; j < result.data[i].length; j++) {
-			row[this.getColumnNames()[j]] = result.data[i][j];
+		    for(var j = 0; j < result[i].length; j++) {
+			row[this.getColumnNames()[j]] = result[i][j];
 		    }
 		    
 		    data.push(row);

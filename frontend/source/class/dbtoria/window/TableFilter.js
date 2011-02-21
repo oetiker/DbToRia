@@ -18,8 +18,8 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(icon/22/actions/format-justify-left.png)
-#asset(icon/16/status/dialog-error.png)
+#asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
+#asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
 
 ************************************************************************ */
 
