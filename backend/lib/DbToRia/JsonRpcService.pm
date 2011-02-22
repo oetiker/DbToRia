@@ -31,7 +31,7 @@ setup a new serivice
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    $self->DBI(DbToRia::DBI->new(dsn=>$self->cfg->{General}{dsn}));
+    $self->DBI(DbToRia::DBI->new(dsn=>$self->cfg->{General}{dsn},schema=>$self->cfg->{General}{schema}));
     return $self;
 }
 
@@ -46,7 +46,7 @@ our %allow_access = (
     login => 1,
     getTables => 2,
     getViews => 2,
-    getTableStructur => 2,
+    getTableStructure => 2,
     getTableData => 2,
     getTableDataChunk => 2,
     updateTableData => 2,
@@ -79,6 +79,8 @@ sub login {
     my $session = $self->mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
+    $self->DBI->username($session->param('username'));
+    $self->DBI->password($session->param('password'));
     $session->param('authenticated',1) if $self->DBI->getDbh->ping;
     return 1;
 }

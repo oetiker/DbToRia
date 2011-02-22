@@ -141,10 +141,11 @@ sub _make_parser {
         _mandatory => [qw(General)],
         General => {
             _doc => 'Global configuration settings for DbToRia',
-            _vars => [ qw(dsn mojo_secret log_file log_toppic_filer) ],
+            _vars => [ qw(dsn mojo_secret log_file log_toppic_filer schema) ],
             _mandatory => [ qw(dsn mojo_secret log_file) ],
             dsn => { _doc => 'DBI connect string', _example=>'dbi:Pg:dbname=testdb' },
             mojo_secret => { _doc => 'secret for signing mojo cookies' },
+            schema => { _doc => 'which schema should we prowl for data?' },
             log_file => { _doc => 'write a log file to this location'},
             log_toppic_filter => { _doc => 'rx to match against log toppics'},        
         }
