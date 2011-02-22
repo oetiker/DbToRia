@@ -21,10 +21,11 @@ use strict;
 use DBI;
 use DbToRia::Exception;
 
-use base qw(Mojo::Base);
+use Mojo::Base -base;
 
-__PACKAGE__->attr('dsn');
-__PACKAGE__->attr('session');
+has 'dsn';
+has 'username';
+has 'password';
 
 sub new {
     my $self = shift->SUPER::new(@_);
@@ -39,9 +40,7 @@ sub new {
     
 sub getDbh {
     my $self = shift;
-    my $user = $self->session->param('username');
-    my $pass = $self->session->param('password');
-    my $dbh = DBI->connect_cached($self->{dsn},$user,$pass,{
+    my $dbh = DBI->connect_cached($self->{dsn},$self->{username},$self->{password},{
         RaiseError => 1,
         PrintError => 0,
         AutoCommit => 1,
