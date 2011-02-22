@@ -21,6 +21,8 @@ Now get Mojo and the Mojo qooxdoo dispatcher and the config grammar module:
 
 Edit the F<backend/etc/dbtoria.cfg> file to point to the database of your choice.
 
-With this set you are ready to run dbtoria with its build in webserver for testing
+With this set you are ready to run dbtoria with its built in webserver for testing
 
+ ./backend/bin/dbtoria.pl daemon
 
+(oh and you need to build the frontend and you need to setup a databse ... will describe later)
