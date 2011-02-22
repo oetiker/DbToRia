@@ -13,11 +13,11 @@ server functions
 
 =cut
 
-use base qw(Mojo::Base);
+use Mojo::Base -base;
 
-__PACKAGE__->attr('cfg');
-__PACKAGE__->attr('_mojo_stash');
-__PACKAGE__->attr('DBI');
+has 'cfg';
+has 'mojo_stash';
+has 'DBI';
 
 use strict;
 
@@ -35,19 +35,39 @@ sub new {
     return $self;
 }
 
-=head2 _check_access(method)
+=head2 allow_rpc_access(method)
 
 This gets called before each method call. We use it to make sure the
 session settings are correct and users get connected as with their own login.
 
 =cut
 
-sub _check_access {
+our %allow_access = (
+    login => 1,
+    getTables => 2,
+    getViews => 2,
+    getTableStructur => 2,
+    getTableData => 2,
+    getTableDataChunk => 2,
+    updateTableData => 2,
+    insertTableData => 2,
+    deleteTableData => 2,
+    getNumRows => 2,
+    logout => 1,
+);
+
+sub allow_rpc_access {
     my $self = shift;
     my $method = shift;
-    if ($self->DBI){
-        $self->DBI->session($self->_mojo_stash->{'dbtoria.session'});
+    my $access = $allow_access{$method} or return 0;
+    my $session = $self->mojo_stash->{'dbtoria.session'};
+    return 1 if $access == 1;
+    if ( $access == 2 and $session->param('authenticated') ){
+        $self->DBI->username($session->param('username'));
+        $self->DBI->password($session->param('password'));
+        return 1;
     }
+    return 0;
 }   
 
  
@@ -56,9 +76,10 @@ sub login {
     my $param = shift;
     my $username = $param->{username};
     my $password = $param->{password};
-    my $session = $self->_mojo_stash->{'dbtoria.session'};
+    my $session = $self->mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
+    $session->param('authenticated',1) if $self->DBI->getDbh->ping;
     return 1;
 }
 

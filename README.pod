@@ -23,5 +23,4 @@ Edit the F<backend/etc/dbtoria.cfg> file to point to the database of your choice
 
 With this set you are ready to run dbtoria with its build in webserver for testing
 
- ./backend/bin/dbtoria.pl daemon
 

@@ -23,9 +23,9 @@ use vars qw($VERSION);
 $VERSION   = '0.01';
 use Carp;
 use Config::Grammar;
-use base qw(Mojo::Base);
+use Mojo::Base -base;
 
-__PACKAGE__->attr('file');
+has 'file';
     
 
 =head1 METHODS
