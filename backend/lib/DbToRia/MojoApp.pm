@@ -21,8 +21,6 @@ sub startup {
 
     my $r = $self->routes;
 
-    $self->log->path($self->cfg->{General}{log_file})
-        if $self->cfg->{General}{log_file};
 
     $self->secret($self->cfg->{General}{secret});
 
@@ -72,6 +70,8 @@ sub startup {
             }    
         );
     } else {
+        $self->log->path($self->cfg->{General}{log_file})
+            if $self->cfg->{General}{log_file};
         $r->route('/jsonrpc')->to(
             class       => 'Jsonrpc',
             method      => 'dispatch',

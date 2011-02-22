@@ -26,6 +26,7 @@ use Mojo::Base -base;
 has 'dsn';
 has 'username';
 has 'password';
+has 'schema';
 
 sub new {
     my $self = shift->SUPER::new(@_);
@@ -54,7 +55,7 @@ sub getTables {
     my $self = shift;
     my $type = shift;
     my $dbh	= $self->getDbh();
-	my $sth = $dbh->table_info('','','', $type);
+	my $sth = $dbh->table_info('',$self->schema,'', $type);
 	my @tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
 	    push @tables, {
@@ -80,7 +81,6 @@ sub getTableStructure {
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
     my $dbh = $self->getDbh();
-    warn "table: $table";
 	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table);
 
 	my %foreignKeys;
@@ -325,7 +325,7 @@ sub getNumRows {
     if (@where){
         $query .= ' WHERE '. join (' AND ',@where);
     }
-    return ($dbh->fetchrow_array($query))[0];
+    return ($dbh->selectrow_array($query))[0];
 }
 
 1;
