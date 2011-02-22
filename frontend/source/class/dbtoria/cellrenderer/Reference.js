@@ -24,21 +24,28 @@
 /**
  * Reference
  */
-qx.Class.define("dbtoria.cellrenderer.Reference",
-{
-  extend : qx.ui.table.cellrenderer.AbstractImage,
+qx.Class.define("dbtoria.cellrenderer.Reference", {
+    extend : qx.ui.table.cellrenderer.AbstractImage,
 
-  /*
-  *****************************************************************************
-     MEMBERS
-  *****************************************************************************
-  */
 
-  members :
-  {
-    // overridden
-    _getContentHtml : function(cellInfo) {
-      return ("<em>" + cellInfo.value + "</em>" || "");
+
+
+    /*
+      *****************************************************************************
+         MEMBERS
+      *****************************************************************************
+      */
+
+    members : {
+        // overridden
+        /**
+         * TODOC
+         *
+         * @param cellInfo {var} TODOC
+         * @return {var} TODOC
+         */
+        _getContentHtml : function(cellInfo) {
+            return ("<em>" + cellInfo.value + "</em>" || "");
+        }
     }
-  }
 });

@@ -172,10 +172,9 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
             this.__btn_ok.focus();
             var trace = '';
 
-//            if (exc.code == 2) {
-//               trace = "<br/>Stack Trace: " + qx.dev.StackTrace.getStackTrace().join("<br/>");
-//            }
-
+            //            if (exc.code == 2) {
+            //               trace = "<br/>Stack Trace: " + qx.dev.StackTrace.getStackTrace().join("<br/>");
+            //            }
             this.__open(this.tr('RPC Error %1', exc.code), this.tr('%1 (Error Code %2)%3', exc.message, exc.code, trace));
         },
 

@@ -8,11 +8,7 @@
 
 ************************************************************************ */
 
-qx.Theme.define("dbtoria.theme.Decoration",
-{
-  extend : qx.theme.modern.Decoration,
-
-  decorations :
-  {
-  }
+qx.Theme.define("dbtoria.theme.Decoration", {
+    extend      : qx.theme.modern.Decoration,
+    decorations : {}
 });

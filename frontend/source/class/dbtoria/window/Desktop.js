@@ -16,15 +16,19 @@
 ************************************************************************ */
 
 qx.Class.define("dbtoria.window.Desktop", {
-    extend: qx.ui.window.Desktop,
-    type: "singleton",
+    extend : qx.ui.window.Desktop,
+    type : "singleton",
+
+
+
 
     /*
-    *****************************************************************************
-	CONSTRUCTOR
-    *****************************************************************************
-    */    
-    construct: function() {
-        this.base(arguments,new qx.ui.window.Manager());
+        *****************************************************************************
+    	CONSTRUCTOR
+        *****************************************************************************
+        */
+
+    construct : function() {
+        this.base(arguments, new qx.ui.window.Manager());
     }
 });
