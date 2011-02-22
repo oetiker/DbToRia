@@ -28,31 +28,42 @@
  * generated and a click on them opens the detailled TableView. 
  */
 qx.Class.define("dbtoria.window.TableSelection", {
-    extend: qx.ui.menu.Menu,
-    
+    extend : qx.ui.menu.Menu,
+
+
+
+
     /*
-    *****************************************************************************
-	CONSTRUCTOR
-    *****************************************************************************
-    */
-    construct: function(showViews) {
+        *****************************************************************************
+    	CONSTRUCTOR
+        *****************************************************************************
+        */
+
+    construct : function(showViews) {
         this.base(arguments);
-	    var rpc = dbtoria.communication.Rpc.getInstance()
+        var rpc = dbtoria.communication.Rpc.getInstance();
         var desktop = dbtoria.window.Desktop.getInstance();
-        var that = this;    
-        rpc.callAsyncSmart(function(ret){
-    	    // generate a button for each table
-	        for (var i = 0; i < ret.length; i++) {(function(){
-                var table = ret[i];
-    		    if ( ! table.name ) {
-                    table.name = table.id
-                }            
-                var menuButton= new qx.ui.menu.Button(table.name);
-                that.add(menuButton);
-                menuButton.addListener("execute", function(e) {
-                    desktop.add(new dbtoria.window.Table(table.id,table.name));
-                },this);
-	        })()}
-        }, showViews ? 'getViews' : 'getTables');
+        var that = this;
+
+        rpc.callAsyncSmart(function(ret) {
+            // generate a button for each table
+            for (var i=0; i<ret.length; i++) {
+                (function() {
+                    var table = ret[i];
+
+                    if (!table.name) {
+                        table.name = table.id;
+                    }
+
+                    var menuButton = new qx.ui.menu.Button(table.name);
+                    that.add(menuButton);
+
+                    menuButton.addListener("execute", function(e) {
+                        desktop.add(new dbtoria.window.Table(table.id, table.name));
+                    }, this);
+                })();
+            }
+        },
+        showViews ? 'getViews' : 'getTables');
     }
 });

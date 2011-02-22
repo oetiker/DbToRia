@@ -24,6 +24,7 @@ qx.Class.define('dbtoria.communication.Rpc', {
             serviceName : 'DbToRia'
         });
     },
+
     members : {
         /**
          * A variant of the asyncCall method which pops up error messages

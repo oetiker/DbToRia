@@ -8,11 +8,7 @@
 
 ************************************************************************ */
 
-qx.Theme.define("dbtoria.theme.Appearance",
-{
-  extend : qx.theme.modern.Appearance,
-
-  appearances :
-  {
-  }
+qx.Theme.define("dbtoria.theme.Appearance", {
+    extend      : qx.theme.modern.Appearance,
+    appearances : {}
 });

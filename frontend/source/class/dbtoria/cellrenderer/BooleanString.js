@@ -26,59 +26,67 @@
  * BooleanString
  */
 qx.Class.define("dbtoria.cellrenderer.BooleanString", {
-    extend: qx.ui.table.cellrenderer.Boolean,
-    
-    /*
-    *****************************************************************************
-	CONSTRUCTOR
-    *****************************************************************************
-    */
-    
-    construct: function() {
-	this.base(arguments);
-	
-	var aliasManager = qx.util.AliasManager.getInstance();
+    extend : qx.ui.table.cellrenderer.Boolean,
 
-	this.__iconUrlTrue = aliasManager.resolve("decoration/table/boolean-true.png");
-	this.__iconUrlFalse = aliasManager.resolve("decoration/table/boolean-false.png");
+
+
+
+    /*
+        *****************************************************************************
+    	CONSTRUCTOR
+        *****************************************************************************
+        */
+
+    construct : function() {
+        this.base(arguments);
+
+        var aliasManager = qx.util.AliasManager.getInstance();
+
+        this.__iconUrlTrue = aliasManager.resolve("decoration/table/boolean-true.png");
+        this.__iconUrlFalse = aliasManager.resolve("decoration/table/boolean-false.png");
     },
-    
+
+
+
+
     /*
-    *****************************************************************************
-       MEMBERS
-    *****************************************************************************
-    */
-    
-    members: {
-	// @Override
-	_identifyImage : function(cellInfo)
-	{
+        *****************************************************************************
+           MEMBERS
+        *****************************************************************************
+        */
 
-	    var imageHints =
-	    {
-		imageWidth  : 11,
-		imageHeight : 11
-	    };
+    members : {
+        // @Override
+        /**
+         * TODOC
+         *
+         * @param cellInfo {var} TODOC
+         * @return {var} TODOC
+         */
+        _identifyImage : function(cellInfo) {
+            var imageHints = {
+                imageWidth  : 11,
+                imageHeight : 11
+            };
 
-	    switch(cellInfo.value)
-	    {
-		
-		case "true":
-		case true:
-		    imageHints.url = this.__iconUrlTrue;
-		    break;
-	
-		case "false":
-		case false:
-		    imageHints.url = this.__iconUrlFalse;
-		    break;
-	
-		default:
-		    imageHints.url = null;
-		    break;
-	    }
-    
-	    return imageHints;
-	}
-    }
-});
+            switch(cellInfo.value)
+            {
+                case "true":
+                    case true:
+                        imageHints.url = this.__iconUrlTrue;
+                        break;
+
+                    case "false":
+                        case false:
+                            imageHints.url = this.__iconUrlFalse;
+                            break;
+
+                        default:
+                            imageHints.url = null;
+                            break;
+                    }
+
+                    return imageHints;
+                }
+            }
+        });

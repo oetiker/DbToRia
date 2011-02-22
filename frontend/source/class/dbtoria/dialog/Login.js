@@ -35,11 +35,14 @@ qx.Class.define("dbtoria.dialog.Login", {
             contentPaddingTop    : 20,
             contentPaddingBottom : 20
         });
+
         this.getChildControl('captionbar').exclude();
+
         this.getChildControl('pane').set({
-            decorator : new qx.ui.decoration.Single(1, 'solid', '#777'),
-            backgroundColor: '#f8f8f8'
+            decorator       : new qx.ui.decoration.Single(1, 'solid', '#777'),
+            backgroundColor : '#f8f8f8'
         });
+
         var grid = new qx.ui.layout.Grid(10, 10);
         this.setLayout(grid);
         grid.setColumnAlign(1, 'right', 'middle');
@@ -112,9 +115,10 @@ qx.Class.define("dbtoria.dialog.Login", {
         },
         this);
 
-        this.addListener('appear', function() {        
+        this.addListener('appear', function() {
             password.setValue('');
-            if (username.getValue()){
+
+            if (username.getValue()) {
                 username.setEnabled(false);
                 password.focus();
                 password.activate();
@@ -122,7 +126,8 @@ qx.Class.define("dbtoria.dialog.Login", {
             else {
                 username.focus();
                 username.activate();
-            }                        
+            }
+
             this.setEnabled(true);
             this.center();
         });
@@ -145,10 +150,12 @@ qx.Class.define("dbtoria.dialog.Login", {
             }
             else {
                 var element = this.getContainerElement().getDomElement();
+
                 if (ret) {
                     this.fireDataEvent('login', ret);
                     var effect = new qx.fx.effect.combination.Fold(element);
                     effect.start();
+
                     effect.addListener('finish', function() {
                         this.close();
                     }, this);
