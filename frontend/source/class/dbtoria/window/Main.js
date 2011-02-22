@@ -64,48 +64,19 @@ qx.Class.define("dbtoria.window.Main", {
     	// toolbar
     	var spacer = toolbar.addSpacer();
     	spacer.setMaxWidth(10);
-	
-    	var tableSelectionBtn = new qx.ui.toolbar.CheckBox(this.tr("Table Selection"), "icon/22/actions/format-justify-left.png");
-    	toolbar.add(tableSelectionBtn);
-	
-    	var viewSelectionBtn = new qx.ui.toolbar.CheckBox(this.tr("View Selection"), "icon/22/actions/format-justify-left.png");
-    	toolbar.add(viewSelectionBtn);
+
+        var tableMenu = new dbtoria.window.TableSelection(false);	
+    	var tableBtn = new qx.ui.toolbar.MenuButton(this.tr("Table Selection"), "icon/22/actions/format-justify-left.png",tableMenu);
+    	toolbar.add(tableBtn);
+	    
+        var viewMenu = new dbtoria.window.TableSelection(true);
+    	var viewBtn = new qx.ui.toolbar.MenuButton(this.tr("View Selection"), "icon/22/actions/format-justify-left.png",viewMenu);
+    	toolbar.add(viewBtn);
 	
     	toolbar.addSpacer();
 	
 	    var logoutBtn = new qx.ui.toolbar.Button(this.tr("logout"), "icon/16/status/dialog-error.png");
-	
-    	toolbar.add(logoutBtn);
-	
-	    // on a click on the table selection button the table selection window is shown, on the next
-    	// click it is hidden
-        var tableSelection = new dbtoria.window.TableSelection(false);
-        tableSelection.close();
-        desktop.add(tableSelection);
-
-	    tableSelectionBtn.addListener("changeValue", function(e) {
-	        if ( e.getTarget().isValue()) {
-                tableSelection.open();
-    	    }
-	        else {
-                tableSelection.close();
-	        }
-    	}, this);
-	
-    	// on a click on the view selection button the view selection window is shown, on the next
-	    // click it is hidden
-        var viewSelection = new dbtoria.window.TableSelection(true);
-        viewSelection.close();
-        desktop.add(viewSelection);
-	    viewSelectionBtn.addListener("changeValue", function(e) {
-	        if ( e.getTarget().isValue() ) {
-        		viewSelection.open();
-            }
-    	    else {
-	        	viewSelection.close();
-    	    }
-	    }, this);
-    
+		toolbar.add(logoutBtn);   
     	// call logout on the backend to destroy session
 	    logoutBtn.addListener("execute", function(e) {
 	        var rpc = dbtoria.communication.Rpc.getInstance();
@@ -117,6 +88,5 @@ qx.Class.define("dbtoria.window.Main", {
 	    var spacer = toolbar.addSpacer();
     	spacer.setMaxWidth(10);
 	    
-    	tableSelectionBtn.setValue(true);
     }
 });

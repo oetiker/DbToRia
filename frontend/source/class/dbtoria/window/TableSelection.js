@@ -28,40 +28,17 @@
  * generated and a click on them opens the detailled TableView. 
  */
 qx.Class.define("dbtoria.window.TableSelection", {
-    extend: qx.ui.window.Window,
+    extend: qx.ui.menu.Menu,
     
     /*
     *****************************************************************************
 	CONSTRUCTOR
     *****************************************************************************
     */
-    
     construct: function(showViews) {
-    	// call super class
-    	if(showViews) {
-	        this.base(arguments, this.tr("View Selection"));
-	        this.moveTo(170, 0);
-    	}
-	    else {
-    	    this.base(arguments, this.tr("Table Selection"));
-	    }
-	
-    	// disable window resizing and moving
-	    this.set({
-	        showMaximize: false,
-    	    showMinimize: false,
-    	    resizable: false,
-    	    showClose: false,
-	        contentPadding: 20,
-	        minWidth: 150,
-	        margin: 20
-    	});
-    
-    	// layout properties
-	    var layout = new qx.ui.layout.VBox(5);
-    	this.setLayout(layout);
-    
+        this.base(arguments);
 	    var rpc = dbtoria.communication.Rpc.getInstance()
+        var desktop = dbtoria.window.Desktop.getInstance();
         var that = this;    
         rpc.callAsyncSmart(function(ret){
     	    // generate a button for each table
@@ -70,11 +47,9 @@ qx.Class.define("dbtoria.window.TableSelection", {
     		    if ( ! table.name ) {
                     table.name = table.id
                 }            
-                var tableButton= new qx.ui.form.Button(table.name);
-                that.add(tableButton);
-                // on click open table view
-                var desktop = dbtoria.window.Desktop.getInstance();
-                tableButton.addListener("click", function(e) {
+                var menuButton= new qx.ui.menu.Button(table.name);
+                that.add(menuButton);
+                menuButton.addListener("execute", function(e) {
                     desktop.add(new dbtoria.window.Table(table.id,table.name));
                 },this);
 	        })()}
