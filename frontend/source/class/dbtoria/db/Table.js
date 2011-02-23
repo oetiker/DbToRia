@@ -31,27 +31,10 @@ qx.Class.define("dbtoria.db.Table", {
     extend : qx.core.Object,
 
 
-
-
-    /*
-        *****************************************************************************
-    	CONSTRUCTOR
-        *****************************************************************************
-        */
-
     construct : function(tableName) {
         this.__tableName = tableName;
         this.__rpc = dbtoria.communication.Rpc.getInstance();
     },
-
-
-
-
-    /*
-        *****************************************************************************
-           MEMBERS
-        *****************************************************************************
-        */
 
     members : {
         // the table name in the databse
@@ -242,6 +225,7 @@ qx.Class.define("dbtoria.db.Table", {
          * @return {var | null} TODOC
          */
         getDataChunk : function(firstRow, lastRow, sortId, sortDirection) {
+            
             try {
                 if (sortId) {
                     var result = this.__rpc.callSync("getTableDataChunk", this.__tableName, this.__filter, firstRow, lastRow, sortId, sortDirection);
