@@ -60,10 +60,10 @@ sub getTables {
 	while ( my $table = $sth->fetchrow_hashref ) {
 	    push @tables, {
             id   => $table->{TABLE_NAME},
-            name => $table->{REMARKS}
+            name => $table->{REMARKS} || $table->{TABLE_NAME}
     	}
     }
-    return \@tables;
+    return [ sort {$a->{name} cmp $b->{name}} @tables ];
 }
 
 =head2 getTableStructure(table)
