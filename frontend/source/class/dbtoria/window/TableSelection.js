@@ -59,7 +59,7 @@ qx.Class.define("dbtoria.window.TableSelection", {
                     that.add(menuButton);
 
                     menuButton.addListener("execute", function(e) {
-                        desktop.add(new dbtoria.window.Table(table.id, table.name));
+                        desktop.add(new dbtoria.window.TableWindow(table.id, table.name));
                     }, this);
                 })();
             }

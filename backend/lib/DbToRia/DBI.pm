@@ -102,8 +102,7 @@ sub getTableStructure {
 
 	my @columns;
 	while( my $col = $sth->fetchrow_hashref ) {
-        my $id = $col->{column_name};
-
+        my $id = $col->{COLUMN_NAME};
         # return structure
         push @columns, {
             id         => $id,
@@ -153,14 +152,14 @@ sub getTableData {
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
         for (my $i=0;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_obj}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
+            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
         }
         push @data,\@new_row;
     }
     return \@data;
 }
 
-=head2 getTableDataChunk(table)
+=head2 getTableDataChunk(table,firstRow,lastRow,opts)
 
 Returns all data from a table. The result can be massive. We only use it for pupulating
 selection lists (fk) ... should merge this code with getTableData above almost the same!
@@ -169,13 +168,13 @@ selection lists (fk) ... should merge this code with getTableData above almost t
 
 sub getTableDataChunk {
     my $self	  = shift;
-
     my $table = shift;
-    my $filter	  = shift;
     my $firstRow  = shift;
     my $lastRow   = shift;
-    my $sortId	  = shift;
-    my $sortDirection = shift;
+    my $opts = shift || {};
+    my $filter	  = $opts->{filter};
+    my $sortId	  = $opts->{sortId};
+    my $sortDirection = $opts->{sortDirection};
 
     my $dbh = $self->getDbh();
 
@@ -201,7 +200,7 @@ sub getTableDataChunk {
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
         for (my $i=0;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_obj}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
+            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
         }
         push @data,\@new_row;
     }

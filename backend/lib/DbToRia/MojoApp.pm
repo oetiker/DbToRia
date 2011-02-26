@@ -6,7 +6,7 @@ use DbToRia::JsonRpcService;
 use DbToRia::Config;
 use DbToRia::Session;
 
-use base 'Mojolicious';
+use Mojo::Base 'Mojolicious';
 
 __PACKAGE__->attr(cfg => sub {
     my $self = shift;
