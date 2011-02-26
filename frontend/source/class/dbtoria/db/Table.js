@@ -34,6 +34,15 @@ qx.Class.define("dbtoria.db.Table", {
     construct : function(tableName) {
         this.__tableName = tableName;
         this.__rpc = dbtoria.communication.Rpc.getInstance();
+        this.__rpc.callAsyncSmart(function(result){
+            // if no name is provided fill with id
+            for (var i=0; i<result.length; i++) {
+                if (!result[i].name) {
+                    result[i].name = result[i].id;
+                 }
+            }
+            this.__tableStructure = result;
+        },"getTableStructure", tableName);
     },
 
     members : {
@@ -68,25 +77,6 @@ qx.Class.define("dbtoria.db.Table", {
          * @return {var} TODOC
          */
         getTableStructure : function() {
-            if (!this.__tableStructure) {
-                try {
-                    var result = this.__rpc.callSync("getTableStructure", this.__tableName);
-
-                    // if no name is provided fill with id
-                    for (var i=0; i<result.length; i++) {
-                        if (!result[i].name) {
-                            result[i].name = result[i].id;
-                        }
-                    }
-
-                    this.__tableStructure = result;
-                }
-                catch(e) {
-                    var errorDialog = dbtoria.dialog.Error.getInstance();
-                    errorDialog.showError("Connection to remote server failed: " + e);
-                }
-            }
-
             return this.__tableStructure;
         },
 
@@ -171,33 +161,19 @@ qx.Class.define("dbtoria.db.Table", {
          */
         getDataWithKey : function(column, key) {
             var columnIndex = this.getColumnIndexByName(column);
-
-            try {
-                var selection = {};
-                selection[column] = key;
-
-                var result = this.__rpc.callSync("getTableData", this.__tableName, selection);
-
-                var data = [];
-
+            var selection = {};
+            selection[column] = key;
+            var data = [];
+            this.__rpc.callAsyncSmart(function(result){
                 for (var i=0; i<result.length; i++) {
                     var row = {};
-
                     for (var j=0; j<result[i].length; j++) {
                         row[this.getColumnNames()[j]] = result[i][j];
                     }
-
                     data.push(row);
                 }
-
-                return data;
-            }
-            catch(e) {
-                var errorDialog = dbtoria.dialog.Error.getInstance();
-                errorDialog.showError("Connection to remote server failed: " + e);
-            }
-
-            return null;
+            },"getTableData", this.__tableName, selection);
+            return data;
         },
 
 
