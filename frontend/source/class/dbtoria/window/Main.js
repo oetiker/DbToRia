@@ -18,8 +18,8 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
-#asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
+#asset(qx/icon/${qx.icontheme}/16/places/folder.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/application-exit.png)
 
 ************************************************************************ */
 
@@ -66,21 +66,20 @@ qx.Class.define("dbtoria.window.Main", {
         var taskbar = dbtoria.window.Taskbar.getInstance();
         this.add(taskbar);
 
-        // toolbar
-        var spacer = toolbar.addSpacer();
-        spacer.setMaxWidth(10);
+        
+        var menu = new qx.ui.menu.Menu();
+        var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu).set({show: 'icon'});
+        toolbar.add(menuBtn);
 
         var tableMenu = new dbtoria.window.TableSelection(false);
-        var tableBtn = new qx.ui.toolbar.MenuButton(this.tr("Table Selection"), "icon/22/actions/format-justify-left.png", tableMenu);
-        toolbar.add(tableBtn);
+        menu.add(new qx.ui.menu.Button(this.tr("Tables"),null,null,tableMenu));
 
         var viewMenu = new dbtoria.window.TableSelection(true);
-        var viewBtn = new qx.ui.toolbar.MenuButton(this.tr("View Selection"), "icon/22/actions/format-justify-left.png", viewMenu);
-        toolbar.add(viewBtn);
+        menu.add(new qx.ui.menu.Button(this.tr("Views"),null,null,viewMenu));
 
         toolbar.addSpacer();
 
-        var logoutBtn = new qx.ui.toolbar.Button(this.tr("logout"), "icon/16/status/dialog-error.png");
+        var logoutBtn = new qx.ui.toolbar.Button(this.tr("Logout"), "icon/16/actions/application-exit.png").set({show: 'icon'});
         toolbar.add(logoutBtn);
 
         // call logout on the backend to destroy session
@@ -92,8 +91,5 @@ qx.Class.define("dbtoria.window.Main", {
             }, 'logout');
         },
         this);
-
-        var spacer = toolbar.addSpacer();
-        spacer.setMaxWidth(10);
     }
 });

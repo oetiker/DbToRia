@@ -18,12 +18,14 @@
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/${qx.icontheme}/16/mimetypes/office-calendar.png)
-#asset(qx/icon/${qx.icontheme}/22/actions/document-new.png)
-#asset(qx/icon/${qx.icontheme}/22/actions/dialog-cancel.png)
-#asset(qx/icon/${qx.icontheme}/22/actions/edit-redo.png)
-#asset(qx/icon/${qx.icontheme}/22/actions/document-print.png)
-#asset(qx/icon/${qx.icontheme}/22/actions/edit-find.png)
+#asset(qx/icon/${qx.icontheme}/16/mimetypes/text-plain.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/contact-new.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/edit-delete.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/view-refresh.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/document-save-as.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/system-search.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/edit-copy.png)
+#asset(qx/icon/${qx.icontheme}/16/apps/utilities-text-editor.png)
 
 ************************************************************************ */
 
@@ -43,13 +45,13 @@ qx.Class.define("dbtoria.window.TableWindow", {
             margin         : 0,
             width          : 800,
             height         : 500,
-            layout         : new qx.ui.layout.VBox()
+            layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"})
         });
 
         // on clicking the minimize button a new button on the taskbar is
         // generated which allows to restore the window again
         this.addListener("minimize", function(e) {
-            var taskbarButton = new qx.ui.toolbar.Button(tableName, "icon/16/mimetypes/office-calendar.png");
+            var taskbarButton = new qx.ui.toolbar.Button(tableName, "icon/16/mimetypes/text-plain.png");
             var tb = dbtoria.window.Taskbar.getInstance();
             tb.add(taskbarButton);
             taskbarButton.addListener("execute", function(e) {
@@ -59,9 +61,9 @@ qx.Class.define("dbtoria.window.TableWindow", {
             this);
         },
         this);
-//        this.addListenerOnce("close", function(e) {
-//            this.close();
-//        });
+//      this.addListenerOnce("close", function(e) {
+//           this.close();
+//      });
         this.center();
         this.open();
         this.__buildUi(tableId);
@@ -76,15 +78,19 @@ qx.Class.define("dbtoria.window.TableWindow", {
          */
         __buildUi : function(tableId) {
             var toolbar = new qx.ui.toolbar.ToolBar();
-            var newButton = new qx.ui.toolbar.Button(this.tr("New Entry"), "icon/22/actions/document-new.png");
-            var deleteButton = new qx.ui.toolbar.Button(this.tr("Delete Selection"), "icon/22/actions/dialog-cancel.png");
-            var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/22/actions/edit-redo.png");
-            var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/22/actions/document-print.png");
-            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/22/actions/edit-find.png");
+            var newButton = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
+            var editButton = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png");
+            var dupButton = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png");
+            var deleteButton = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png");
+            var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
+            var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png");
+            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
             toolbar.add(newButton);
+            toolbar.add(editButton);
+            toolbar.add(dupButton);
             toolbar.add(deleteButton);
-            toolbar.add(refreshButton);
             toolbar.addSpacer();
+            toolbar.add(refreshButton);
             toolbar.add(exportButton);
             toolbar.add(filterButton);
             this.add(toolbar);

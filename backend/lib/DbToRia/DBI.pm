@@ -53,17 +53,20 @@ sub getDbh {
 
 sub getTables {
     my $self = shift;
-    my $type = shift;
+    return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
-	my $sth = $dbh->table_info('',$self->schema,'', $type);
+	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
 	my @tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
+        next unless $table->{TABLE_TYPE} ~~ ['TABLE','VIEW'];
 	    push @tables, {
             id   => $table->{TABLE_NAME},
+            type => $table->{TABLE_TYPE},
             name => $table->{REMARKS} || $table->{TABLE_NAME}
     	}
     }
-    return [ sort {$a->{name} cmp $b->{name}} @tables ];
+    $self->{tableList} = [ sort {$a->{name} cmp $b->{name}} @tables ];
+    return $self->{tableList};
 }
 
 =head2 getTableStructure(table)
@@ -107,12 +110,10 @@ sub getTableStructure {
         push @columns, {
             id         => $id,
             type       => $self->{driver_object}->map_type($col->{TYPE_NAME}),
-            nativeType => $col->{TYPE_NAME},
             name       => $col->{REMARKS},
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
-            primaryKey => $primaryKeys{$id},
             pos        => $col->{ORDINAL_POSITION} 
         }
     }
@@ -121,49 +122,15 @@ sub getTableStructure {
     return $self->{tableStructure}{$table};
 }
 
-=head2 getTableData(table)
+=head2 getTableDataChunk(table,firstRow,lastRow,optMap)
 
-Returns all data from a table. The result can be massive. We only use it for pupulating
-selection lists (fk)
+Returns data from a table. Using firstRow and lastRow the number of results can be limited.
+The following options are supported:
 
-=cut
-
-sub getTableData {
-    my $self = shift;
-
-    my $table = shift;
-    my $selection = shift || {};
+ sortColumn => name of the column to use for sorting
+ sortDesc => sort descending
+ filter => { key => [ 'op', 'value'], ... }
     
-    my $dbh = $self->getDbh();
-	my $query = "SELECT * FROM ". $dbh->quote_identifier($table);
-	
-    my @where;
-    for my $key (keys %$selection) {
-        push @where, $dbh->quote_identifier($key) . ' = ' .  $dbh->quote($selection->{$key});
-    }
-    if (@where){
-        $query .= ' WHERE '. join (' AND ',@where);
-    }
-    my $sth = $dbh->prepare($query);
-    $sth->execute;
-    my @data;
-
-    my $structure = $self->getTableStructure($table);
-    while ( my @row = $sth->fetchrow_array ) {
-        my @new_row;
-        for (my $i=0;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
-        }
-        push @data,\@new_row;
-    }
-    return \@data;
-}
-
-=head2 getTableDataChunk(table,firstRow,lastRow,opts)
-
-Returns all data from a table. The result can be massive. We only use it for pupulating
-selection lists (fk) ... should merge this code with getTableData above almost the same!
-
 =cut
 
 sub getTableDataChunk {
@@ -172,9 +139,8 @@ sub getTableDataChunk {
     my $firstRow  = shift;
     my $lastRow   = shift;
     my $opts = shift || {};
-    my $filter	  = $opts->{filter};
-    my $sortId	  = $opts->{sortId};
-    my $sortDirection = $opts->{sortDirection};
+    my $sortKey  = $opts->{sortColumn};
+    my $sortDirection = $opts->{sortDesc} ? 'DESC' : 'ASC';
 
     my $dbh = $self->getDbh();
 
@@ -182,32 +148,33 @@ sub getTableDataChunk {
 	
     my @where;
     for my $key (keys %$filter) {
-        my $value = $filter->{$key};
-        my $op = $value =~ /%/ ? ' LIKE ' : ' = ';
+        my $value = $filter->{$key}{value};
+        my $op = $filter->{$key}{op};
+        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like'];
         push @where, $dbh->quote_identifier($key) . $op . $value;
     }
-    $query .= ' WHERE '. join (' AND ',@where) if @where;
-	
-    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortId) . $sortDirection if $sortId;
-	
+    $query .= ' WHERE '. join (' AND ',@where) if @where;	
+    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
     $query .= ' LIMIT ' . ($lastRow - $firstRow) . ' OFFSET ' . $firstRow;
-
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;
-
-    my $structure = $self->getTableStructure($table);
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
         for (my $i=0;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$structure->[$i]->{nativeType});
+            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$sth->{TYPE}[$i]);
         }
         push @data,\@new_row;
+    }    
+    return {
+        rows => $sth->{NAME},
+        data => \@data
     }
-    return \@data;
 }
 
 =head2 updateTableData(table,selection,data)
+
+Update the records matching the selection map with data.
 
 =cut
 
@@ -235,21 +202,23 @@ sub updateTableData {
     }
     $update .= ' WHERE '. join (' AND ',@where) if @where;
 
-    my $sth = $dbh->prepare($update);
-    
-    return $sth->execute();        
+    $dbh->begin_work;
+    my $rows = $dbh->do($update);    
+    if ($rows > 1){
+        $dbh->rollback();
+        die error(33874,"Statement $update would affect $rows rows. Rolling back.");
+    }
+    return $rows;
 }
 
 =head2 insertTableData(table,data)
 
-Insert and return key of new entry
+Insert and return key(s) of new entry
 
 =cut
 
 sub insertTableData {
-
     my $self	  = shift;
-
     my $table	  = shift;
     my $data	  = shift;
 
@@ -270,14 +239,14 @@ sub insertTableData {
     $sth->execute();
 
     my $structure = $self->getTableStructure($table);
-    my $keyCol = (grep { $_->{primaryKey} } @$structure)[0]->{id};
-
-	return  $dbh->last_insert_id(undef,undef,$table,$keyCol);    
+    my @keyCols = map { $_->{id} } grep { $_->{primaryKey} } @$structure;    
+    my %keys = map { $_, $dbh->last_insert_id(undef,undef,$table,$_) } @keyCols;    
+	return  \%keys;
 }
 
 =head2 deleteTableData(table,selection)
 
-Insert and return key of new entry
+Delete matching entries from table.
 
 =cut
 
@@ -296,8 +265,14 @@ sub deleteTableData {
     }
     $delete .= ' WHERE '. join (' AND ',@where) if @where;
 
-    my $sth = $dbh->prepare($delete);
-    return $sth->execute();
+    $dbh->begin_work;
+    my $rows = $dbh->do($delete);
+    if ($rows > 1){
+        $dbh->rollback();
+        die error(38948,"Statement $delete would affect $rows rows. Rolling back");
+    }
+    $dbh->commit;
+    return $rows;
 }
 
 =head2 getNumRows(table,filter)
