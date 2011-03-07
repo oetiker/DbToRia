@@ -86,7 +86,6 @@ sub login {
 }
 
 
-
 sub getTables {
     my $self = shift;
     return $self->DBI->getTables('TABLE'); 
@@ -100,11 +99,6 @@ sub getViews{
 sub getTableStructure {
     my $self = shift;
     return $self->DBI->getTableStructure(@_); 
-}
-
-sub getTableData {
-    my $self = shift;
-    return $self->DBI->getTableData(@_); 
 }
 
 sub getTableDataChunk {
