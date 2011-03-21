@@ -22,6 +22,7 @@ use DBI;
 use DbToRia::Exception;
 
 use Mojo::Base -base;
+use Mojo::JSON;
 
 has 'dsn';
 has 'username';
@@ -50,6 +51,13 @@ sub getDbh {
         pg_enable_utf8=>1
     });
 }
+
+
+=head2 getTables()
+
+Returns a list of tables and views available from the system.
+
+=cut
 
 sub getTables {
     my $self = shift;
@@ -105,6 +113,7 @@ sub getTableStructure {
 	my $sth = $dbh->column_info(undef, undef, $table, undef);
 
 	my @columns;
+    my %typeMap;
 	while( my $col = $sth->fetchrow_hashref ) {
         my $id = $col->{COLUMN_NAME};
         # return structure
@@ -115,17 +124,19 @@ sub getTableStructure {
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
-            primary    => $primaryKey{$id},
+            primary    => $primaryKeys{$id},
             pos        => $col->{ORDINAL_POSITION} 
-        }
+        };
+        $typeMap{$id} = $col->{TYPE_NAME};
     }
     # sort the result
     $self->{tableStructure}{$table} = {
         columns => [ sort { $a->{pos} <=> $b->{pos} } @columns ],
+        typeMap => \%typeMap,
         meta => {
             primary => \@primaryKey
         }
-    }
+    };
     return $self->{tableStructure}{$table};
 }
 
@@ -140,9 +151,53 @@ sub getListView {
     my $table = shift;
     my $tableList = $self->getTableList();
     my $structure = $self->getTableStructure($table);
+    my @return;
     for my $row (@{$structure->{columns}}){
-        
+        push @return, { map { $_ => $row->{$_} } qw (id type name size pos) };
     }  
+    return \@return;
+}
+
+=head2 getEditView(table)
+
+returns information on how to display a single record in the table
+
+=cut
+
+sub getEditView {
+    my $self = shift;
+    my $table = shift;
+    my $tableList = $self->getTableList();
+    my $structure = $self->getTableStructure($table);
+    my @return;
+    for my $row (@{$structure->{columns}}){
+        push @return, { map { $_ => $row->{$_} } qw (id type name size pos) };
+    }  
+    return \@return;
+}
+
+=head2 getRecord (table,recordId)
+
+Returns hash of data for the record matching the indicated key. Data gets converted on the way out.
+
+=cut
+
+sub getRecord {
+    my $self = shift;
+    my $dbh = $self->getDbh();
+    my $table = $dbh->quote_identifier(shift);
+    my $recordId = $dbh->quote(shift);
+    my $primaryKey = $dbh->quote_identifier($self->getTableStructure($table)->{meta}{primary}[0]);
+    my $sth = $dbh->prepare("SELECT * FROM $table WHERE $primaryKey = $recordId"); 
+    $sth->execute();
+    my $row = $sth->fetchrow_hashref;    
+    my $structure = $self->getTableStructure($table);
+    my $typeMap = $structure->{typeMape};
+    my %newRow;
+    for my $key (keys %$row) {
+          $newRow{$key} = $self->{driver_object}->db_to_fe($row->{$key},$typeMap->{$key});
+    };
+    return \%newRow;
 }
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
@@ -155,42 +210,55 @@ The following options are supported:
 
  sortColumn => name of the column to use for sorting
  sortDesc => sort descending
- filter => { key => [ 'op', 'value'], ... }
-
-The first column of the data returned is always the primary key.
+ filter => { column => [ 'op', 'value'], ... }
 
 Return format:
 
- [ [c1,c2,c3,... ],[...], ...]
+ [
+   [ [id,update,del], c1,c2,c3,... ],
+   [ [], ... ],
+   [ ... ]
 
     
 =cut
 
+sub _buildWhere {
+    my $self = shift;
+    my $filter = shift or return '';
+    my $dbh = $self->getDbh();
+    my @where;
+    for my $key (keys %$filter) {
+        my $value = $filter->{$key}{value};
+        my $op = $filter->{$key}{op};
+        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like'];
+        push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
+    }
+    return 'WHERE '. join(' AND ',@where);
+}
+
 sub getTableDataChunk {
     my $self	  = shift;
-    my $table = shift;
+    my $table     = shift;
     my $firstRow  = shift;
     my $lastRow   = shift;
     my $columns   = shift;
     my $opts = shift || {};
-    my $sortKey  = $opts->{sortColumn};
+    my $sortColumn  = $opts->{sortColumn};
     my $sortDirection = $opts->{sortDesc} ? 'DESC' : 'ASC';
+    my $filter = $opts->{filter};
 
     my $dbh = $self->getDbh();
+
+    my $structure = $self->getTableStructure($table);
+    my $typeMap = $structure->{typeMap};
+    unshift @$columns, $structure->{meta}{primary}[0];
 
 	my $query = 'SELECT '
         . join(',',map{$dbh->quote_identifyer($_)} @$columns)
         . ' FROM '
         . $dbh->quote_identifier($table);
 	
-    my @where;
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key}{value};
-        my $op = $filter->{$key}{op};
-        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like'];
-        push @where, $dbh->quote_identifier($key) . $op . $value;
-    }
-    $query .= ' WHERE '. join (' AND ',@where) if @where;	
+    $query .= $self->_buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
     $query .= ' LIMIT ' . ($lastRow - $firstRow) . ' OFFSET ' . $firstRow;
     my $sth = $dbh->prepare($query);
@@ -198,42 +266,59 @@ sub getTableDataChunk {
     my @data;
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
-        for (my $i=0;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$sth->{TYPE}[$i]);
+        $new_row[0] = [ $row[0], Mojo::JSON::true, Mojo::JSON::true ];
+        for (my $i=1;$i<$#row;$i++){
+            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
     }    
     return \@data
 }
 
+=head2 getNumRows(table,filter)
+
+Find the number of rows matching the current filter
+
+=cut
+
+sub getRowCount {
+    my $self = shift;
+    my $table = shift;
+    my $filter = shift;
+    
+    my $dbh = $self->getDbh();
+	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
+	
+    $query .= $self->_buildWhere($filter);
+    return ($dbh->selectrow_array($query))[0];
+}
+
 =head2 updateTableData(table,selection,data)
 
-Update the records matching the selection map with data.
+Update the record with the given recId using the data.
 
 =cut
 
 sub updateTableData {
-
-    my $self	  = shift;
-    
-    my $table = shift;
-    my $selection = shift;
+    my $self	  = shift;    
+    my $table     = shift;
+    my $recId     = shift;
     my $data	  = shift;
 
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
+    my $structure = $self->getTableStructure($table);
+    my $primaryKey = $structure->{meta}{primary}[0];
+    my $typeMap = $structure->{typeMape}; 
 
     my @set;  
     for my $key (keys %$data) {
-        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($data->{$key});
+        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key}));
     }
     $update .= 'SET '.join(', ',@set) if @set;
     
-    my @where;
-      for my $key (keys %$selection) {
-        push @where, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($selection->{$key});
-    }
+    my @where = ( $dbh->quote_identifier($primaryKey) . ' = ' . $dbh->quote($recId));
     $update .= ' WHERE '. join (' AND ',@where) if @where;
 
     $dbh->begin_work;
@@ -242,12 +327,13 @@ sub updateTableData {
         $dbh->rollback();
         die error(33874,"Statement $update would affect $rows rows. Rolling back.");
     }
+    $dbh->commit;
     return $rows;
 }
 
 =head2 insertTableData(table,data)
 
-Insert and return key(s) of new entry
+Insert and return key of new entry
 
 =cut
 
@@ -259,22 +345,23 @@ sub insertTableData {
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 
+    my $structure = $self->getTableStructure($table);
+    my $primaryKey = $structure->{meta}{primary}[0];
+    my $typeMap = $structure->{typeMape};
+
     my @keys;
     my @values;
     
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
-        push @values, $dbh->quote($data->{$key});
+        push @values, $dbh->quote($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key}));
     }
     
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
     my $sth = $dbh->prepare($insert);
     
     $sth->execute();
-
-    my $structure = $self->getTableStructure($table);
-
-    return $dbh->last_insert_id(undef,undef,$table,$structure->{meta}{primary});    
+    return $dbh->last_insert_id(undef,undef,$table,$primaryKey);
 }
 
 =head2 deleteTableData(table,selection)
@@ -286,54 +373,26 @@ Delete matching entries from table.
 sub deleteTableData {
     my $self	  = shift;
     my $table	  = shift;
-    my $selection = shift;
+    my $recId     = shift;
 
     my $dbh = $self->getDbh();
 
     my $delete = 'DELETE FROM '. $dbh->quote_identifier($table);
 
-    my @where;
-      for my $key (keys %$selection) {
-        push @where, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($selection->{$key});
-    }
+    my $primaryKey = $self->getTableStructure($table)->{meta}{primary}[0];
+    my @where = ( $dbh->quote_identifier($primaryKey) . ' = ' . $dbh->quote($recId));
     $delete .= ' WHERE '. join (' AND ',@where) if @where;
 
     $dbh->begin_work;
     my $rows = $dbh->do($delete);
     if ($rows > 1){
-        $dbh->rollback();
+        $dbh->rollback;
         die error(38948,"Statement $delete would affect $rows rows. Rolling back");
     }
     $dbh->commit;
     return $rows;
 }
 
-=head2 getNumRows(table,filter)
-
-Find the number of rows matching the current filter
-
-=cut
-
-sub getNumRows {
-    my $self = shift;
-
-    my $table = shift;
-    my $filter = shift || {};
-    
-    my $dbh = $self->getDbh();
-	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
-	
-    my @where;
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key};
-        my $op = $value =~ /%/ ? ' LIKE ' : ' = ';
-        push @where, $dbh->quote_identifier($key) . $op . $value;
-    }
-    if (@where){
-        $query .= ' WHERE '. join (' AND ',@where);
-    }
-    return ($dbh->selectrow_array($query))[0];
-}
 
 1;
 

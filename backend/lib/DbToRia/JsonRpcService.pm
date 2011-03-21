@@ -85,20 +85,30 @@ sub login {
     return 1;
 }
 
+sub logout{
+    my $self = shift;
+    $self->_mojo_stash->{'dbtoria.session'}->delete();
+    return 1;
+}
 
 sub getTables {
     my $self = shift;
-    return $self->DBI->getTables('TABLE'); 
+    return $self->DBI->getTables; 
 }
 
-sub getViews{
+sub getListView {
     my $self = shift;
-    return $self->DBI->getTables('VIEW');
+    return $self->DBI->getListView(@_);
 }
 
-sub getTableStructure {
+sub getEditView {
     my $self = shift;
-    return $self->DBI->getTableStructure(@_); 
+    return $self->DBI->getEditView(@_);
+}
+
+sub getRecord {
+    my $self = shift;
+    return $self->DBI->getEditView(@_);
 }
 
 sub getTableDataChunk {
@@ -106,32 +116,27 @@ sub getTableDataChunk {
     return $self->DBI->getTableDataChunk(@_); 
 }
 
+sub getRowCount {
+    my $self = shift;
+    return $self->DBI->getNumRows(@_);
+}
+
 sub updateTableData {
     my $self = shift;
     return $self->DBI->updateTableData(@_);
 }
 
-sub insertTableData{
+sub insertTableData {
     my $self = shift;
     return $self->DBI->insertTableData(@_);
 }
 
-sub deleteTableData{
+sub deleteTableData {
     my $self = shift;
     return $self->DBI->deleteTableData(@_);
 }
 
-sub getNumRows{
-    my $self = shift;
-    return $self->DBI->getNumRows(@_);
-}
 
-
-sub logout{
-    my $self = shift;
-    $self->_mojo_stash->{'dbtoria.session'}->delete();
-    return 1;
-}
 
 
 1;
