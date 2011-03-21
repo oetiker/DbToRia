@@ -82,7 +82,6 @@ sub getTableStructure {
     my $table = shift;
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
-
     my $dbh = $self->getDbh();
 	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table);
 
@@ -95,9 +94,11 @@ sub getTableStructure {
     }
 
     my %primaryKeys;
+    my @primaryKey;
 	my $pksth = $dbh->primary_key_info(undef, undef, $table);
     while ( my $pk = $pksth->fetchrow_hashref ) {
         $primaryKeys{$pk->{COLUMN_NAME}} = 1;
+        push @primaryKey, $pk->{COLUMN_NAME};
     }
 
 	# call column_info for metadata on columns
@@ -114,22 +115,54 @@ sub getTableStructure {
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
+            primary    => $primaryKey{$id},
             pos        => $col->{ORDINAL_POSITION} 
         }
     }
     # sort the result
-    $self->{tableStructure}{$table} = [ sort { $a->{pos} <=> $b->{pos} } @columns ];
+    $self->{tableStructure}{$table} = {
+        columns => [ sort { $a->{pos} <=> $b->{pos} } @columns ],
+        meta => {
+            primary => \@primaryKey
+        }
+    }
     return $self->{tableStructure}{$table};
 }
 
-=head2 getTableDataChunk(table,firstRow,lastRow,optMap)
+=head2 getListView(table)
 
-Returns data from a table. Using firstRow and lastRow the number of results can be limited.
+returns information on how to display the table content in a tabular format
+
+=cut
+
+sub getListView {
+    my $self = shift;
+    my $table = shift;
+    my $tableList = $self->getTableList();
+    my $structure = $self->getTableStructure($table);
+    for my $row (@{$structure->{columns}}){
+        
+    }  
+}
+
+=head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
+
+Returns the selected columns from the table. Using firstRow and lastRow the number of results can be limited.
+
+The columns argument is an array of column identifiers
+
 The following options are supported:
 
  sortColumn => name of the column to use for sorting
  sortDesc => sort descending
  filter => { key => [ 'op', 'value'], ... }
+
+The first column of the data returned is always the primary key.
+
+Return format:
+
+ [ [c1,c2,c3,... ],[...], ...]
+
     
 =cut
 
@@ -138,13 +171,17 @@ sub getTableDataChunk {
     my $table = shift;
     my $firstRow  = shift;
     my $lastRow   = shift;
+    my $columns   = shift;
     my $opts = shift || {};
     my $sortKey  = $opts->{sortColumn};
     my $sortDirection = $opts->{sortDesc} ? 'DESC' : 'ASC';
 
     my $dbh = $self->getDbh();
 
-	my $query = 'SELECT * FROM '. $dbh->quote_identifier($table);
+	my $query = 'SELECT '
+        . join(',',map{$dbh->quote_identifyer($_)} @$columns)
+        . ' FROM '
+        . $dbh->quote_identifier($table);
 	
     my @where;
     for my $key (keys %$filter) {
@@ -166,10 +203,7 @@ sub getTableDataChunk {
         }
         push @data,\@new_row;
     }    
-    return {
-        rows => $sth->{NAME},
-        data => \@data
-    }
+    return \@data
 }
 
 =head2 updateTableData(table,selection,data)
@@ -239,9 +273,8 @@ sub insertTableData {
     $sth->execute();
 
     my $structure = $self->getTableStructure($table);
-    my @keyCols = map { $_->{id} } grep { $_->{primaryKey} } @$structure;    
-    my %keys = map { $_, $dbh->last_insert_id(undef,undef,$table,$_) } @keyCols;    
-	return  \%keys;
+
+    return $dbh->last_insert_id(undef,undef,$table,$structure->{meta}{primary});    
 }
 
 =head2 deleteTableData(table,selection)
