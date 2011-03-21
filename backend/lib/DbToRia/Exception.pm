@@ -27,7 +27,7 @@ use warnings;
 
 use Exporter 'import';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(mkerror);
+@EXPORT_OK = qw(error);
 
 use overload ('""' => 'stringify');
 
@@ -37,13 +37,13 @@ use Mojo::Base -base;
 has 'code';
 has 'message';
 
-=item B<mkerror>(I<code>,I<message>)
+=item B<error>(I<code>,I<message>)
 
 Create an DbToRia::Exception object, setting code and message properties in the process.
 
 =cut
 
-sub mkerror {
+sub error {
     my $code = shift;
     my $message = shift;
     return (__PACKAGE__->new(code=>$code,message=>$message));
