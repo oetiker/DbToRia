@@ -48,7 +48,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             var that = this;
             this.__rpc.callAsyncSmart(function(ret) {
                 that._onRowCountLoaded(ret);
-            }, 'getNumRows', this.__tableId,this.getFilter());
+            }, 'getRowCount', this.__tableId,this.getFilter());
         },
 
 
@@ -90,15 +90,15 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
                 var data = [];
                 var col = that.__columnIdList;
                 for (var i=0;i<ret.length;i++){
-                    var row = {};
+                    var row = { __PK: ret[i][0] };
                     for (var r=0;r<col.length;r++){
-                        row[col[r]] = ret[i][r];
+                        row[col[r]] = ret[i][r+1];
                     }
                     data.push(row);
                 }
                 that._onRowDataLoaded(data);
             },
-            'getTableDataChunk', this.__tableId,firstRow,lastRow,rpcArgs);
+            'getTableDataChunk', this.__tableId,firstRow,lastRow,this.__columnIdList);
         }
     }
 });

@@ -22,7 +22,7 @@ A driver module must implement the following methods:
 
 use strict;
 use warnings;
-use base qw(Mojo::Base);
+use Mojo::Base -base;
 
 =head2 map_type(type_name)
 

@@ -67,15 +67,9 @@ qx.Class.define("dbtoria.window.Main", {
         this.add(taskbar);
 
         
-        var menu = new qx.ui.menu.Menu();
+        var menu = new dbtoria.window.TableSelection();
         var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu).set({show: 'icon'});
         toolbar.add(menuBtn);
-
-        var tableMenu = new dbtoria.window.TableSelection(false);
-        menu.add(new qx.ui.menu.Button(this.tr("Tables"),null,null,tableMenu));
-
-        var viewMenu = new dbtoria.window.TableSelection(true);
-        menu.add(new qx.ui.menu.Button(this.tr("Views"),null,null,viewMenu));
 
         toolbar.addSpacer();
 
