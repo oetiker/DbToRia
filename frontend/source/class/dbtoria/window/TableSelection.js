@@ -29,41 +29,33 @@
  */
 qx.Class.define("dbtoria.window.TableSelection", {
     extend : qx.ui.menu.Menu,
-
-
-
-
-    /*
-        *****************************************************************************
-    	CONSTRUCTOR
-        *****************************************************************************
-        */
-
-    construct : function(showViews) {
+    construct : function() {
         this.base(arguments);
         var rpc = dbtoria.communication.Rpc.getInstance();
         var desktop = dbtoria.window.Desktop.getInstance();
         var that = this;
-
+        var tableMenu = qx.ui.menu.Menu();
+        var viewMenu = qx.ui.menu.Menu();
+        this.add(new qx.ui.menu.Button(this.tr('Tables',null,null,tableMenu)));
+        this.add(new qx.ui.menu.Button(this.tr('Views',null,null,viewMenu))); 
         rpc.callAsyncSmart(function(ret) {
             // generate a button for each table
             for (var i=0; i<ret.length; i++) {
                 (function() {
-                    var table = ret[i];
-
-                    if (!table.name) {
-                        table.name = table.id;
+                    var item = ret[i];
+                    var menuButton = new qx.ui.menu.Button(item.name);
+                    if (item.type == 'TABLE'){
+                        tableMenu.add(menuButton);
                     }
-
-                    var menuButton = new qx.ui.menu.Button(table.name);
-                    that.add(menuButton);
-
+                    else {
+                        viewMenu.add(menuButton);
+                    }
                     menuButton.addListener("execute", function(e) {
                         desktop.add(new dbtoria.window.TableWindow(table.id, table.name));
                     }, this);
                 })();
             }
         },
-        showViews ? 'getViews' : 'getTables');
+        'getTables');
     }
 });
