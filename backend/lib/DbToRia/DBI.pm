@@ -20,14 +20,16 @@ DbToRia::DBI - database interface
 use strict;
 use DBI;
 use DbToRia::Exception;
+use Encode;
+use Mojo::JSON;
 
 use Mojo::Base -base;
-use Mojo::JSON;
 
 has 'dsn';
 has 'username';
 has 'password';
 has 'schema';
+has 'encoding';
 
 sub new {
     my $self = shift->SUPER::new(@_);
@@ -36,9 +38,30 @@ sub new {
     require 'DbToRia/DBI/'.$self->{driver}.'.pm';
     no strict 'refs';
     $self->{driver_object} = "DbToRia::DBI::$self->{driver}"->new();
+    $self->{encoder} = find_encoding($self->encoding) if $self->encoding;
     return $self;
 }
 
+
+sub fromDb {
+    my $self = shift;
+    my $data = shift;
+    my $encoder = $self->{encoder};
+    if (defined $data and defined $encoder){
+        $data = $encoder->decode($data);
+    }
+    return $data;
+}
+
+sub toDb {
+    my $self = shift;
+    my $data = shift;
+    my $encoder = $self->{encoder};
+    if (defined $data and defined $encoder){
+        $data = $encoder->encode($data);
+    }
+    return $data;
+}    
     
 sub getDbh {
     my $self = shift;
@@ -48,7 +71,6 @@ sub getDbh {
         AutoCommit => 1,
         ShowErrorStatement => 1,
         LongReadLen=> 5*1024*1024,
-        pg_enable_utf8=>1
     });
 }
 
@@ -60,7 +82,7 @@ Returns a list of tables and views available from the system.
 =cut
 
 sub getTables {
-    my $self = shift;
+    my $self = shift;    
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
@@ -70,7 +92,7 @@ sub getTables {
 	    push @tables, {
             id   => $table->{TABLE_NAME},
             type => $table->{TABLE_TYPE},
-            name => $table->{REMARKS} || $table->{TABLE_NAME}
+            name => $self->fromDb($table->{REMARKS} || $table->{TABLE_NAME})
     	}
     }
     $self->{tableList} = [ sort {$a->{name} cmp $b->{name}} @tables ];
@@ -120,7 +142,7 @@ sub getTableStructure {
         push @columns, {
             id         => $id,
             type       => $self->{driver_object}->map_type($col->{TYPE_NAME}),
-            name       => $col->{REMARKS},
+            name       => $self->fromDb($col->{REMARKS}),
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
@@ -148,12 +170,11 @@ returns information on how to display the table content in a tabular format
 
 sub getListView {
     my $self = shift;
-    my $table = shift;
-    my $tableList = $self->getTableList();
-    my $structure = $self->getTableStructure($table);
+    my $tableId = shift;
+    my $structure = $self->getTableStructure($tableId);
     my @return;
     for my $row (@{$structure->{columns}}){
-        push @return, { map { $_ => $row->{$_} } qw (id type name size pos) };
+        push @return, { map { $_ => $row->{$_} } qw (id type name size) };
     }  
     return \@return;
 }
@@ -195,7 +216,7 @@ sub getRecord {
     my $typeMap = $structure->{typeMape};
     my %newRow;
     for my $key (keys %$row) {
-          $newRow{$key} = $self->{driver_object}->db_to_fe($row->{$key},$typeMap->{$key});
+          $newRow{$key} = $self->{driver_object}->db_to_fe($self->fromDb($row->{$key}),$typeMap->{$key});
     };
     return \%newRow;
 }
@@ -254,7 +275,7 @@ sub getTableDataChunk {
     unshift @$columns, $structure->{meta}{primary}[0];
 
 	my $query = 'SELECT '
-        . join(',',map{$dbh->quote_identifyer($_)} @$columns)
+        . join(',',map{$dbh->quote_identifier($_)} @$columns)
         . ' FROM '
         . $dbh->quote_identifier($table);
 	
@@ -268,7 +289,7 @@ sub getTableDataChunk {
         my @new_row;
         $new_row[0] = [ $row[0], Mojo::JSON::true, Mojo::JSON::true ];
         for (my $i=1;$i<$#row;$i++){
-            $new_row[$i] = $self->{driver_object}->db_to_fe($row[$i],$typeMap->{$sth->{NAME}[$i]});
+            $new_row[$i] = $self->{driver_object}->db_to_fe($self->fromDb($row[$i]),$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
     }    
@@ -314,7 +335,7 @@ sub updateTableData {
 
     my @set;  
     for my $key (keys %$data) {
-        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key}));
+        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->toDb($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key})));
     }
     $update .= 'SET '.join(', ',@set) if @set;
     
@@ -354,7 +375,7 @@ sub insertTableData {
     
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
-        push @values, $dbh->quote($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key}));
+        push @values, $dbh->quote($self->toDb($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key})));
     }
     
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';

@@ -106,7 +106,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 var model = new dbtoria.db.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.window.Table(model);
                 that.add(that.__table, { flex : 1 });
-            },'getTableStructure',tableId);
+            },'getListView',tableId);
         }
     }
 });

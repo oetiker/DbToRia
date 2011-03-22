@@ -31,7 +31,11 @@ setup a new serivice
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    $self->DBI(DbToRia::DBI->new(dsn=>$self->cfg->{General}{dsn},schema=>$self->cfg->{General}{schema}));
+    $self->DBI(DbToRia::DBI->new(
+        dsn=>$self->cfg->{General}{dsn},
+        schema=>$self->cfg->{General}{schema},
+        encoding=>$self->cfg->{General}{encoding},
+    ));
     return $self;
 }
 
@@ -44,16 +48,17 @@ session settings are correct and users get connected as with their own login.
 
 our %allow_access = (
     login => 1,
+    logout => 1,
     getTables => 2,
-    getViews => 2,
+    getListView => 2,
+    getEditView => 2,
+    getRecord => 2,
     getTableStructure => 2,
-    getTableData => 2,
+    getRowCount => 2,
     getTableDataChunk => 2,
     updateTableData => 2,
     insertTableData => 2,
     deleteTableData => 2,
-    getNumRows => 2,
-    logout => 1,
 );
 
 sub allow_rpc_access {
@@ -118,7 +123,7 @@ sub getTableDataChunk {
 
 sub getRowCount {
     my $self = shift;
-    return $self->DBI->getNumRows(@_);
+    return $self->DBI->getRowCount(@_);
 }
 
 sub updateTableData {
