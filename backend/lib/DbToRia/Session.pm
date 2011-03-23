@@ -31,16 +31,15 @@ uses L<Storable> as its on-disk format.
 
 our $VERSION   = '0.2';
 
-use base qw(Mojo::Base);
+use Mojo::Base -base;
 
 use Carp;
 
-__PACKAGE__->attr('id');
-my $user = (getpwuid($<))[0];
-__PACKAGE__->attr('path','/tmp/dbtoria_session_'.$user);
-__PACKAGE__->attr('clean_interval',600);
-__PACKAGE__->attr('lock_timeout',1.5);
-__PACKAGE__->attr('session_timeout',300);
+has 'id';
+has path =>  '/tmp/dbtoria_session_'.(getpwuid($<))[0];
+has clean_interval => 600;
+has lock_timeout => 1.5;
+has session_timeout => 3600;
 
 
 =head1 METHODS
