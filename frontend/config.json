@@ -49,6 +49,11 @@
 //          "files" : [ "resource/excanvas.js" ]
 //       }
      },
+    "libraries" : {
+       "library" : [{
+         "manifest"   : "contrib://ComboTable/trunk/Manifest.json"
+       }]
+     },
      "pretty" :
      {
         "pretty-print" : 

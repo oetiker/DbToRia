@@ -31,6 +31,13 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
     },
 
     properties : {
+        searchString : {
+            init     : null,
+            apply    : '_applySearchString',
+            nullable : true,
+            check    : "String"
+        },
+
         filter : {
             nullable : true,
             apply    : '_applyFilter'
@@ -49,6 +56,18 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             this.__rpc.callAsyncSmart(function(ret) {
                 that._onRowCountLoaded(ret);
             }, 'getRowCount', this.__tableId,this.getFilter());
+        },
+
+        _applySearchString: function (newString,oldString){
+            if (oldString == newString){
+                return;
+            }
+            this.setFilter({
+                String(this.__columnIdList[1]): {
+                    op: 'like',
+                    value: newString + '%'
+                }
+            });
         },
 
 
