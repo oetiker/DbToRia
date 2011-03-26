@@ -30,18 +30,19 @@ use base qw(DbToRia::DBI::base);
 use DbToRia::Exception;
 
 our $map = {
-    (map { $_ => 'varchar' } ('bit','bit varying','varbit','character varying','varchar','character','text','char')),
-    (map { $_ => 'integer' } ('bigint','int8','int','int4','serial','bigserial','smallint')),
+    (map { $_ => 'varchar' } ('bit','bit varying','varbit','character varying','varchar','character','text','char','name')),
+    (map { $_ => 'integer' } ('bigint','int8','int','int4','serial','bigserial','smallint','integer')),
     (map { $_ => 'float' }   ('double precision','numeric','decimal','real','float 8','float4')),
     (map { $_ => 'boolean' } ('bool')),
     (map { $_ => 'datetime' } ('timestamp without time zone')),
+    (map { $_ => 'date' } ('date')),
 };
 
 
 sub map_type {
     my $self = shift;
     my $type = shift;
-    return $map->{$type} or die error(9844,'Unknown Database Type: "'.$type.'"');
+    return $map->{$type} || die error(9844,'Unknown Database Type: "'.$type.'"');
 }
 
 =head2 db_to_fe(value,type)

@@ -39,6 +39,7 @@
 qx.Class.define("dbtoria.window.TableWindow", {
     extend : qx.ui.window.Window,
     construct : function(tableId, tableName) {
+        this.__tableName = tableName;
         this.base(arguments, this.tr('Table: %1', tableName));
         this.set({
             contentPadding : 0,
@@ -71,6 +72,10 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
     members : {
         __table: null,
+        __tbEdit: null,
+        __tbDelete: null,
+        __currentId: null,
+        __tableName: null,
         /**
          * Display a table overview with data
          *
@@ -79,20 +84,29 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __buildUi : function(tableId) {
             var toolbar = new qx.ui.toolbar.ToolBar();
             var newButton = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
-            var editButton = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png");
+            var editButton = this.__tbEdit = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png");
             var dupButton = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png");
-            var deleteButton = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png");
+            var deleteButton = this.__tbDelete = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png");
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png");
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
             toolbar.add(newButton);
+            newButton.addListener('execute',function(e){
+                new dbtoria.window.RecordEdit(tableId,null,"New "+this.__tableName);
+            },this);
             toolbar.add(editButton);
+
+            editButton.addListener('execute',function(e){
+                new dbtoria.window.RecordEdit(tableId,this.__currentId,"Edit "+this.__tableName);
+            },this);
+
             toolbar.add(dupButton);
             toolbar.add(deleteButton);
             toolbar.addSpacer();
             toolbar.add(refreshButton);
             toolbar.add(exportButton);
             toolbar.add(filterButton);
+
             this.add(toolbar);
             var rpc = dbtoria.communication.Rpc.getInstance();
             var that = this;
@@ -105,8 +119,31 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 }
                 var model = new dbtoria.db.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.window.Table(model);
+                that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
                 that.add(that.__table, { flex : 1 });
             },'getListView',tableId);
+        },
+        __switchRecord : function(e) {
+            var table = this.__table;
+            var model = table.getTableModel();
+            var selMod = table.getSelectionModel();
+            var tbBtn = this.__tbBtn;
+            var row;
+
+            selMod.iterateSelection(function(ind) {
+                row = model.getRowData(ind);
+            });
+
+            if (row) {
+                this.__currentId = row.ROWINFO[0];
+                this.__tbEdit.setEnabled(row.ROWINFO[1]);
+                this.__tbDelete.setEnabled(row.ROWINFO[2]);
+            }
+            else {
+                tbBtn.update.setEnabled(false);
+                tbBtn.del.setEnabled(false);
+                this.__currentId = null;
+            }
         }
     }
 });

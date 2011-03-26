@@ -53,6 +53,7 @@ our %allow_access = (
     getListView => 2,
     getEditView => 2,
     getRecord => 2,
+    getForm => 2,
     getTableStructure => 2,
     getRowCount => 2,
     getTableDataChunk => 2,
@@ -114,6 +115,11 @@ sub getEditView {
 sub getRecord {
     my $self = shift;
     return $self->DBI->getEditView(@_);
+}
+
+sub getForm {
+    my $self = shift;
+    return $self->DBI->getForm(@_);
 }
 
 sub getTableDataChunk {

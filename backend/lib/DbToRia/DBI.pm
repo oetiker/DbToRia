@@ -112,6 +112,7 @@ sub getTableStructure {
     my $table = shift;
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
+
     my $dbh = $self->getDbh();
 	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table);
 
@@ -187,13 +188,27 @@ returns information on how to display a single record in the table
 
 sub getEditView {
     my $self = shift;
-    my $table = shift;
-    my $tableList = $self->getTableList();
-    my $structure = $self->getTableStructure($table);
+    my $tableId = shift;
+    my $structure = $self->getTableStructure($tableId);
     my @return;
-    for my $row (@{$structure->{columns}}){
-        push @return, { map { $_ => $row->{$_} } qw (id type name size pos) };
+    my $widgetMap = {
+        varchar => 'TextField',
+        integer => 'TextField',
+        date => 'Date',
+        boolean => 'CheckBox',
+        float => 'TextField',
+    };
+
+    for my $row (@{$structure->{columns}}){        
+        push @return, {
+            name => $row->{id},
+            label => $row->{name},
+            # required => xxx,
+            # check => { rx => x, msg => x },
+            type => $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"}
+        }
     }  
+
     return \@return;
 }
 
@@ -205,20 +220,40 @@ Returns hash of data for the record matching the indicated key. Data gets conver
 
 sub getRecord {
     my $self = shift;
+    my $tableId = shift;
     my $dbh = $self->getDbh();
-    my $table = $dbh->quote_identifier(shift);
     my $recordId = $dbh->quote(shift);
-    my $primaryKey = $dbh->quote_identifier($self->getTableStructure($table)->{meta}{primary}[0]);
-    my $sth = $dbh->prepare("SELECT * FROM $table WHERE $primaryKey = $recordId"); 
+    my $tableIdQ = $dbh->quote_identifier($tableId);
+    my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
+    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId"); 
     $sth->execute();
     my $row = $sth->fetchrow_hashref;    
-    my $structure = $self->getTableStructure($table);
+    my $structure = $self->getTableStructure($tableId);
     my $typeMap = $structure->{typeMape};
     my %newRow;
     for my $key (keys %$row) {
           $newRow{$key} = $self->{driver_object}->db_to_fe($self->fromDb($row->{$key}),$typeMap->{$key});
     };
     return \%newRow;
+}
+
+=head2 getForm (table,recordId)
+
+transitional method to get both the form description AND the default data. If the recordId is null, the form will contain
+the default values
+
+=cut
+
+sub getForm {
+    my $self = shift;
+    my $tableId = shift;
+    my $recordId = shift;
+    my $row = $self->getRecord($tableId,$recordId);
+    my $view = $self->getEditView($tableId);
+    map {
+        $_->{initial} = $row->{$_->{name}}
+    } @$view;
+    return $view;
 }
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
