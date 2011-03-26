@@ -125,7 +125,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     control.set({ placeholder : this._vtr('dd.mm.jjjj') });
 
                     if (qx.lang.Type.isNumber(desc.initial)) {
+                        // handle epoch seconds
                         desc.initial = new Date(desc.initial * 1000);
+                    } else {
+                        desc.initial = new Date(desc.initial); 
                     }
 
                     control.set({ allowGrowX : false });

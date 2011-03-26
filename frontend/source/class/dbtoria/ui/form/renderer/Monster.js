@@ -9,7 +9,7 @@
  * A form renderer almost like the 'Single' render, but
  * with the labels aligned in the middle
  */
-qx.Class.define("nq.ui.form.renderer.Monster", {
+qx.Class.define("dbtoria.ui.form.renderer.Monster", {
     extend : qx.ui.form.renderer.Single,
 
 

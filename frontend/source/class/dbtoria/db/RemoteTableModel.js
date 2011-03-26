@@ -62,12 +62,13 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             if (oldString == newString){
                 return;
             }
-            this.setFilter({
-                String(this.__columnIdList[1]): {
-                    op: 'like',
-                    value: newString + '%'
-                }
-            });
+            var filer = {};
+
+            filter[String(this.__columnIdList[1])] = {
+                op: 'like',
+                value: newString + '%'
+            };
+            this.setFilter(filter);
         },
 
 
@@ -109,7 +110,8 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
                 var data = [];
                 var col = that.__columnIdList;
                 for (var i=0;i<ret.length;i++){
-                    var row = { __PK: ret[i][0] };
+                    var row = {};
+                    row.ROWINFO = ret[i][0];
                     for (var r=0;r<col.length;r++){
                         row[col[r]] = ret[i][r+1];
                     }
