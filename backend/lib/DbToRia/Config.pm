@@ -15,7 +15,7 @@ DbToRia::Config - The Configuration File
 
 =head1 DESCRIPTION
 
-Configuration reader for remOcularssas.
+Configuration reader for DbToRia.
 
 =cut
 
@@ -50,7 +50,7 @@ sub parse_config {
 
 =head2 $x->B<make_config_pod>()
 
-Create a pod documentation file based on the information fro all config actions.
+Create a pod documentation file based on the information from all config actions.
 
 =cut
 
@@ -129,7 +129,7 @@ HEADER
 
 =item $x->B<_make_parser>()
 
-Create a config parser for dbtoria.
+Create a config parser for DbToRia.
 
 =cut
 
