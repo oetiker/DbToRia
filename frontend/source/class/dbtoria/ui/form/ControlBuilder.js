@@ -122,12 +122,11 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                 case "Date":
                     control = new qx.ui.form.DateField();
-                    control.set({ placeholder : this._vtr('dd.mm.jjjj') });
 
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         // handle epoch seconds
                         desc.initial = new Date(desc.initial * 1000);
-                    } else {
+                    } else if (desc.initial) {
                         desc.initial = new Date(desc.initial); 
                     }
 
@@ -156,7 +155,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     break;
                 case "ComboTable":
-                    var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,[desc.idCol,desc.valueCol]);
+                    var l = {};
+                    l[desc.idCol] = 'id';
+                    l[desc.valueCol] = 'value';
+                    var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,[desc.idCol,desc.valueCol],l);
                     control = new combotable.ComboTable(remoteModel);
                     break;
                 case "SelectBox":

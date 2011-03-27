@@ -27,13 +27,15 @@ Map a native database column type to a DbToRia field type:
 
 use base qw(DbToRia::DBI::base);
 
-use DbToRia::Exception;
+use DbToRia::Exception qw(error);
+use Mojo::JSON;
+
 
 our $map = {
     (map { $_ => 'varchar' } ('bit','bit varying','varbit','character varying','varchar','character','text','char','name')),
     (map { $_ => 'integer' } ('bigint','int8','int','int4','serial','bigserial','smallint','integer')),
     (map { $_ => 'float' }   ('double precision','numeric','decimal','real','float 8','float4')),
-    (map { $_ => 'boolean' } ('bool')),
+    (map { $_ => 'boolean' } ('boolean')),
     (map { $_ => 'datetime' } ('timestamp without time zone')),
     (map { $_ => 'date' } ('date')),
 };
@@ -47,11 +49,30 @@ sub map_type {
 
 =head2 db_to_fe(value,type)
 
-Convert the data reutrnet from an sql query to something suitable for the frontend according to the database type.
+Convert the data from an sql query to something suitable for the frontend according to the database type.
 
 =cut
 
 sub db_to_fe {
+    my $self = shift;
+    my $value = shift;
+    my $type = shift;
+    my $ourtype = $map->{$type};
+#   warn "#### $type, $ourtype, $value\n";
+    if ($ourtype eq 'boolean'){
+        $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+    }
+    return $value;
+}
+
+=head2 db_to_fe(value,type)
+
+Convert the data from the frontend to a format usable in sql.
+
+=cut
+
+sub db_to_fe {
+
     my $self = shift;
     my $value = shift;
     my $type = shift;
