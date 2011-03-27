@@ -11,7 +11,7 @@ DbToRia::DBI::Pg - postgresql support for DbToRia
 
 =head1 DESCRIPTION
 
-All methods from L<DbToRia::DBI::base> adapted to Postgresql.
+All methods from L<DbToRia::DBI::base> implemented for Postgresql.
 
 =head2 map_type(type_name)
 
@@ -49,7 +49,7 @@ sub map_type {
 
 =head2 db_to_fe(value,type)
 
-Convert the data from an sql query to something suitable for the frontend according to the database type.
+Convert the data returned from an sql query to something suitable for the frontend according to the database type.
 
 =cut
 
@@ -58,7 +58,6 @@ sub db_to_fe {
     my $value = shift;
     my $type = shift;
     my $ourtype = $map->{$type};
-#   warn "#### $type, $ourtype, $value\n";
     if ($ourtype eq 'boolean'){
         $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
     }

@@ -13,7 +13,7 @@ DbToRia::DBI::base - base class for database drivers
 =head1 DESCRIPTION
 
 DbToRia uses DBI for database introspection wherever possible. For the non
-generic bits it uses the services of a databse driver module. This is the base class for
+generic bits it uses the services of a database driver module. This is the base class for
 implementing such driver modules.
 
 A driver module must implement the following methods:
@@ -43,7 +43,7 @@ sub map_type {
 
 =head2 db_to_fe(value,type)
 
-Convert the data reutrnet from an sql query to something suitable for the frontend according to the database type.
+Convert the data returned from an sql query to something suitable for the frontend according to the database type.
 
 =cut
 
