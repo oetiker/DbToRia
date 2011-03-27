@@ -19,7 +19,7 @@ DbToRia::DBI - database interface
 
 use strict;
 use DBI;
-use DbToRia::Exception;
+use DbToRia::Exception qw(error);
 use Encode;
 use Mojo::JSON;
 
@@ -114,24 +114,23 @@ sub getTableStructure {
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
     my $dbh = $self->getDbh();
-	my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table);
-
 	my %foreignKeys;
-    while ( my $fk = $fksth->fetchrow_hashref ) {
-        $foreignKeys{$fk->{FK_COLUMN_NAME}} = {
-            table => $fk->{UK_TABLE_NAME},
-            field => $fk->{UK_COLUMN_NAME}
-        };    
+    if ( my $fksth = $dbh->foreign_key_info(undef, undef, undef, undef, undef, $table)){
+        while ( my $fk = $fksth->fetchrow_hashref ) {
+            $foreignKeys{$fk->{FK_COLUMN_NAME}} = {
+                table => $fk->{UK_TABLE_NAME},
+                column => $fk->{UK_COLUMN_NAME}
+            };    
+        }
     }
-
     my %primaryKeys;
     my @primaryKey;
-	my $pksth = $dbh->primary_key_info(undef, undef, $table);
-    while ( my $pk = $pksth->fetchrow_hashref ) {
-        $primaryKeys{$pk->{COLUMN_NAME}} = 1;
-        push @primaryKey, $pk->{COLUMN_NAME};
+	if ( my $pksth = $dbh->primary_key_info(undef, undef, $table) ){
+        while ( my $pk = $pksth->fetchrow_hashref ) {
+            $primaryKeys{$pk->{COLUMN_NAME}} = 1;
+            push @primaryKey, $pk->{COLUMN_NAME};
+        }
     }
-
 	# call column_info for metadata on columns
 	my $sth = $dbh->column_info(undef, undef, $table, undef);
 
@@ -200,13 +199,21 @@ sub getEditView {
     };
 
     for my $row (@{$structure->{columns}}){        
-        push @return, {
-            name => $row->{id},
-            label => $row->{name},
-            # required => xxx,
-            # check => { rx => x, msg => x },
-            type => $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"}
+        my $r = {
+           name => $row->{id},
+           label => $row->{name},
+        };
+        if ($row->{references}){
+            $r->{type} = 'ComboTable';
+            $r->{tableId} = $row->{references}{table},
+            my $rstruct = $self->getTableStructure($r->{tableId});
+            $r->{idCol} = $row->{references}{column},
+            $r->{valueCol} = ${$rstruct->{columns}}[1]{id};
         }
+        else {
+            $r->{type} = $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"};
+        }
+        push @return,$r;
     }  
 
     return \@return;
@@ -229,10 +236,10 @@ sub getRecord {
     $sth->execute();
     my $row = $sth->fetchrow_hashref;    
     my $structure = $self->getTableStructure($tableId);
-    my $typeMap = $structure->{typeMape};
+    my $typeMap = $structure->{typeMap};
     my %newRow;
     for my $key (keys %$row) {
-          $newRow{$key} = $self->{driver_object}->db_to_fe($self->fromDb($row->{$key}),$typeMap->{$key});
+        $newRow{$key} = $self->{driver_object}->db_to_fe($self->fromDb($row->{$key}),$typeMap->{$key});
     };
     return \%newRow;
 }
@@ -286,7 +293,7 @@ sub _buildWhere {
     for my $key (keys %$filter) {
         my $value = $filter->{$key}{value};
         my $op = $filter->{$key}{op};
-        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like'];
+        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
         push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
     }
     return 'WHERE '. join(' AND ',@where);
@@ -322,8 +329,8 @@ sub getTableDataChunk {
     my @data;
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
-        $new_row[0] = [ $row[0], Mojo::JSON::true, Mojo::JSON::true ];
-        for (my $i=1;$i<$#row;$i++){
+        $new_row[0] = [ $row[0], $Mojo::JSON::TRUE, $Mojo::JSON::TRUE ];
+        for (my $i=1;$i<=$#row;$i++){
             $new_row[$i] = $self->{driver_object}->db_to_fe($self->fromDb($row[$i]),$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
@@ -366,7 +373,7 @@ sub updateTableData {
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
     my $structure = $self->getTableStructure($table);
     my $primaryKey = $structure->{meta}{primary}[0];
-    my $typeMap = $structure->{typeMape}; 
+    my $typeMap = $structure->{typeMap}; 
 
     my @set;  
     for my $key (keys %$data) {
@@ -403,7 +410,7 @@ sub insertTableData {
 
     my $structure = $self->getTableStructure($table);
     my $primaryKey = $structure->{meta}{primary}[0];
-    my $typeMap = $structure->{typeMape};
+    my $typeMap = $structure->{typeMap};
 
     my @keys;
     my @values;
