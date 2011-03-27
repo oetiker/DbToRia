@@ -10,7 +10,7 @@ use Time::HiRes qw(usleep gettimeofday);
 
 =head1 NAME
 
-DbToRia::Session - Simple Session handler race resistant
+DbToRia::Session - Simple Session handler (race condition resistant)
 
 =head1 SYNOPSIS
 
@@ -23,8 +23,8 @@ DbToRia::Session - Simple Session handler race resistant
 =head1 DESCRIPTION
 
 This is a simple file based session manager. It supports only a
-small subset of L<CGI::Session> functionality. Its main advantage is, that
-it is race resistant in the sense that it merges param settings on disk. It
+small subset of L<CGI::Session> functionality. Its main advantage is that
+it is race condition resistant in the sense that it merges param settings on disk. It
 uses L<Storable> as its on-disk format.
 
 =cut
@@ -46,9 +46,9 @@ has session_timeout => 3600;
 
 =over
 
-=item my $sess = remOcular::Session->new(id=>?)
+=item my $sess = DbToRia::Session->new(id=>?)
 
-The 'new' method expects the session id as input. If no id is provided, a new id gets created.
+The 'new' method expects the session id as input. If no id is provided, a new id will be created.
 
 =cut
 
@@ -148,7 +148,7 @@ sub _exclusive_data_op {
 =item my $value = $sess->param($key); $sess->param($key,$value)
 
 Set and get a session parameter. This command acts on the disk copy of the
-session. Locking makes this race-save in contrast to CGI::Session.
+session. Locking makes this race save in contrast to CGI::Session.
 
 =cut
 

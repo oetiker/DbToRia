@@ -16,7 +16,7 @@ DbToRia::Exception - a simple exception class
  
 =head1 DESCRIPTION
 
-An error object to be used in remOcular code.
+An error object to be used in DbToRia code.
 
 =over
 
