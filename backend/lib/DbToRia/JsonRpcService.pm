@@ -41,8 +41,8 @@ sub new {
 
 =head2 allow_rpc_access(method)
 
-This gets called before each method call. We use it to make sure the
-session settings are correct and users get connected as with their own login.
+This is called before each method call. We use it to make sure the
+session settings are correct and users are connected with their own login.
 
 =cut
 
