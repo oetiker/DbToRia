@@ -1,0 +1,13 @@
+To pass all tests, you need the db in place.
+
+Execute the init script to initalize user, schema, 
+and data needed for the tests.
+
+issue to insert data 
+(replace "your-admin-user" with the respective 
+postgres admin for your server)
+
+psql -h localhost -U your-admin-user -f init_pg_test_db.sql
+
+"Very good... but not my favorite." 
+ - Chocolat (Very good film... but not my favourite) :-)
