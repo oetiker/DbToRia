@@ -22,6 +22,7 @@ has 'DBI';
 use strict;
 
 use DbToRia::DBI;
+use DBI;
 use Try::Tiny;
 
 =head2 new(cfg=>DbToRia::Config)
@@ -32,11 +33,15 @@ setup a new serivice
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    $self->DBI(DbToRia::DBI->new(
-        dsn=>$self->cfg->{General}{dsn},
-        schema=>$self->cfg->{General}{schema},
-        encoding=>$self->cfg->{General}{encoding},
-    ));
+    my $driver = (DBI->parse_dsn($self->cfg->{General}{dsn}))[1];
+    require 'DbToRia/DBI/'.$driver.'.pm';
+    do { 
+        no strict 'refs';
+        $self->DBI("DbToRia::DBI::$driver"->new(
+            schema=>$self->cfg->{General}{schema},
+            encoding=>$self->cfg->{General}{encoding},
+        ));
+    };
     return $self;
 }
 
