@@ -50,6 +50,38 @@ qx.Class.define('dbtoria.communication.Rpc', {
 
             arguments[0] = superHandler;
             this.callAsync.apply(this, arguments);
+        },
+        /**
+         * A asyncCall handler which tries to
+         * login in the case of a permission exception.
+         *
+         * @param handler {Function} the callback function.
+         * @param methodName {String} the name of the method to call.
+         * @return {var} the method call reference.
+         */
+        callAsync : function(handler, methodName) {
+            var origArguments = arguments;
+            var origThis = this;
+            var origHandler = handler;
+
+            var superHandler = function(ret, exc, id) {
+                if (exc && exc.code == 6) {
+                    var login = dbtoria.dialog.Login.getInstance();    
+                    login.addListenerOnce('login', function(e) {
+                        origArguments.callee.base.apply(origThis, origArguments);
+                    });
+                    login.open();
+                    return;
+                }
+                origHandler(ret, exc, id);
+            };
+
+            if (methodName != 'login') {
+                arguments[0] = superHandler;
+            }
+
+            arguments.callee.base.apply(this, arguments);
         }
     }
+
 });

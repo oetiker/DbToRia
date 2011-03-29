@@ -22,6 +22,7 @@ has 'DBI';
 use strict;
 
 use DbToRia::DBI;
+use Try::Tiny;
 
 =head2 new(cfg=>DbToRia::Config)
 
@@ -62,20 +63,34 @@ our %allow_access = (
     deleteTableData => 2,
 );
 
+sub connect_db {
+    my $self = shift;
+    my $session = $self->mojo_stash->{'dbtoria.session'};
+    my $dbi = $self->DBI;
+    $dbi->username($session->param('username'));
+    $dbi->password($session->param('password'));
+    return try {
+        warn "HELLO\n";
+        $dbi->getDbh->ping;
+        return 1;
+    }
+    catch {
+        return 0;
+    }
+}
+
 sub allow_rpc_access {
     my $self = shift;
     my $method = shift;
     my $access = $allow_access{$method} or return 0;
-    my $session = $self->mojo_stash->{'dbtoria.session'};
-    return 1 if $access == 1;
-    if ( $access == 2 and $session->param('authenticated') ){
-        $self->DBI->username($session->param('username'));
-        $self->DBI->password($session->param('password'));
-        return 1;
-    }
-    return 0;
+    return ( $access == 1 or ( $access == 2 and $self->connect_db() ) ) ? 1 : 0
 }   
 
+=head1 login({username=>u,password=>p})
+
+On successful login, return 1, else return an exception.
+
+=cut
  
 sub login {
     my $self = shift;
@@ -85,15 +100,12 @@ sub login {
     my $session = $self->mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
-    $self->DBI->username($session->param('username'));
-    $self->DBI->password($session->param('password'));
-    $session->param('authenticated',1) if $self->DBI->getDbh->ping;
-    return 1;
+    return $self->connect_db;
 }
 
 sub logout{
     my $self = shift;
-    $self->_mojo_stash->{'dbtoria.session'}->delete();
+    $self->mojo_stash->{'dbtoria.session'}->delete();
     return 1;
 }
 
