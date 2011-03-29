@@ -133,7 +133,7 @@ sub getEditView {
 
 sub getRecord {
     my $self = shift;
-    return $self->DBI->getEditView(@_);
+    return $self->DBI->getRecord(@_);
 }
 
 sub getForm {
