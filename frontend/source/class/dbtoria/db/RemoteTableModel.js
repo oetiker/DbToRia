@@ -62,11 +62,11 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             if (oldString == newString){
                 return;
             }
-            var filer = {};
+            var filter = {};
 
             filter[String(this.__columnIdList[1])] = {
-                op: 'like',
-                value: newString + '%'
+                op: 'ilike',
+                value: '%' + newString + '%'
             };
             this.setFilter(filter);
         },
@@ -104,7 +104,10 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             if (sc >= 0) {
                 rpcArgs.sortColumn = this.getColumnId(sc);
             }
-
+            var filter = this.getFilter();
+            if (filter){
+                rpcArgs.filter = filter;
+            }
             var that = this;
             this.__rpc.callAsyncSmart(function(ret) {
                 var data = [];
@@ -119,7 +122,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
                 }
                 that._onRowDataLoaded(data);
             },
-            'getTableDataChunk', this.__tableId,firstRow,lastRow,this.__columnIdList);
+            'getTableDataChunk', this.__tableId,firstRow,lastRow,this.__columnIdList,rpcArgs);
         }
     }
 });

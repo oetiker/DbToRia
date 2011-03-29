@@ -3,7 +3,7 @@
 # otherwise some tests will fail.
 
 
-use Test::More tests => 23;
+use Test::More tests => 31;
 use Test::Mojo;
 
 use FindBin;
@@ -55,7 +55,7 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTables"}')
   ->status_is(200);
   
 $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTableStructure","params":["chocolate"]}')
-  ->content_is()
+  ->content_is('{"id":1,"result":{"typeMap":{"chocolate_flavour":"character varying","chocolate_id":"integer"},"columns":[{"primary":1,"name":"chocolate_id","size":4,"required":"1","references":null,"id":"chocolate_id","type":"integer","pos":1},{"primary":null,"name":"chocolate_flavour","size":50,"required":"","references":null,"id":"chocolate_flavour","type":"varchar","pos":2}],"meta":{"primary":["chocolate_id"]}}}')
   ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
 
@@ -64,3 +64,4 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRowCount","para
   ->content_is('{"id":1,"result":"4"}')
   ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
+  
