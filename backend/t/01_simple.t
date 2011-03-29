@@ -3,11 +3,13 @@
 # otherwise some tests will fail.
 
 
-use Test::More tests => 43;
-use Test::Mojo;
 
 use FindBin;
 use lib $FindBin::Bin.'/../lib';
+use lib $FindBin::Bin.'/../../thirdparty/lib/perl5';
+
+use Test::More tests => 43;
+use Test::Mojo;
 
 use_ok 'MojoX::Dispatcher::Qooxdoo::Jsonrpc';
 use_ok 'DbToRia::MojoApp';
