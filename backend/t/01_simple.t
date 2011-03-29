@@ -30,7 +30,7 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"sdf"}','request without method')
 # Request ok, but requesting inexistent servce "notthere"
 $t->post_ok('/jsonrpc','{"id":1,"service":"notthere","method":"test"}','requesting unknown service')
   ->json_content_is({error=>{origin=>1,code=>2,message=>"service notthere not available"},id=>1},'json error for invalid service')
-  ->content_type_is('application/json')
+  ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
   
 # Request ok, but requesting inextstent method "notthere"
@@ -41,17 +41,17 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"rpc","method":"notthere"}','requestin
 # Gain Login: works with proper db in place only
 
 # Request ok, using existent service and method (login)
-$t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"login","params":[{"username":"test", "password": "xyz"}]}')
+$t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"login","params":[{"username":"dbtoria_test_user", "password": "abc"}]}')
   ->content_is('{"id":1,"result":1}','proper response')
-  ->content_type_is('application/json')
+  ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
   
 # From here we are working with the login obtained in the test above  
  
 # Request tables
 $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTables"}')
-  ->content_is('{"id":1,"result":[{"name":"testdb","type":"TABLE","id":"testdb"}]}','proper response')
-  ->content_type_is('application/json')
+  ->content_is('{"id":1,"result":[{"name":"dbtoria_test_db","type":"TABLE","id":"dbtoria_test_db"}]}','proper response')
+  ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
   
 
