@@ -40,14 +40,14 @@ qx.Class.define("dbtoria.Application", {
                 qx.log.appender.Console;
             }
 
-            var loginWindow = dbtoria.dialog.Login.getInstance();
             var root = this.getRoot();
 
-            loginWindow.addListenerOnce('login', function() {
+//            loginWindow.addListenerOnce('login', function() {
                 root.add(new dbtoria.window.Main(), { edge : 0 });
-            }, this);
+//            }, this);
 
-            loginWindow.open();
+//          var loginWindow = dbtoria.dialog.Login.getInstance();
+//          loginWindow.open();
         }
     }
 });

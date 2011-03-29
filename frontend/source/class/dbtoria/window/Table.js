@@ -25,7 +25,7 @@ qx.Class.define("dbtoria.window.Table", {
         this.base(arguments, tm, tableOpts);
         this.set({
             showCellFocusIndicator : false,
-            decorator              : null,
+            decorator              : null
         });
         this.getDataRowRenderer().setHighlightFocusRow(false);
     }

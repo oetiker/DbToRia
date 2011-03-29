@@ -142,7 +142,7 @@ sub getTableStructure {
         push @columns, {
             id         => $id,
             type       => $self->{driver_object}->map_type($col->{TYPE_NAME}),
-            name       => $self->fromDb($col->{REMARKS}),
+            name       => $self->fromDb($col->{REMARKS} || $id),
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
@@ -314,10 +314,10 @@ sub getTableDataChunk {
 
     my $structure = $self->getTableStructure($table);
     my $typeMap = $structure->{typeMap};
-    unshift @$columns, $structure->{meta}{primary}[0];
+    unshift @$columns, ( $structure->{meta}{primary}[0] || 'NULL') ;
 
 	my $query = 'SELECT '
-        . join(',',map{$dbh->quote_identifier($_)} @$columns)
+        . join(',',map{/^NULL$/ ? 'NULL' : $dbh->quote_identifier($_)} @$columns)
         . ' FROM '
         . $dbh->quote_identifier($table);
 	
