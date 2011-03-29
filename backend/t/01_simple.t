@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # note for self: with current config.cfg a PostGres db is used.
 # this requires DBD:Pg to be installed an the respective DB being in place.
 # otherwise some tests will fail.

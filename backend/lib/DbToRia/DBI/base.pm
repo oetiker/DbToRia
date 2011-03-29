@@ -91,12 +91,13 @@ sub toDb {
     
 sub getDbh {
     my $self = shift;
-    return DBI->connect_cached($self->{dsn},$self->{username},$self->{password},{
+    my $driver = (DBI->parse_dsn($self->dsn))[1];
+    return DBI->connect_cached($self->dsn,$self->username,$self->password,{
         RaiseError => 0,
         PrintError => 0,
         HandleError => sub {
             my ($msg,$h,$ret) = @_;
-            die error($h->state,$h->errstr." (".$h->{Statement}.")");
+            die error($driver."_".$h->state,$h->errstr." (".$h->{Statement}.")");
         },
         AutoCommit => 1,
         ShowErrorStatement => 1,
