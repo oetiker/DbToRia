@@ -17,11 +17,11 @@ use Mojo::Base -base;
 
 has 'cfg';
 has 'mojo_stash';
+has 'log';
 has 'DBI';
 
 use strict;
 
-use DbToRia::DBI;
 use DBI;
 use Try::Tiny;
 
@@ -33,13 +33,15 @@ setup a new serivice
 
 sub new {
     my $self = shift->SUPER::new(@_);
-    my $driver = (DBI->parse_dsn($self->cfg->{General}{dsn}))[1];
+    my $dsn = $self->cfg->{General}{dsn};
+    my $driver = (DBI->parse_dsn($dsn))[1];
     require 'DbToRia/DBI/'.$driver.'.pm';
     do { 
         no strict 'refs';
         $self->DBI("DbToRia::DBI::$driver"->new(
             schema=>$self->cfg->{General}{schema},
             encoding=>$self->cfg->{General}{encoding},
+            dsn=>$dsn
         ));
     };
     return $self;
@@ -75,11 +77,11 @@ sub connect_db {
     $dbi->username($session->param('username'));
     $dbi->password($session->param('password'));
     return try {
-        warn "HELLO\n";
         $dbi->getDbh->ping;
         return 1;
     }
     catch {
+        $self->log->warn($_);
         return 0;
     }
 }
