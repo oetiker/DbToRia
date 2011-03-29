@@ -33,8 +33,9 @@ sub startup {
 
     $self->plugin('qooxdoo_jsonrpc',{
         services => {
-            DbToRia => new DbToRia::JsonRpcService(
-                 cfg       => $self->cfg
+            DbToRia  => new DbToRia::JsonRpcService(
+                cfg => $self->cfg,
+                log => $self->app->log,
            )
         }
     });

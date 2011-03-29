@@ -25,3 +25,6 @@ if [ -d /usr/pack/postgresql-8.4.3-za ]; then
 fi
 
 cpanm  DBD::Pg
+cpanm  JSON::XS
+cpanm  Mojo::JSON::Any
+cpanm  Try::Tiny
