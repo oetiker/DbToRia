@@ -38,7 +38,7 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"rpc","method":"notthere"}','requestin
   ->json_content_is({error=>{origin=>1,code=>2,message=>"service rpc not available"},id=>1},'json error for invalid method');
 
 
-# Gain Login: works with proper db in place only
+# Gain Login: works with proper db in place only (see README)
 
 # Request ok, using existent service and method (login)
 $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"login","params":[{"username":"dbtoria_test_user", "password": "abc"}]}')
@@ -50,8 +50,17 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"login","params":[{
  
 # Request tables
 $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTables"}')
-  ->content_is('{"id":1,"result":[{"name":"dbtoria_test_db","type":"TABLE","id":"dbtoria_test_db"}]}','proper response')
+  ->content_is('{"id":1,"result":[{"name":"chocolate","type":"TABLE","id":"chocolate"},{"name":"favourite","type":"TABLE","id":"favourite"}]}','proper response')
   ->content_type_is('application/json; charset=utf-8')
   ->status_is(200);
   
+$t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTableStructure","params":["chocolate"]}')
+  ->content_is()
+  ->content_type_is('application/json; charset=utf-8')
+  ->status_is(200);
 
+
+$t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRowCount","params":["chocolate"]}')
+  ->content_is('{"id":1,"result":"4"}')
+  ->content_type_is('application/json; charset=utf-8')
+  ->status_is(200);
