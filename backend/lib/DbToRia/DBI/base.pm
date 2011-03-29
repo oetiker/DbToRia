@@ -23,6 +23,7 @@ A driver module must implement the following methods:
 use strict;
 use warnings;
 use Encode;
+use DbToRia::Exception qw(error);
 use Mojo::Base -base;
 
 =head2 map_type(type_name)
@@ -91,8 +92,12 @@ sub toDb {
 sub getDbh {
     my $self = shift;
     return DBI->connect_cached($self->{dsn},$self->{username},$self->{password},{
-        RaiseError => 1,
+        RaiseError => 0,
         PrintError => 0,
+        HandleError => sub {
+            my ($msg,$h,$ret) = @_;
+            die error($h->state,$h->errstr." (".$h->{Statement}.")");
+        },
         AutoCommit => 1,
         ShowErrorStatement => 1,
         LongReadLen=> 5*1024*1024,
