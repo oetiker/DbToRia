@@ -160,6 +160,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     l[desc.valueCol] = 'value';
                     var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,[desc.idCol,desc.valueCol],l);
                     control = new combotable.ComboTable(remoteModel);
+                    if (qx.lang.Type.isNumber(desc.initial)) {
+                        desc.initial = String(desc.initial);
+                    }
                     break;
                 case "SelectBox":
                     control = new qx.ui.form.SelectBox();
