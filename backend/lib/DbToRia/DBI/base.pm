@@ -22,171 +22,16 @@ A driver module must implement the following methods:
 
 use strict;
 use warnings;
-use Encode;
 use DbToRia::Exception qw(error);
 use Mojo::Base -base;
-
-=head2 map_type(type_name)
-
-Map a native database column type to a DbToRia field type:
-
- varchar
- integer
- float
- boolean
- datatime
-
-=cut
-
-sub map_type {
-    my $self = shift;
-    return "varchar";
-}
-
-=head2 db_to_fe(value,type)
-
-Convert the data returned from an sql query to something suitable for the frontend according to the database type.
-
-=cut
-
-sub db_to_fe {
-    my $self = shift;
-    my $value = shift;
-    my $type = shift;
-    return $value
-}
 
 has 'dsn';
 has 'username';
 has 'password';
 has 'schema';
-has 'encoding';
+has 'metaEngines';
 
-sub new {
-    my $self = shift->SUPER::new(@_);
-    $self->{encoder} = find_encoding($self->encoding) if $self->encoding;
-    return $self;
-}
-
-
-sub fromDb {
-    my $self = shift;
-    my $data = shift;
-    my $encoder = $self->{encoder};
-    if (defined $data and defined $encoder){
-        $data = $encoder->decode($data);
-    }
-    return $data;
-}
-
-sub toDb {
-    my $self = shift;
-    my $data = shift;
-    my $encoder = $self->{encoder};
-    if (defined $data and defined $encoder){
-        $data = $encoder->encode($data);
-    }
-    return $data;
-}    
-    
-sub getDbh {
-    my $self = shift;
-    my $driver = (DBI->parse_dsn($self->dsn))[1];
-    return DBI->connect_cached($self->dsn,$self->username,$self->password,{
-        RaiseError => 0,
-        PrintError => 0,
-        HandleError => sub {
-            my ($msg,$h,$ret) = @_;
-            my $state = $h->state;
-            my $code = lc($state);
-            $code =~ s/[^a-z0-9]//g;
-            $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
-            $code += 70000000;
-            die error($code,$h->errstr." (".$h->{Statement}.") [${driver}-$state]");
-        },
-        AutoCommit => 1,
-        ShowErrorStatement => 1,
-        LongReadLen=> 5*1024*1024,
-    });
-}
-
-
-=head2 getTables()
-
-Returns a list of tables and views available from the system.
-
-=cut
-
-sub getTables {
-    my $self = shift;    
-    die "Override in Driver";
-    return $self->{tableList};
-}
-
-=head2 getTableStructure(table)
-
-Returns meta information about the table structure directly from he database
-This uses the map_type methode from the database driver to map the internal
-datatypes to DbToRia compatible datatypes.
-
-=cut
-
-sub getTableStructure {
-    my $self = shift;
-    my $tableId = shift;
-    die "Override in Driver";
-}
-
-=head2 getListView(table)
-
-returns information on how to display the table content in a tabular format
-
-=cut
-
-sub getListView {
-    my $self = shift;
-    my $tableId = shift;
-    die "Override in Driver";
-}
-
-=head2 getEditView(table)
-
-returns information on how to display a single record in the table
-
-=cut
-
-sub getEditView {
-    my $self = shift;
-    my $tableId = shift;
-    die "Override in Driver";
-}
-
-=head2 getRecord (table,recordId)
-
-Returns hash of data for the record matching the indicated key. Data gets converted on the way out.
-
-=cut
-
-sub getRecord {
-    my $self = shift;
-    my $tableId = shift;
-    my $recordId = shift;
-    die "Override in Driver";
-}
-
-=head2 getForm (table,recordId)
-
-transitional method to get both the form description AND the default data. If the recordId is null, the form will contain
-the default values
-
-=cut
-
-sub getForm {
-    my $self = shift;
-    my $tableId = shift;
-    my $recordId = shift;
-    die "Override in Driver";
-}
+=head1 ABSTRACT METHODS
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
 
@@ -209,20 +54,6 @@ Return format:
 
     
 =cut
-
-sub buildWhere {
-    my $self = shift;
-    my $filter = shift or return '';
-    my $dbh = $self->getDbh();
-    my @where;
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key}{value};
-        my $op = $filter->{$key}{op};
-        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
-        push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
-    }
-    return 'WHERE '. join(' AND ',@where);
-}
 
 sub getTableDataChunk {
     my $self	  = shift;
@@ -287,8 +118,226 @@ sub deleteTableData {
     die "Override in Driver";
 }
 
+=head1 CORE METHODS
+
+=head2 getDbh
+
+returns a database handle. The method reconnects as required.
+
+=cut
+
+sub getDbh {
+    my $self = shift;
+    my $driver = (DBI->parse_dsn($self->dsn))[1];
+    return DBI->connect_cached($self->dsn,$self->username,$self->password,{
+        RaiseError => 0,
+        PrintError => 0,
+        HandleError => sub {
+            my ($msg,$h,$ret) = @_;
+            my $state = $h->state;
+            my $code = lc($state);
+            $code =~ s/[^a-z0-9]//g;
+            $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
+            $code += 70000000;
+            die error($code,$h->errstr." (".$h->{Statement}.") [${driver}-$state]");
+        },
+        AutoCommit => 1,
+        ShowErrorStatement => 1,
+        LongReadLen=> 5*1024*1024,
+    });
+}
+
+
+=head2 getTables()
+
+Returns a list of tables and views available from the system.
+
+=cut
+
+sub getTables {
+    my $self = shift;    
+    die "Override in Driver";
+    return $self->{tableList};
+}
+
+=head2 getTableStructure(table)
+
+Returns meta information about the table structure directly from he database
+This uses the map_type methode from the database driver to map the internal
+datatypes to DbToRia compatible datatypes.
+
+=cut
+
+sub getTableStructure {
+    my $self = shift;
+    my $tableId = shift;
+    die "Override in Driver";
+}
+
+=head2 getRecord (table,recordId)
+
+Returns hash of data for the record matching the indicated key. Data gets converted on the way out.
+
+=cut
+
+sub getRecord {
+    my $self = shift;
+    my $tableId = shift;
+    my $recordId = shift;
+    die "Override in Driver";
+}
+
+=head2 getListView(table)
+
+returns information on how to display the table content in a tabular format
+
+=cut
+
+sub getListView {
+    my $self = shift;
+    my $tableId = shift;
+    my $structure = $self->getTableStructure($tableId);
+    my @return;
+    for my $row (@{$structure->{columns}}){
+        push @return, { map { $_ => $row->{$_} } qw (id type name size) };
+    }  
+    return \@return;   
+}
+
+=head2 getEditView(table)
+
+returns information on how to display a single record in the table
+
+=cut
+
+sub getEditView {
+    my $self = shift;
+    my $tableId = shift;
+    my $structure = $self->getTableStructure($tableId);
+    my @return;
+    my $widgetMap = {
+        varchar => 'TextField',
+        integer => 'TextField',
+        date => 'Date',
+        boolean => 'CheckBox',
+        float => 'TextField',
+    };   
+
+    for my $row (@{$structure->{columns}}){
+        my $r = {
+           name => $row->{id},
+           label => $row->{name},
+        };
+        if ($row->{references}){
+            $r->{type} = 'ComboTable';
+            $r->{tableId} = $row->{references}{table},
+            my $rstruct = $self->getTableStructure($r->{tableId});
+            $r->{idCol} = $row->{references}{column},
+            $r->{valueCol} = ${$rstruct->{columns}}[1]{id};
+        }
+        else {
+            $r->{type} = $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"};
+        }
+        push @return,$r;
+    }  
+
+    return \@return;
+}
+
+
+=head2 getForm (table,recordId)
+
+transitional method to get both the form description AND the default data. If the recordId is null, the form will contain
+the default values
+
+=cut
+
+sub getForm {
+    my $self = shift;
+    my $tableId = shift;
+    my $recordId = shift;
+    die "Override in Driver";
+}
+
+
+=head2 buildWhere(filter)
+
+create a where fragment based on a filter map and array of the form
+
+ {
+    key => ['op', 'value' ],
+ }
+
+=cut
+
+sub buildWhere {
+    my $self = shift;
+    my $filter = shift or return '';
+    my $dbh = $self->getDbh();
+    my @where;
+    for my $key (keys %$filter) {
+        my $value = $filter->{$key}{value};
+        my $op = $filter->{$key}{op};
+        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
+        push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
+    }
+    return 'WHERE '. join(' AND ',@where);
+}
+
+=head2 map_type(type_name)
+
+Map a native database column type to a DbToRia field type:
+
+ varchar
+ integer
+ float
+ boolean
+ datatime
+
+=cut
+
+sub mapType {
+    my $self = shift;
+    return "varchar";
+}
+
+=head2 dbToFe(value,type)
+
+Convert the data returned from an sql query to something suitable for the frontend according to the database type.
+
+=cut
+
+sub dbToFe {
+    my $self = shift;
+    my $value = shift;
+    my $type = shift;
+    my $ourtype = $self->mapType($type);
+    if ($ourtype eq 'boolean'){
+        $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+    }
+    return $value;
+}
+
+=head2 feToDb(value,type)
+
+Convert the data from the frontend to a format usable in sql.
+
+=cut
+
+sub feToDb {
+    my $self = shift;
+    my $value = shift;
+    my $type = shift;
+    my $ourtype = $self->mapType($type);
+    if ($ourtype eq 'boolean'){
+        $value = $value ? 1 : 0;   
+    }
+    return $value;
+}
 
 1;
+
+__END__
 
 =head1 COPYRIGHT
 

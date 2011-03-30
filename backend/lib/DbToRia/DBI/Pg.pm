@@ -13,7 +13,7 @@ DbToRia::DBI::Pg - postgresql support for DbToRia
 
 All methods from L<DbToRia::DBI::base> implemented for Postgresql.
 
-=head2 map_type(type_name)
+=head2 mapType(type_name)
 
 Map a native database column type to a DbToRia field type:
 
@@ -29,7 +29,6 @@ use Mojo::Base 'DbToRia::DBI::base';
 use DbToRia::Exception qw(error);
 use Mojo::JSON;
 use DBI;
-use Encode;
 
 
 our $map = {
@@ -42,45 +41,12 @@ our $map = {
 };
 
 
-sub map_type {
+sub mapType {
     my $self = shift;
     my $type = shift;
     return $map->{$type} || die error(9844,'Unknown Database Type: "'.$type.'"');
 }
 
-=head2 db_to_fe(value,type)
-
-Convert the data returned from an sql query to something suitable for the frontend according to the database type.
-
-=cut
-
-sub db_to_fe {
-    my $self = shift;
-    my $value = shift;
-    my $type = shift;
-    my $ourtype = $map->{$type};
-    if ($ourtype eq 'boolean'){
-        $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
-    }
-    return $value;
-}
-
-=head2 fe_to_db(value,type)
-
-Convert the data from the frontend to a format usable in sql.
-
-=cut
-
-sub fe_to_db {
-    my $self = shift;
-    my $value = shift;
-    my $type = shift;
-    my $ourtype = $map->{$type};
-    if ($ourtype eq 'boolean'){
-        $value = $value ? 1 : 0;
-    }
-    return $value;
-}
    
 =head2 getTables()
 
@@ -99,7 +65,7 @@ sub getTables {
 	    push @tables, {
             id   => $table->{TABLE_NAME},
             type => $table->{TABLE_TYPE},
-            name => $self->fromDb($table->{REMARKS} || $table->{TABLE_NAME})
+            name => $table->{REMARKS} || $table->{TABLE_NAME}
     	}
     }
     $self->{tableList} = [ sort {$a->{name} cmp $b->{name}} @tables ];
@@ -109,7 +75,7 @@ sub getTables {
 =head2 getTableStructure(table)
 
 Returns meta information about the table structure directly from he database
-This uses the map_type methode from the database driver to map the internal
+This uses the mapType methode from the database driver to map the internal
 datatypes to DbToRia compatible datatypes.
 
 =cut
@@ -148,8 +114,8 @@ sub getTableStructure {
         # return structure
         push @columns, {
             id         => $id,
-            type       => $self->map_type($col->{TYPE_NAME}),
-            name       => $self->fromDb($col->{REMARKS} || $id),
+            type       => $self->mapType($col->{TYPE_NAME}),
+            name       => $col->{REMARKS} || $id,
             size       => $col->{COLUMN_SIZE},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
@@ -167,63 +133,6 @@ sub getTableStructure {
         }
     };
     return $self->{tableStructure}{$table};
-}
-
-=head2 getListView(table)
-
-returns information on how to display the table content in a tabular format
-
-=cut
-
-sub getListView {
-    my $self = shift;
-    my $tableId = shift;
-    my $structure = $self->getTableStructure($tableId);
-    my @return;
-    for my $row (@{$structure->{columns}}){
-        push @return, { map { $_ => $row->{$_} } qw (id type name size) };
-    }  
-    return \@return;
-}
-
-=head2 getEditView(table)
-
-returns information on how to display a single record in the table
-
-=cut
-
-sub getEditView {
-    my $self = shift;
-    my $tableId = shift;
-    my $structure = $self->getTableStructure($tableId);
-    my @return;
-    my $widgetMap = {
-        varchar => 'TextField',
-        integer => 'TextField',
-        date => 'Date',
-        boolean => 'CheckBox',
-        float => 'TextField',
-    };
-
-    for my $row (@{$structure->{columns}}){        
-        my $r = {
-           name => $row->{id},
-           label => $row->{name},
-        };
-        if ($row->{references}){
-            $r->{type} = 'ComboTable';
-            $r->{tableId} = $row->{references}{table},
-            my $rstruct = $self->getTableStructure($r->{tableId});
-            $r->{idCol} = $row->{references}{column},
-            $r->{valueCol} = ${$rstruct->{columns}}[1]{id};
-        }
-        else {
-            $r->{type} = $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"};
-        }
-        push @return,$r;
-    }  
-
-    return \@return;
 }
 
 =head2 getRecord (table,recordId)
@@ -246,7 +155,7 @@ sub getRecord {
     my $typeMap = $structure->{typeMap};
     my %newRow;
     for my $key (keys %$row) {
-        $newRow{$key} = $self->db_to_fe($self->fromDb($row->{$key}),$typeMap->{$key});
+        $newRow{$key} = $self->dbToFe($row->{$key},$typeMap->{$key});
     };
     return \%newRow;
 }
@@ -292,20 +201,6 @@ Return format:
     
 =cut
 
-sub _buildWhere {
-    my $self = shift;
-    my $filter = shift or return '';
-    my $dbh = $self->getDbh();
-    my @where;
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key}{value};
-        my $op = $filter->{$key}{op};
-        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
-        push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
-    }
-    return 'WHERE '. join(' AND ',@where);
-}
-
 sub getTableDataChunk {
     my $self	  = shift;
     my $table     = shift;
@@ -328,7 +223,7 @@ sub getTableDataChunk {
         . ' FROM '
         . $dbh->quote_identifier($table);
 	
-    $query .= $self->_buildWhere($filter);
+    $query .= $self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow;
     my $sth = $dbh->prepare($query);
@@ -338,7 +233,7 @@ sub getTableDataChunk {
         my @new_row;
         $new_row[0] = [ $row[0], $Mojo::JSON::TRUE, $Mojo::JSON::TRUE ];
         for (my $i=1;$i<=$#row;$i++){
-            $new_row[$i] = $self->db_to_fe($self->fromDb($row[$i]),$typeMap->{$sth->{NAME}[$i]});
+            $new_row[$i] = $self->dbToFe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
     }    
@@ -359,7 +254,7 @@ sub getRowCount {
     my $dbh = $self->getDbh();
 	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
 	
-    $query .= $self->_buildWhere($filter);
+    $query .= $self->buildWhere($filter);
     return ($dbh->selectrow_array($query))[0];
 }
 
@@ -384,7 +279,7 @@ sub updateTableData {
 
     my @set;  
     for my $key (keys %$data) {
-        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->toDb($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key})));
+        push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     $update .= 'SET '.join(', ',@set) if @set;
     
@@ -424,7 +319,7 @@ sub insertTableData {
     
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
-        push @values, $dbh->quote($self->toDb($self->{driver_object}->fe_to_db($data->{$key},$typeMap->{$key})));
+        push @values, $dbh->quote($self->toDb($self->feToDb($data->{$key},$typeMap->{$key})));
     }
     
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
@@ -465,6 +360,8 @@ sub deleteTableData {
 
 
 1;
+
+__END__
 
 =head1 COPYRIGHT
 
