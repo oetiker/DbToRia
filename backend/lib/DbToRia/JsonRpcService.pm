@@ -40,10 +40,19 @@ sub new {
         no strict 'refs';
         $self->DBI("DbToRia::DBI::$driver"->new(
             schema=>$self->cfg->{General}{schema},
-            encoding=>$self->cfg->{General}{encoding},
             dsn=>$dsn
         ));
     };
+    my $meta = $self->cfg->{MetaEngines};
+    my @metaEngines;
+    for my $engine (keys %$meta){
+        require 'DbToRia/Meta/'.$engine.'.pm';
+        do {
+            no strict 'refs';
+            push @metaEngines, "DbToRia::Meta::$engine"->new(cfg=>$meta->{$engine},DBI=>$self->DBI);
+        };
+    }
+    $self->DBI->metaEngines(\@metaEngines) if @metaEngines;
     return $self;
 }
 

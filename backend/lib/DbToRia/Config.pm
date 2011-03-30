@@ -137,7 +137,7 @@ sub _make_parser {
     my $self = shift;
     my $E = '=';
     my $grammar = {
-        _sections => [ qw(General)],
+        _sections => [ qw(General MetaEngines)],
         _mandatory => [qw(General)],
         General => {
             _doc => 'Global configuration settings for DbToRia',
@@ -147,8 +147,17 @@ sub _make_parser {
             mojo_secret => { _doc => 'secret for signing mojo cookies' },
             schema => { _doc => 'which schema should we prowl for data?' },
             log_file => { _doc => 'write a log file to this location'},
-            log_toppic_filter => { _doc => 'rx to match against log toppics'},        
-            encoding => { _doc => 'how is the data in the database encoded'},        
+        },
+        MetaEngines => {
+            _doc => 'Modules for adding meta information to the database',
+            _sections => [ '/\S+/' ],
+            '/\S+/' => {
+                _doc => 'Load the meta engine coresponding the section name'
+                _vars => [ '/\S+/' ],
+                '/\S+/' => {
+                    _doc => 'Any key value settings appropriate for the engine at hand'
+                }
+            }
         }
     };
     my $parser =  Config::Grammar->new ($grammar);
