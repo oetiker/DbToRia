@@ -97,7 +97,12 @@ sub getDbh {
         PrintError => 0,
         HandleError => sub {
             my ($msg,$h,$ret) = @_;
-            die error($driver."_".$h->state,$h->errstr." (".$h->{Statement}.")");
+            my $state = $h->state;
+            my $code = lc($state);
+            $code =~ s/[^a-z0-9]//g;
+            $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
+            $code += 70000000;
+            die error($code,$h->errstr." (".$h->{Statement}.") [${driver}-$state]");
         },
         AutoCommit => 1,
         ShowErrorStatement => 1,
