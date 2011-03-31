@@ -44,7 +44,11 @@ qx.Class.define("dbtoria.window.TableSelection", {
             for (var tableId in ret) {
                 tables.push(tableId);
             }
-            tables.sort().map(
+            tables.sort(function(a,b){
+                if (ret[a].name > ret[b].name) return 1;
+                if (ret[a].name < ret[b].name) return -1;
+                return 0;
+            }).map(
                 function(tableId) {
                     var item = ret[tableId];
                     var menuButton = new qx.ui.menu.Button(item.name);
