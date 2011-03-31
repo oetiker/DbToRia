@@ -5,3 +5,8 @@ mojo_secret = MyCookieSecret
 log_file = /tmp/dbtoria.log
 schema = public
 encoding = latin1
+
+*** MetaEngines ***
++GedafeSQL
++GedafeMeta
+

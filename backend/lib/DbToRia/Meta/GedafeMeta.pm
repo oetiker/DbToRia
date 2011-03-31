@@ -1,17 +1,17 @@
-package DbToRia::Meta::Gedafe;
+package DbToRia::Meta::GedafeMeta;
 
 =head1 NAME
 
-DbToRia::Meta::Gedafe - read meta information gedafe style out of the database structure
+DbToRia::Meta::GedafeMeta - read meta table information gedafe style out of the database
 
 =head1 SYNOPSIS
 
- use DbToRia::Meta::Gedafe
+ use DbToRia::Meta::GedafeMeta
 
 =head1 DESCRIPTION
 
 DbToRia can be used as a drop-in replacement for gedafe. The compatibility
-layer is reaslized by this module. See L<http://isg.ee.ethz.ch/tools/gedafe/> for details on
+layer for the meta_* tables is reaslized by this module. See L<http://isg.ee.ethz.ch/tools/gedafe/> for details on
 Gedafe.
 
 =cut
@@ -94,16 +94,14 @@ sub massageTables {
     my $self = shift;
     my $tables = shift;
     for my $table (keys %$tables) {
+        if ($table =~ /^meta_(fields|tables)$/){
+            delete $tables->{$table};            
+        }
         if (my $meta = $self->metaTables->{$table}){
             if ($meta->{hide}){
                 delete $tables->{$table};
                 next;
             }
-        }
-        if ($tables->{$table}{type} eq 'VIEW' and $table =~ /_(list|combo)$/ ){
-            warn "delete $table\n";
-            delete $tables->{$table};
-            next;
         }
     }    
 }
