@@ -8,13 +8,13 @@ use DbToRia::Session;
 
 use Mojo::Base 'Mojolicious';
 
-__PACKAGE__->attr(cfg => sub {
+has 'cfg' => sub {
     my $self = shift;
     my $conf = DbToRia::Config->new( 
         file=> $ENV{DBTORIA_CONF} || $self->home->rel_file('etc/dbtoria.cfg')
     );
     return $conf->parse_config();
-});
+};
 
 sub startup {
     my $self = shift;
@@ -28,7 +28,7 @@ sub startup {
             id=>$self->stash('mojo.session')->{id}
         );
         $self->stash('mojo.session')->{id} = $session->id;
-        $self->stash('dbtoria.session',$session);
+        $self->stash->{'dbtoria.session'} = $session;
     });
 
     $self->plugin('qooxdoo_jsonrpc',{

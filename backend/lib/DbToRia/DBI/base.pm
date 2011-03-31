@@ -29,7 +29,6 @@ has 'dsn';
 has 'username';
 has 'password';
 has 'schema';
-has 'metaEngines';
 
 =head1 ABSTRACT METHODS
 
@@ -150,7 +149,7 @@ sub getDbh {
 
 =head2 getTables()
 
-Returns a list of tables and views available from the system.
+Returns a map of tables with associated meta information.
 
 =cut
 

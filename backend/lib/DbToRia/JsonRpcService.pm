@@ -14,11 +14,13 @@ server functions
 =cut
 
 use Mojo::Base -base;
+use Storable qw(dclone);
 
 has 'cfg';
 has 'mojo_stash';
 has 'log';
 has 'DBI';
+has 'metaEngines' => sub { [] };
 
 use strict;
 
@@ -43,7 +45,7 @@ sub new {
             dsn=>$dsn
         ));
     };
-    my $meta = $self->cfg->{MetaEngines};
+    my $meta = $self->cfg->{MetaEngines} || {};
     my @metaEngines;
     for my $engine (keys %$meta){
         require 'DbToRia/Meta/'.$engine.'.pm';
@@ -52,7 +54,7 @@ sub new {
             push @metaEngines, "DbToRia::Meta::$engine"->new(cfg=>$meta->{$engine},DBI=>$self->DBI);
         };
     }
-    $self->DBI->metaEngines(\@metaEngines) if @metaEngines;
+    $self->metaEngines(\@metaEngines) if @metaEngines;
     return $self;
 }
 
@@ -87,6 +89,9 @@ sub connect_db {
     $dbi->password($session->param('password'));
     return try {
         $dbi->getDbh->ping;
+        for my $engine (@{$self->metaEngines}){
+            $engine->prepare();
+        }
         return 1;
     }
     catch {
@@ -116,7 +121,8 @@ sub login {
     my $session = $self->mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
-    return $self->connect_db;
+    my $connect = $self->connect_db;
+    return $connect;
 }
 
 sub logout{
@@ -127,7 +133,11 @@ sub logout{
 
 sub getTables {
     my $self = shift;
-    return $self->DBI->getTables; 
+    my $tables = dclone($self->DBI->getTables(@_));     
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageTables($tables);            
+    }
+    return $tables;
 }
 
 sub getListView {
