@@ -59,16 +59,15 @@ sub getTables {
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
-	my @tables;
+	my %tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
         next unless $table->{TABLE_TYPE} ~~ ['TABLE','VIEW'];
-	    push @tables, {
-            id   => $table->{TABLE_NAME},
+	    $tables{$table->{TABLE_NAME}} = {
             type => $table->{TABLE_TYPE},
             name => $table->{REMARKS} || $table->{TABLE_NAME}
-    	}
+    	};
     }
-    $self->{tableList} = [ sort {$a->{name} cmp $b->{name}} @tables ];
+    $self->{tableList} = \%tables;
     return $self->{tableList};
 }
 
@@ -183,6 +182,8 @@ sub getForm {
 
 Returns the selected columns from the table. Using firstRow and lastRow the number of results can be limited.
 
+If firstRow is undefined, the complete table contents will be returned.
+
 The columns argument is an array of column identifiers
 
 The following options are supported:
@@ -225,7 +226,7 @@ sub getTableDataChunk {
 	
     $query .= $self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
-    $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow;
+    $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;

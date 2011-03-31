@@ -32,6 +32,18 @@ use Mojo::Base -base;
 has 'DBI';
 has 'cfg';
 
+=head2 prepare()
+
+If information has to be pulled from the database prior to using the engine,
+do it in this function as it will be called after the database has been
+connected.
+
+=cut
+
+sub prepare {
+    my $self = shift;
+}
+
 =head2 massageTables(tablelist)
 
 Updates the table list created by L<DbToRia::DBI::base::getTables>.

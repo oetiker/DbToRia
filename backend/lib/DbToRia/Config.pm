@@ -152,7 +152,7 @@ sub _make_parser {
             _doc => 'Modules for adding meta information to the database',
             _sections => [ '/\S+/' ],
             '/\S+/' => {
-                _doc => 'Load the meta engine coresponding the section name'
+                _doc => 'Load the meta engine coresponding the section name',
                 _vars => [ '/\S+/' ],
                 '/\S+/' => {
                     _doc => 'Any key value settings appropriate for the engine at hand'

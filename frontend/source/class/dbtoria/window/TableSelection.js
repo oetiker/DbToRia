@@ -40,9 +40,13 @@ qx.Class.define("dbtoria.window.TableSelection", {
         this.add(new qx.ui.menu.Button(this.tr('Views'),null,null,viewMenu)); 
         rpc.callAsyncSmart(function(ret) {
             // generate a button for each table
-            for (var i=0; i<ret.length; i++) {
-                (function() {
-                    var item = ret[i];
+            var tables = [];
+            for (var tableId in ret) {
+                tables.push(tableId);
+            }
+            tables.sort().map(
+                function(tableId) {
+                    var item = ret[tableId];
                     var menuButton = new qx.ui.menu.Button(item.name);
                     if (item.type == 'TABLE'){
                         tableMenu.add(menuButton);
@@ -51,10 +55,10 @@ qx.Class.define("dbtoria.window.TableSelection", {
                         viewMenu.add(menuButton);
                     }
                     menuButton.addListener("execute", function(e) {
-                        desktop.add(new dbtoria.window.TableWindow(item.id, item.name));
+                        desktop.add(new dbtoria.window.TableWindow(tableId, item.name));
                     }, this);
-                })();
-            }
+                }
+            )
         },
         'getTables');
     }
