@@ -85,6 +85,15 @@ sub massageEditView {
     my $self = shift;
     my $tableId = shift;
     my $editView = shift;
+    my $tables = $self->DBI->getAllTables();
+    for my $row (@$editView){    
+        next unless $row->{type} eq 'ComboTable';
+        if (exists $tables->{$row->{tableId}.'_combo'}){
+            $row->{tableId} .= '_combo';
+            $row->{idCol} = 'id';
+            $row->{valueCol} = 'text';
+        }
+    }
 }
 
 

@@ -227,7 +227,7 @@ sub getTableDataChunk {
         . ' FROM '
         . $dbh->quote_identifier($table);
 	
-    $query .= $self->buildWhere($filter);
+    $query .= ' '.$self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
     warn $query,"\n";
