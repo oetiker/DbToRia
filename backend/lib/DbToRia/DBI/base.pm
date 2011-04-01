@@ -268,6 +268,7 @@ sub getEditView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
+    my $tables = $self->getAllTables();
     my @return;
     my $widgetMap = {
         varchar => 'TextField',
@@ -294,7 +295,9 @@ sub getEditView {
         }
         push @return,$r;
     }  
-
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageEditView($tableId,\@return);            
+    }
     return \@return;
 }
 
@@ -333,7 +336,7 @@ sub buildWhere {
         my $value = $filter->{$key}{value};
         my $op = $filter->{$key}{op};
         die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
-        push @where, $dbh->quote_identifier($key) . $op . $dbh->quote($value);
+        push @where, $dbh->quote_identifier($key) ." $op ". $dbh->quote($value);
     }
     return 'WHERE '. join(' AND ',@where);
 }
