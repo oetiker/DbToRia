@@ -14,7 +14,6 @@ server functions
 =cut
 
 use Mojo::Base -base;
-use Storable qw(dclone);
 
 has 'cfg';
 has 'mojo_stash';
@@ -42,19 +41,10 @@ sub new {
         no strict 'refs';
         $self->DBI("DbToRia::DBI::$driver"->new(
             schema=>$self->cfg->{General}{schema},
-            dsn=>$dsn
+            dsn=>$dsn,
+            metaEnginesCfg => $self->cfg->{MetaEngines}
         ));
     };
-    my $meta = $self->cfg->{MetaEngines} || {};
-    my @metaEngines;
-    for my $engine (keys %$meta){
-        require 'DbToRia/Meta/'.$engine.'.pm';
-        do {
-            no strict 'refs';
-            push @metaEngines, "DbToRia::Meta::$engine"->new(cfg=>$meta->{$engine},DBI=>$self->DBI);
-        };
-    }
-    $self->metaEngines(\@metaEngines) if @metaEngines;
     return $self;
 }
 
@@ -133,11 +123,7 @@ sub logout{
 
 sub getTables {
     my $self = shift;
-    my $tables = dclone($self->DBI->getTables(@_));     
-    for my $engine (@{$self->metaEngines}){
-        $engine->massageTables($tables);            
-    }
-    return $tables;
+    return $self->DBI->getTables(@_);
 }
 
 sub getListView {

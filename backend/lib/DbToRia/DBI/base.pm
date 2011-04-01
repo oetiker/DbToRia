@@ -23,12 +23,30 @@ A driver module must implement the following methods:
 use strict;
 use warnings;
 use DbToRia::Exception qw(error);
+use Storable qw(dclone);
 use Mojo::Base -base;
 
 has 'dsn';
 has 'username';
 has 'password';
 has 'schema';
+has 'metaEngines';
+has 'metaEnginesCfg' => sub { {} };
+
+sub new {
+    my $self = shift->SUPER::new(@_);
+    my $meta = $self->metaEnginesCfg;
+    my @metaEngines;
+    for my $engine (keys %$meta){
+        require 'DbToRia/Meta/'.$engine.'.pm';
+        do {
+            no strict 'refs';
+            push @metaEngines, "DbToRia::Meta::$engine"->new(cfg=>$meta->{$engine},DBI=>$self);
+        };
+    }
+    $self->metaEngines(\@metaEngines);
+    return $self;
+}
 
 =head1 ABSTRACT METHODS
 
@@ -133,12 +151,12 @@ sub getDbh {
         PrintError => 0,
         HandleError => sub {
             my ($msg,$h,$ret) = @_;
-            my $state = $h->state;
+            my $state = $h->state || 9999;
             my $code = lc($state);
             $code =~ s/[^a-z0-9]//g;
             $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
             $code += 70000000;
-            die error($code,$h->errstr." (".$h->{Statement}.") [${driver}-$state]");
+            die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
         },
         AutoCommit => 1,
         ShowErrorStatement => 1,
@@ -147,13 +165,13 @@ sub getDbh {
 }
 
 
-=head2 getTables()
+=head2 getAllTables()
 
 Returns a map of tables with associated meta information.
 
 =cut
 
-sub getTables {
+sub getAllTables {
     my $self = shift;    
     die "Override in Driver";
     return $self->{tableList};
@@ -184,6 +202,23 @@ sub getRecord {
     my $tableId = shift;
     my $recordId = shift;
     die "Override in Driver";
+}
+
+=head1 BASE METHODS
+
+=head2 getTables
+
+return tables and views filtered for menu display.
+
+=cut
+
+sub getTables {
+    my $self = shift;
+    my $tables = dclone($self->getAllTables(@_));     
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageTables($tables);            
+    }
+    return $tables;
 }
 
 =head2 getListView(table)
