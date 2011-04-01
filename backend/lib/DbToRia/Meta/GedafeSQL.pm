@@ -1,3 +1,4 @@
+
 package DbToRia::Meta::GedafeSQL;
 
 =head1 NAME
@@ -51,6 +52,11 @@ sub massageTableStructure {
     my $self = shift;
     my $tableId = shift;
     my $structure = shift;
+    if ($tableId =~ /_(combo|list)$/){
+        $structure->{columns}[0]{primary} = 1;
+        $structure->{columns}[0]{hidden} = 1;
+        $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
+    }
 } 
 
 =head2 massageListView(tableId,listView) 
@@ -61,8 +67,12 @@ Updates the information on how to display the table content in a tabular format
 
 sub massageListView {
     my $self = shift;
-    my $tableId = shift;
-    my $listView = shift;
+    my $view = shift;
+    my $tables = $self->DBI->getAllTables();
+    if ($tables->{$view->{tableId}.'_list'}){
+        my $newView = $self->DBI->prepListView($view->{tableId}.'_list');
+        map { $view->{$_} = $newView->{$_} } keys %$newView;
+    }
 }
 
 =head2 massageEditView(tableId,editView)
