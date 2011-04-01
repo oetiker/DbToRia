@@ -39,6 +39,7 @@ pop-ups which allows to filter the table contents similar to gedafe.
 The set of avalable filter operators depend on the choice of database backend.
 
 Status: available
+Effort: 8h
 
 =head2 Direct access URL
 
@@ -47,6 +48,7 @@ reflected in the browser url such that bookmarking will allow to
 reopen the view directly.
 
 Status: available
+Effort: 3h
 
 =head2 Configurable Toolbar content
 
@@ -55,6 +57,7 @@ buttons for directly accessing tables, view or reports. The buttons are
 configurable from server side.
 
 Status: available
+Effort: 4h
 
 =head2 AutoForm with setable content
 
@@ -62,30 +65,43 @@ The AutoForm widget can be supplied with a new data set (model)
 from the database.
 
 Status: available
+Effort: 8h
 
 =head2 View Form
 
 Rows in read-only tables and views can be opened in a read-only edit form.
 
 Status: available
+Effort: 2h
+
+=head2 Gedafe Friendly Names Cache
+
+In gedafeSQL field names in tables are unique, this allows to identify appropriate
+friendly names for view fields even when none are defined directly. 
+
+Status: available
+Effort: 3h
 
 =head2 Record Switching in Edit Form.
 
 The Edit form gains access-like navigation buttons at the bottom for switching between records without closing the edit form.
 
 Status: available
+Effort: 4h
 
 =head2 Default Values in New Records
 
 The New Record form gets populated with default value from the database.
 
 Status: available
+Effort: 2h
 
 =head2 Pearl Reports Integration
 
 Gedafe Pearl can be used within DbToRia and show up in iframes.
 
 Status: available
+Effort: 6h
 
 =head1 COPYRIGHT
 
