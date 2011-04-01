@@ -32,6 +32,7 @@ has 'password';
 has 'schema';
 has 'metaEngines';
 has 'metaEnginesCfg' => sub { {} };
+has 'dbhCache' => sub { {} };
 
 sub new {
     my $self = shift->SUPER::new(@_);
@@ -146,22 +147,27 @@ returns a database handle. The method reconnects as required.
 sub getDbh {
     my $self = shift;
     my $driver = (DBI->parse_dsn($self->dsn))[1];
-    return DBI->connect_cached($self->dsn,$self->username,$self->password,{
-        RaiseError => 0,
-        PrintError => 0,
-        HandleError => sub {
-            my ($msg,$h,$ret) = @_;
-            my $state = $h->state || 9999;
-            my $code = lc($state);
-            $code =~ s/[^a-z0-9]//g;
-            $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
-            $code += 70000000;
-            die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
-        },
-        AutoCommit => 1,
-        ShowErrorStatement => 1,
-        LongReadLen=> 5*1024*1024,
-    });
+    my $key = $self->username.$self->password;
+    my $dbh = $self->dbhCache->{$key};
+    if (not defined $dbh or $dbh->ping){        
+        $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
+            RaiseError => 0,
+            PrintError => 0,
+            HandleError => sub {
+                my ($msg,$h,$ret) = @_;
+                my $state = $h->state || 9999;
+                my $code = lc($state);
+                $code =~ s/[^a-z0-9]//g;
+                $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
+                $code += 70000000;
+                die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
+            },
+            AutoCommit => 1,
+            ShowErrorStatement => 1,
+            LongReadLen=> 5*1024*1024,
+        });
+    }    
+    return $dbh;
 }
 
 
