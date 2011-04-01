@@ -23,7 +23,7 @@ use DbToRia::Exception qw(error);
 use Mojo::Base 'DbToRia::Meta::base';
 
 
-=head2 massageTables(tablelist)
+=head2 massageMenu(tablelist)
 
 Updates the table list created by L<DbToRia::DBI::base::getTables>.
 

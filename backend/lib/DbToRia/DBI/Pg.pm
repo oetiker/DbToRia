@@ -48,13 +48,13 @@ sub mapType {
 }
 
    
-=head2 getTables()
+=head2 getAllTables()
 
 Returns a list of tables and views available from the system.
 
 =cut
 
-sub getTables {
+sub getAllTables {
     my $self = shift;    
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
