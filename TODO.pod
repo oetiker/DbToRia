@@ -6,7 +6,7 @@ DbToRia Development
 
 With the basic structure of DbToRia in place, the featureset is still patchy
 at best. The following work packages are largely independent and will lead
-to a fully working with a feature set similar to that of Gedafe.
+to a fully working version with a feature set similar to that of Gedafe.
 
 The current project leader (PL) of DbToRia is Tobi Oetiker.
 
@@ -98,7 +98,7 @@ Effort: 2h
 
 =head2 Pearl Reports Integration
 
-Gedafe Pearl can be used within DbToRia and show up in iframes.
+Gedafe Pearl can be used within DbToRia and show up in iframes and  have support for printing.
 
 Status: available,
 Effort: 6h
