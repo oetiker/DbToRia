@@ -227,15 +227,29 @@ returns information on how to display the table content in a tabular format
 
 =cut
 
-sub getListView {
+sub prepListView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
     my @return;
-    for my $row (@{$structure->{columns}}){
+    for my $row (@{$structure->{columns}}){        
+        next if $row->{hidden};
         push @return, { map { $_ => $row->{$_} } qw (id type name size) };
-    }  
-    return \@return;   
+    };
+    return {
+        tableId => $tableId,
+        columns => \@return
+    };
+}
+
+sub getListView {
+    my $self = shift;
+    my $tableId = shift;
+    my $view = $self->prepListView($tableId);
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageListView($view);
+    }
+    return $view;
 }
 
 =head2 getEditView(table)

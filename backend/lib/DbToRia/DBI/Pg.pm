@@ -131,6 +131,9 @@ sub getTableStructure {
             primary => \@primaryKey
         }
     };
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageTableStructure($table,$self->{tableStructure}{$table});
+    }
     return $self->{tableStructure}{$table};
 }
 
@@ -227,6 +230,7 @@ sub getTableDataChunk {
     $query .= $self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
+    warn $query,"\n";
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;

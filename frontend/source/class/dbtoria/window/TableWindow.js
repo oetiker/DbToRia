@@ -109,11 +109,13 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var rpc = dbtoria.communication.Rpc.getInstance();
             var that = this;
             rpc.callAsyncSmart(function(ret){
+                var columns = ret.columns;
+                var tableId = ret.tableId;
                 var columnIds = [];
                 var columnLabels = {};
-                for (var i=0;i<ret.length;i++){
-                    columnIds.push(ret[i].id);
-                    columnLabels[ret[i].id] = ret[i].name;
+                for (var i=0;i<columns.length;i++){
+                    columnIds.push(columns[i].id);
+                    columnLabels[columns[i].id] = columns[i].name;
                 }
                 var model = new dbtoria.db.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.window.Table(model);
