@@ -54,8 +54,11 @@ sub massageTableStructure {
     my $structure = shift;
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
-        $structure->{columns}[0]{hidden} = 1;
+        $structure->{columns}[0]{hidden} = 1;        
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
+        for (@{$structure->{columns}}){
+            $_->{hidden} = 1 if $_->{name} eq 'meta_sort';
+        }
     }
 } 
 
