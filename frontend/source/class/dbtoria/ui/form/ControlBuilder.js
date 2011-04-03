@@ -160,9 +160,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     l[desc.valueCol] = 'value';
                     var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,[desc.idCol,desc.valueCol],l);
                     control = new combotable.ComboTable(remoteModel);
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
+                    control.setModel(String(desc.initial));
+                    control.setValue(String(desc.initialText));
+                    delete desc.initial;
                     break;
                 case "SelectBox":
                     control = new qx.ui.form.SelectBox();
@@ -235,7 +235,12 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             }
 
             if (qx.lang.Type.isObject(model)) {
-                if (control.getModelSelection) {
+                if (control.getModel){
+                    control.addListener('changeModel',function(e){
+                        model[desc.name] = e.getData(); 
+                    },this);
+                }
+                else if (control.getModelSelection) {
                     control.addListener('changeSelection', function(e) {
                         var selected = control.getModelSelection();
                         var value;
@@ -249,8 +254,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 }
                 else {
                     control.addListener('changeValue', function(e) {
-                        var value = e.getData();
-                        model[desc.name] = value;
+                        model[desc.name] = e.getData();
                     },this);
                 }
             }
