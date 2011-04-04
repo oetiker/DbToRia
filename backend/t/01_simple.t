@@ -4,6 +4,7 @@
 # this requires DBD:Pg to be installed an the respective DB being in place.
 # otherwise some tests will fail.
 
+use strict;
 
 use FindBin;
 use lib $FindBin::Bin.'/../lib';
@@ -34,7 +35,7 @@ $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getTables"}')
             id => 1,
             result => {
                 chocolate => {
-                    name        => chocolate,
+                    name        => 'chocolate',
                     type        => 'TABLE'
                 },
                 favourite => {
@@ -107,7 +108,6 @@ $t->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRowCount","para
   
 # Fetch an existing record
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "3"]}')
-  #~ ->content_is('{"id":1,"result":{"chocolate_flavour":"Milk chocolate","chocolate_id":"3"}}')
     ->json_content_is(
         {
             id      => 1,
@@ -123,7 +123,6 @@ $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","para
   
 # Fetch an inexistent record
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "6"]}')
-  #~ ->content_is('{"id":1,"result":{}}')
     ->json_content_is(
         {
             id         => 1,
@@ -138,33 +137,130 @@ $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","para
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "notanumber"]}')
     ->content_like(
         qr/error.*"code":70221502/,
-        ' SQL-error (wrong parameter type)'
+        'SQL-error (wrong parameter type)'
     )
     ->content_type_is('application/json; charset=utf-8')
     ->status_is(200);  
   
 # Get list view
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getListView","params":["chocolate"]}')
-    ->content_is('{"id":1,"result":[{"name":"chocolate_id","type":"integer","id":"chocolate_id","size":4},{"name":"chocolate_flavour","type":"varchar","id":"chocolate_flavour","size":50}]}')
     ->json_content_is(
         {
             id          => 1,
-            result      => [
-                {
-                    name    => chocolate_id,
-                    type    => 'integer',
-                    id      => 'chocolate_id',
-                    size    => 4
-                },
-                {
-                    name    => 'chocolate_flavour',
-                    type    => 'varchar',
-                    id      => 'chocolate_flavour',
-                    size    => 50
-                }
-            ]
+            result      => {
+                tableId     => 'chocolate',
+                columns     => [
+                    {
+                        name    => 'chocolate_id',
+                        type    => 'integer',
+                        id      => 'chocolate_id',
+                        size    => 4
+                    },
+                    {
+                        name    => 'chocolate_flavour',
+                        type    => 'varchar',
+                        id      => 'chocolate_flavour',
+                        size    => 50
+                    }
+                ]
+            }
         },
         'get list view'
     )
     ->content_type_is('application/json; charset=utf-8')
     ->status_is(200); 
+    
+# getEditView(table)
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getEditView","params":["chocolate"]}')
+    ->json_content_is(
+        {
+            "id"    => 1,
+            "result"    =>[
+                {
+                    name      => 'chocolate_id',
+                    type      => 'TextField',
+                    label     => 'chocolate_id'
+                },
+                {
+                    name      => 'chocolate_flavour',
+                    type      => 'TextField',
+                    label     => 'chocolate_flavour'
+                }
+            ]
+        },
+        'getEditView'
+    )
+    ->content_type_is('application/json; charset=utf-8')
+    ->status_is(200);
+    
+# getForm (table,recordId): forget recordID an get all null
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getForm","params":["chocolate"]}')
+    ->json_content_is(
+        {
+            "id"    => 1,
+            "result"    =>[
+                {
+                    name      => 'chocolate_id',
+                    initial   => undef,
+                    type      => 'TextField',
+                    label     => 'chocolate_id'
+                },
+                {
+                    name      => 'chocolate_flavour',
+                    initial   => undef,
+                    type      => 'TextField',
+                    label     => 'chocolate_flavour'
+                }
+            ]
+        },
+        'getForm ("forget" recordId)'
+    ) 
+    ->content_type_is('application/json; charset=utf-8')
+    ->status_is(200);
+
+# ..and correct recordId
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getForm","params":["chocolate", "2"]}')
+    ->json_content_is(
+        {
+            "id"    => 1,
+            "result"    =>[
+                {
+                    name      => 'chocolate_id',
+                    initial   => 2,
+                    type      => 'TextField',
+                    label     => 'chocolate_id'
+                },
+                {
+                    name      => 'chocolate_flavour',
+                    initial   => 'Semisweet chocolate',
+                    type      => 'TextField',
+                    label     => 'chocolate_flavour'
+                }
+            ]
+        },
+        'getForm'
+    ) 
+    ->content_type_is('application/json; charset=utf-8')
+    ->status_is(200);
+    
+# insertTableData where we have no insert rights
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"insertTableData","params":["chocolate",{"chocolate_flavour":"schüümli"}]}')
+
+    
+    ->content_like(
+        qr/error.*"code":70042501/,
+        'insertTableData without appropriate rights (fail)'
+    )
+    ->content_type_is('application/json; charset=utf-8')
+    ->status_is(200);
+    
+# login as admin
+$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"login","params":[{"username":"dbtoria_test_admin", "password": "xyz"}]}')
+    ->json_content_is({id=>2,result=>1},'login successful')
+    ->content_type_is('application/json; charset=utf-8')
+    ->status_is(200);
+
+    
+# insertTableData with admin rights
+$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"insertTableData","params":["favourite",{"favourite_name":":m)","favourite_chocolate":1}]}')
+    ->content_is('not this, but should not be an error..');
