@@ -173,15 +173,11 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    my $rec = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);    
-    for my $field (@$view){
-        if ($field->{type} eq 'ComboTable'){
-            my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
-            $field->{initialText} = $crec->{$field->{valueCol}};
-        }
-        $field->{initial} = $rec->{$field->{name}}
-    }
+    my $row = $self->getRecord($tableId,$recordId);
+    my $view = $self->getEditView($tableId);
+    map {
+        $_->{initial} = $row->{$_->{name}}
+    } @$view;
     return $view;
 }
 
@@ -328,7 +324,7 @@ sub insertTableData {
     
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
-        push @values, $dbh->quote($self->toDb($self->feToDb($data->{$key},$typeMap->{$key})));
+        push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
