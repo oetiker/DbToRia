@@ -35,7 +35,7 @@ after the database is connected, prepare the meta tables. Make sure we do this o
 sub prepare {
     my $self = shift;
     return if $self->prepared;
-    my $tables = $self->DBI->getTables();
+    my $tables = $self->DBI->getAllTables();
     if ($tables->{meta_tables}){
         $self->metaTables($self->readMetaTables);
     }
@@ -93,15 +93,16 @@ Updates the table list created by L<DbToRia::DBI::base::getTables>.
 sub massageTables {
     my $self = shift;
     my $tables = shift;
+    my $mt = $self->metaTables;
     for my $table (keys %$tables) {
         if ($table =~ /^meta_(fields|tables)$/){
             delete $tables->{$table};            
         }
-        if (my $meta = $self->metaTables->{$table}){
-            if ($meta->{hide}){
-                delete $tables->{$table};
-                next;
-            }
+        my $meta = $mt->{$table};
+        next unless $meta;
+        if ($meta->{hide}){
+            delete $tables->{$table};
+            next;
         }
     }    
 }
