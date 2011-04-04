@@ -32,16 +32,16 @@ setup a new serivice
 =cut
 
 sub new {
-    my $self = shift->SUPER::new(@_);
-    my $dsn = $self->cfg->{General}{dsn};
-    my $driver = (DBI->parse_dsn($dsn))[1];
+    my $self    = shift->SUPER::new(@_);
+    my $dsn     = $self->cfg->{General}{dsn};
+    my $driver  = (DBI->parse_dsn($dsn))[1];
     require 'DbToRia/DBI/'.$driver.'.pm';
     do { 
         no strict 'refs';
         $self->DBI("DbToRia::DBI::$driver"->new(
-            schema=>$self->cfg->{General}{schema},
-            dsn=>$dsn,
-            metaEnginesCfg => $self->cfg->{MetaEngines}
+            schema          => $self->cfg->{General}{schema},
+            dsn             => $dsn,
+            metaEnginesCfg  => $self->cfg->{MetaEngines}
         ));
     };
     return $self;
@@ -55,25 +55,25 @@ session settings are correct and users are connected with their own login.
 =cut
 
 our %allow_access = (
-    login => 1,
-    logout => 1,
-    getTables => 2,
-    getListView => 2,
-    getEditView => 2,
-    getRecord => 2,
-    getForm => 2,
-    getTableStructure => 2,
-    getRowCount => 2,
-    getTableDataChunk => 2,
-    updateTableData => 2,
-    insertTableData => 2,
-    deleteTableData => 2,
+    login               => 1,
+    logout              => 1,
+    getTables           => 2,
+    getListView         => 2,
+    getEditView         => 2,
+    getRecord           => 2,
+    getForm             => 2,
+    getTableStructure   => 2,
+    getRowCount         => 2,
+    getTableDataChunk   => 2,
+    updateTableData     => 2,
+    insertTableData     => 2,
+    deleteTableData     => 2
 );
 
 sub connect_db {
-    my $self = shift;
+    my $self    = shift;
     my $session = $self->mojo_stash->{'dbtoria.session'};
-    my $dbi = $self->DBI;
+    my $dbi     = $self->DBI;
     $dbi->username($session->param('username'));
     $dbi->password($session->param('password'));
     return try {
@@ -90,7 +90,7 @@ sub connect_db {
 }
 
 sub allow_rpc_access {
-    my $self = shift;
+    my $self   = shift;
     my $method = shift;
     my $access = $allow_access{$method} or return 0;
     return ( $access == 1 or ( $access == 2 and $self->connect_db() ) ) ? 1 : 0
@@ -103,11 +103,11 @@ On successful login, return 1, else return an exception.
 =cut
  
 sub login {
-    my $self = shift;
-    my $param = shift;
+    my $self     = shift;
+    my $param    = shift;
     my $username = $param->{username};
     my $password = $param->{password};
-    my $session = $self->mojo_stash->{'dbtoria.session'};
+    my $session  = $self->mojo_stash->{'dbtoria.session'};
     $session->param('username',$username);
     $session->param('password',$password);
     my $connect = $self->connect_db;
