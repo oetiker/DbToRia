@@ -256,7 +256,7 @@ $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"insertTableData"
     
 # login as admin
 $t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"login","params":[{"username":"dbtoria_test_admin", "password": "xyz"}]}')
-    ->json_content_is({id=>2,result=>1},'login successful')
+    ->json_content_is({id=>2,result=>1},'login successful', 'login as dbtoria_test_admin')
     ->content_type_is('application/json; charset=utf-8')
     ->status_is(200);
 
@@ -264,3 +264,40 @@ $t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"login","params":
 # insertTableData with admin rights
 $t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"insertTableData","params":["favourite",{"favourite_name":":m)","favourite_chocolate":1}]}')
     ->content_is('not this, but should not be an error..');
+    
+# delete record again
+#todo
+    
+# updateTableData
+$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"updateTableData","params":["chocolate","1",{"chocolate_flavour":"very Dark chocolate"}]}')
+    ->json_content_is({"id"=>2,"result"=>1}, 'update dark chocolate to very dark');
+    
+# check if chocolate has become *very* dark, which is always desirable
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "1"]}')
+    ->json_content_is(
+        {
+            id      => 1,
+            result  => {
+                chocolate_flavour   => 'very Dark chocolate',
+                chocolate_id        => '1'
+            }
+        },
+        'check if chocolate has become very dark'
+    );
+# set chocolate back to dark
+$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"updateTableData","params":["chocolate","1",{"chocolate_flavour":"Dark chocolate"}]}')
+    ->json_content_is({"id"=>2,"result"=>1}, 'update dark chocolate to very dark');
+    
+# check if chocolate has become dark again
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "1"]}')
+    ->json_content_is(
+        {
+            id      => 1,
+            result  => {
+                chocolate_flavour   => 'Dark chocolate',
+                chocolate_id        => '1'
+            }
+        },
+        'check if chocolate has become very dark'
+    )
+    
