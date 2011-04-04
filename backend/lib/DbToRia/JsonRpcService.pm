@@ -19,7 +19,6 @@ has 'cfg';
 has 'mojo_stash';
 has 'log';
 has 'DBI';
-has 'metaEngines' => sub { [] };
 
 use strict;
 
@@ -79,7 +78,7 @@ sub connect_db {
     $dbi->password($session->param('password'));
     return try {
         $dbi->getDbh->ping;
-        for my $engine (@{$self->metaEngines}){
+        for my $engine (@{$self->DBI->metaEngines}){
             $engine->prepare();
         }
         return 1;

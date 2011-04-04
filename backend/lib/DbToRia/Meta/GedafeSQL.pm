@@ -35,7 +35,6 @@ sub massageTables {
     my $tables = shift;
     for my $table (keys %$tables) {
         if ($tables->{$table}{type} eq 'VIEW' and $table =~ /_(list|combo)$/ ){
-            warn "delete $table\n";
             delete $tables->{$table};
             next;
         }
