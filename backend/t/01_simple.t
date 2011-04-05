@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# some tests to ensure functionality of db driver.
+# by :m)
+
 # note for self: with current config.cfg a PostGres db is used.
 # this requires DBD:Pg to be installed an the respective DB being in place.
 # otherwise some tests will fail.
@@ -10,7 +13,7 @@ use FindBin;
 use lib $FindBin::Bin.'/../lib';
 
 use lib $FindBin::Bin.'/../../thirdparty/lib/perl5';
-use Test::More tests => 43;
+use Test::More tests => 68;
 use Test::Mojo;
 
 use_ok 'MojoX::Dispatcher::Qooxdoo::Jsonrpc';
@@ -259,18 +262,29 @@ $t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"login","params":
     ->json_content_is({id=>2,result=>1},'login successful', 'login as dbtoria_test_admin')
     ->content_type_is('application/json; charset=utf-8')
     ->status_is(200);
-
     
 # insertTableData with admin rights
-$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"insertTableData","params":["favourite",{"favourite_name":":m)","favourite_chocolate":1}]}')
-    ->content_is('not this, but should not be an error..');
+$t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"insertTableData","params":["favourite",{"favourite_name":":m)","favourite_chocolate":3}]}')
+    ->content_like(qr/"result":"\d+"/), 'insert new favourite';
+    
+# this returns the resultstring in the form {"id":2,"result":1} e.g.
+# match number, because it may change if you run the tests multiple times
+$t->tx->res->content->asset->slurp =~ m/"result":"(\d+)"}/;
+my $current_row = $1;
+
+    
+# change favourite chocolate by dbtoria_test_user
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"updateTableData","params":["favourite","'.$current_row.'",{"favourite_chocolate":"1"}]}')
+    ->json_content_is({id=>1,result=>1}, 'change favourite from white to dark');
     
 # delete record again
-#todo
+
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"deleteTableData","params":["favourite","'.$current_row.'"]}')
+    ->json_content_is({id=>1,result=>1}, 'delete favourite again');
     
 # updateTableData
 $t  ->post_ok('/jsonrpc','{"id":2,"service":"DbToRia","method":"updateTableData","params":["chocolate","1",{"chocolate_flavour":"very Dark chocolate"}]}')
-    ->json_content_is({"id"=>2,"result"=>1}, 'update dark chocolate to very dark');
+    ->json_content_is({id=>2,result=>1}, 'update dark chocolate to very dark');
     
 # check if chocolate has become *very* dark, which is always desirable
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getRecord","params":["chocolate", "1"]}')
