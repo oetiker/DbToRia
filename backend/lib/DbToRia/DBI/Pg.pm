@@ -173,11 +173,15 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    my $row = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);
-    map {
-        $_->{initial} = $row->{$_->{name}}
-    } @$view;
+    my $rec = $self->getRecord($tableId,$recordId);
+    my $view = $self->getEditView($tableId);    
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
+            $field->{initialText} = $crec->{$field->{valueCol}};
+        }
+        $field->{initial} = $rec->{$field->{name}}
+    }
     return $view;
 }
 
