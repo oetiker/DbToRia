@@ -328,7 +328,7 @@ sub insertTableData {
     
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
-        push @values, $dbh->quote($self->toDb($self->feToDb($data->{$key},$typeMap->{$key})));
+        push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
