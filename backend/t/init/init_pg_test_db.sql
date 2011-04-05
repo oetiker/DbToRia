@@ -7,7 +7,7 @@ GRANT ALL ON DATABASE dbtoria_test_db TO  dbtoria_test_admin;
 \connect dbtoria_test_db
 SET search_path = public, pg_catalog;
 
-DROP TABLE chocolate CASCADE;
+DROP TABLE IF EXISTS chocolate CASCADE;
 
 CREATE TABLE chocolate (
     chocolate_id INT NOT NULL PRIMARY KEY,
@@ -28,7 +28,7 @@ GRANT SELECT, UPDATE ON
    chocolate
  TO dbtoria_test_admin;
 
-DROP TABLE favourite;
+DROP TABLE IF EXISTS favourite;
 
 CREATE TABLE favourite (
     favourite_id SERIAL NOT NULL PRIMARY KEY,
