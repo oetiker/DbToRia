@@ -22,11 +22,7 @@ INSERT INTO chocolate VALUES
 
 GRANT SELECT, UPDATE ON
    chocolate
- TO dbtoria_test_user;
- 
-GRANT SELECT, UPDATE ON
-   chocolate
- TO dbtoria_test_admin;
+ TO dbtoria_test_user,dbtoria_test_admin;
 
 DROP TABLE IF EXISTS favourite;
 
@@ -42,7 +38,7 @@ GRANT SELECT, UPDATE, INSERT, DELETE ON
 
 GRANT SELECT, UPDATE ON
    favourite_favourite_id_seq
- TO dbtoria_test_user;
+ TO dbtoria_test_admin;
 
 GRANT SELECT, UPDATE ON
    favourite
