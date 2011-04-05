@@ -36,6 +36,8 @@ CREATE TABLE favourite (
     favourite_chocolate INT NOT NULL REFERENCES chocolate
 );
 
+GRANT SELECT, UPDATE ON favourite_favourite_id_seq TO dbtoria_test_admin;
+
 GRANT SELECT, UPDATE, INSERT, DELETE ON
     favourite
   TO dbtoria_test_admin;
