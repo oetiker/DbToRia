@@ -30,7 +30,7 @@ use DbToRia::Exception qw(error);
 use Mojo::JSON;
 use DBI;
 
-# note: I am unsure, wheter datetime and date should be stored as
+# note: I am unsure wheter datetime and date should be stored as
 # integers or if I should use strings (and even convert internally to a 
 # certain format.) :m)
 our $map = {
@@ -56,8 +56,25 @@ Returns a list of tables available.
 =cut
 
 sub getAllTables {
-    my $self = shift;   
+    my $self = shift;  
 
-    return ["about to find out how this has to work.."];
+    # just return if tableList already exists
+    return $self->{tableList} if $self->{tableList};
+    my $dbh	= $self->getDbh();
+    
+    # SQLite needs "undef" while '' is o.k. for Pg.
+    my $sth = $dbh->table_info(undef,undef,undef, 'TABLE');
+ 
+    my %tables;
+    while ( my $table = $sth->fetchrow_hashref ) {
+        next unless $table->{TABLE_TYPE} =~ /TABLE/i; # does SQLite have "views", too?
+        
+        $tables{$table->{TABLE_NAME}} = {
+            type => $table->{TABLE_TYPE},
+            name => $table->{REMARKS} || $table->{TABLE_NAME}
+    	};
+    }
+    $self->{tableList} = \%tables;
+    return $self->{tableList};
     
 }
