@@ -27,7 +27,7 @@ use Try::Tiny;
 
 =head2 new(cfg=>DbToRia::Config)
 
-setup a new serivice
+setup a new service
 
 =cut
 
@@ -206,7 +206,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 S<Tobias Oetiker E<lt>tobi@oetiker.chE<gt>>,
 S<Matthias Bloch E<lt>matthias@puffin.chE<gt>>,
-S<David Anleitner E<lt>david.angleitner@tet.htwchur.chE<gt>>
+S<David Angleitner E<lt>david.angleitner@tet.htwchur.chE<gt>>
 
 =head1 HISTORY
 
