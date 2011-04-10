@@ -56,22 +56,8 @@ Returns a list of tables available.
 =cut
 
 sub getAllTables {
-    my $self = shift;    
+    my $self = shift;   
+
+    return ["about to find out how this has to work.."];
     
-        
-    print "hellou bei den allTables\n";
-    
-    return $self->{tableList} if $self->{tableList};
-    my $dbh	= $self->getDbh();
-	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
-	my %tables;
-	while ( my $table = $sth->fetchrow_hashref ) {
-        next unless $table->{TABLE_TYPE} ~~ ['TABLE','VIEW'];
-	    $tables{$table->{TABLE_NAME}} = {
-            type => $table->{TABLE_TYPE},
-            name => $table->{REMARKS} || $table->{TABLE_NAME}
-    	};
-    }
-    $self->{tableList} = \%tables;
-    return $self->{tableList};
 }
