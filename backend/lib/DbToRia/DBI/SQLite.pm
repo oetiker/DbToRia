@@ -30,16 +30,11 @@ use DbToRia::Exception qw(error);
 use Mojo::JSON;
 use DBI;
 
-# note: I am unsure wheter datetime and date should be stored as
-# integers or if I should use strings (and even convert internally to a 
-# certain format.) :m)
 our $map = {
     (map { $_ => 'varchar' } ('text')),
     (map { $_ => 'integer' } ('integer')),
     (map { $_ => 'float' }   ('real')),
     (map { $_ => 'boolean' } ('integer')),  # use 0 as false and 1 as true(?)
-    (map { $_ => 'datetime' } ('integer')), # store datetime as seconds since 1970-01-01 00:00:00 UTC (?)
-    (map { $_ => 'date' } ('integer')),     # same as datetime (?)
 };
 
 
