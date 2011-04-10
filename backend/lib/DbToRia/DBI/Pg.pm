@@ -55,7 +55,7 @@ Returns a list of tables and views available from the system.
 =cut
 
 sub getAllTables {
-    my $self = shift;    
+    my $self = shift;      
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
