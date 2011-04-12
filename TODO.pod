@@ -186,6 +186,19 @@ Effort: ?
 
 =head3 Source Code
 
+=over
+
+=item Lint check for all js files.
+
+=item Fix SVN Id strings.
+
+=item Make sure docu of functions is up-to-date (watch out for
+      cut/paste errors).
+
+=item Check authorship and licence info.
+
+=back
+
 Status: available,
 Effort: ?
 
