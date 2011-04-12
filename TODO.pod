@@ -222,11 +222,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 S<Tobias Oetiker E<lt>tobi@oetiker.chE<gt>>,
+S<Fritz Zaucker E<lt>fritz.zaucker@oetiker.chE<gt>>
 
 =head1 HISTORY
 
- 2011-04-010 to initial version
-
+ 2011-04-010 to Initial version.
+ 2011-04-012 fz Added installation/documentation.
