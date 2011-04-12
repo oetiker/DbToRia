@@ -9,6 +9,10 @@
 
 ************************************************************************ */
 
+// FIX ME:
+//  - documentation (Messreihen is not relevant here)
+//  - license
+
 /**
  * An {@link qx.ui.table.model.Remote} implementation for accessing
  * accessing Messreihen on the server.

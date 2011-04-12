@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -99,6 +99,7 @@ qx.Class.define("dbtoria.table.Table", {
                 for (var i=0, arr=this._getPaneScrollerArr(); i<arr.length; i++) {
                     arr[i].addListener.apply(arr[i], arguments);
                 }
+                // FIX ME: there is no return value for this execution branch
             }
             else {
                 return this.base(arguments, type, listener, self, capture);
