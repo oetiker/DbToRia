@@ -4,15 +4,21 @@ DbToRia Development
 
 =head2 DESCRIPTION
 
-With the basic structure of DbToRia in place, the feature set is still
-incomplete. The following work packages are largely independent. They
-will lead to a fully working DbToRia version with a feature set
-similar to that of Gedafe, allowing drop-in replacement of Gedafe
-without modifications to the database.
+With the basic structure of DbToRia in place, there are still some
+elements missing for a public release.
+
+The following work packages are largely independent. They will lead to
+a fully working DbToRia version with a feature set similar to that of
+Gedafe, allowing drop-in replacement of Gedafe without modifications
+to the database.
+
+There will also be sample applications and software packages for
+simple installation and testing.
+
 
 The current project leader (PL) of DbToRia is Tobi Oetiker.
 
-=head2 Implementation Aproach
+=head2 Implementation Approach
 
 To ensure implementation consistency and quality, development follows
 a few simple rules:
@@ -35,7 +41,13 @@ Document, implement, test. Send pull request to PL.
 
 =head1 WORK PACKAGES
 
-=head2 Filter builder Widget
+=head2 Missing Features
+
+While the basic functionality is already available, the feature set is
+still incomplete in order to replace Gedafe with Dbtoria in an
+existing Gedafe application.
+
+=head3 Filter Builder Widget
 
 Upon clicking the search button in a DbToRia table view, a filter
 widget pops up which allows to filter the table contents similar to
@@ -47,7 +59,7 @@ backend.
 Status: available,
 Effort: 8h
 
-=head2 Direct access URL
+=head3 Direct access URL
 
 The filter and the selected sort order of a view or table is
 reflected in the browser URL such that bookmarking will allow to
@@ -56,7 +68,7 @@ re-open the view directly.
 Status: available,
 Effort: 3h
 
-=head2 Configurable Toolbar content
+=head3 Configurable Toolbar content
 
 The top row of the DbToRia frontend should contain a configurable set
 of toolbar buttons for directly accessing tables, view or reports. The
@@ -65,7 +77,7 @@ buttons are configurable from the server side.
 Status: available,
 Effort: 4h
 
-=head2 AutoForm with setable content
+=head3 AutoForm with setable content
 
 The AutoForm widget can be supplied with a new data set (model)
 from the database.
@@ -73,14 +85,7 @@ from the database.
 Status: available,
 Effort: 8h
 
-=head2 View Form
-
-Rows in read-only tables and views can be opened in a read-only edit form.
-
-Status: available,
-Effort: 2h
-
-=head2 Gedafe Friendly Names Cache
+=head3 Gedafe Friendly Names Cache
 
 In gedafeSQL field names in tables are unique. This allows to identify
 appropriate friendly names for view fields even when none are defined
@@ -89,7 +94,33 @@ directly.
 Status: available,
 Effort: 3h
 
-=head2 Record Switching in Edit Form.
+=head3 Default Values in New Records
+
+The New Record form is populated with default values from the database.
+
+Status: available,
+Effort: 2h
+
+=head3 Pearl Reports Integration
+
+Gedafe Pearl can be used within DbToRia. Pearl reports show up in
+iframes and have support for printing.
+
+Status: available,
+Effort: 6h
+
+=head2 Additional Features
+
+The following feature extend the functionality of Gedafe.
+
+=head3 View Form
+
+Rows in read-only tables and views can be opened in a read-only edit form.
+
+Status: available,
+Effort: 2h
+
+=head3 Record Switching in Edit Form.
 
 Extend the Edit form with MS-Access-like navigation buttons at the bottom
 to allow switching between records without closing the Edit form.
@@ -97,20 +128,27 @@ to allow switching between records without closing the Edit form.
 Status: available,
 Effort: 4h
 
-=head2 Default Values in New Records
+=head2 Installation
 
-The New Record form is populated with default values from the database.
+Provide simple installation mechanisms for various platforms to allow
+easy trial installations as well as integration into an existing
+infrastructure.
 
-Status: available,
-Effort: 2h
+=over
 
-=head2 Pearl Reports Integration
+=item
 
-Gedafe Pearl can be used within DbToRia. Pearl reports show up in
-iframes and have support for printing.
+Konfiguration using autoconf
 
-Status: available,
-Effort: 6h
+=item
+
+Linux: dbtoria.rpm and dbtoria.deb packages.
+
+=item
+
+Windows: dbtoria.exe installer.
+
+=head2 Documentation
 
 =head1 COPYRIGHT
 
