@@ -44,7 +44,7 @@ Document, implement, test. Send pull request to PL.
 =head2 Missing Features
 
 While the basic functionality is already available, the feature set is
-still incomplete in order to replace Gedafe with Dbtoria in an
+still incomplete in order to replace Gedafe with DbToRia in an
 existing Gedafe application.
 
 =head3 Filter Builder Widget
@@ -59,7 +59,7 @@ backend.
 Status: available,
 Effort: 8h
 
-=head3 Direct access URL
+=head3 Direct Access URL
 
 The filter and the selected sort order of a view or table is
 reflected in the browser URL such that bookmarking will allow to
@@ -68,7 +68,7 @@ re-open the view directly.
 Status: available,
 Effort: 3h
 
-=head3 Configurable Toolbar content
+=head3 Configurable Toolbar Content
 
 The top row of the DbToRia frontend should contain a configurable set
 of toolbar buttons for directly accessing tables, view or reports. The
@@ -77,7 +77,7 @@ buttons are configurable from the server side.
 Status: available,
 Effort: 4h
 
-=head3 AutoForm with setable content
+=head3 AutoForm with Setable Content
 
 The AutoForm widget can be supplied with a new data set (model)
 from the database.
@@ -134,21 +134,73 @@ Provide simple installation mechanisms for various platforms to allow
 easy trial installations as well as integration into an existing
 infrastructure.
 
-=over
+=head3 autoconf
 
-=item
+Konfiguration using autoconf.
 
-Konfiguration using autoconf
+Status: available,
+Effort: ?
 
-=item
+=head3 Redhat
 
-Linux: dbtoria.rpm and dbtoria.deb packages.
+dbtoria.rpm package.
 
-=item
+Status: available,
+Effort: ?
 
-Windows: dbtoria.exe installer.
+=head3 Debian/Ubuntu
+
+dbtoria.deb package.
+
+Status: available,
+Effort: ?
+
+=head3 Windows
+
+dbtoria.exe installer.
+
+Status: available,
+Effort: ?
 
 =head2 Documentation
+
+=head3 Installation
+
+Status: available,
+Effort: ?
+
+=head3 Application Developer
+
+Status: available,
+Effort: ?
+
+=head3 End-user
+
+Status: available,
+Effort: ?
+
+=head3 Website
+
+Status: available,
+Effort: ?
+
+=head3 Source Code
+
+Status: available,
+Effort: ?
+
+=head3 Review
+
+=over
+
+=item Check completeness.
+
+=item Fix language issues.
+
+=back
+
+Status: available,
+Effort: ?
 
 =head1 COPYRIGHT
 
