@@ -41,7 +41,7 @@ Upon clicking the search button in a DbToRia table view, a filter
 widget pops up which allows to filter the table contents similar to
 Gedafe.
 
-The set of available filter operators depend on the choice of database
+The set of available filter operators depends on the choice of database
 backend.
 
 Status: available,
@@ -50,7 +50,7 @@ Effort: 8h
 =head2 Direct access URL
 
 The filter and the selected sort order of a view or table is
-reflected in the browser url such that bookmarking will allow to
+reflected in the browser URL such that bookmarking will allow to
 re-open the view directly.
 
 Status: available,
@@ -60,7 +60,7 @@ Effort: 3h
 
 The top row of the DbToRia frontend should contain a configurable set
 of toolbar buttons for directly accessing tables, view or reports. The
-buttons are configurable from server side.
+buttons are configurable from the server side.
 
 Status: available,
 Effort: 4h
@@ -91,8 +91,8 @@ Effort: 3h
 
 =head2 Record Switching in Edit Form.
 
-The Edit form gains access-like navigation buttons at the bottom for
-switching between records without closing the edit form.
+Extend the Edit form with MS-Access-like navigation buttons at the bottom
+to allow switching between records without closing the Edit form.
 
 Status: available,
 Effort: 4h
