@@ -147,7 +147,7 @@ returns a database handle. The method reconnects as required.
 sub getDbh {
     my $self = shift;
     my $driver = (DBI->parse_dsn($self->dsn))[1];
-    my $key = $self->username.$self->password;
+    my $key = ($self->username||'???').($self->password||'???');
     my $dbh = $self->dbhCache->{$key};
     if (not defined $dbh or $dbh->ping){        
         $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
