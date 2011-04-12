@@ -35,7 +35,6 @@ sub massageTables {
     my $tables = shift;
     for my $table (keys %$tables) {
         if ($tables->{$table}{type} eq 'VIEW' and $table =~ /_(list|combo)$/ ){
-            warn "delete $table\n";
             delete $tables->{$table};
             next;
         }
@@ -54,8 +53,11 @@ sub massageTableStructure {
     my $structure = shift;
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
-        $structure->{columns}[0]{hidden} = 1;
+        $structure->{columns}[0]{hidden} = 1;        
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
+        for (@{$structure->{columns}}){
+            $_->{hidden} = 1 if $_->{name} eq 'meta_sort';
+        }
     }
 } 
 
