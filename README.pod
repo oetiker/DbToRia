@@ -11,7 +11,7 @@ further optimized.
 
 =head1 SETUP
 
-=head2 Quick Start
+=head2 Backend
 
 We assume you have DBI and the respektive DBD module for your database already installed.
 Now get Mojo and the Mojo qooxdoo dispatcher and the config grammar module:
@@ -25,4 +25,27 @@ With this set you are ready to run dbtoria with its built in webserver for testi
 
  ./backend/bin/dbtoria.pl daemon
 
-(oh and you need to build the frontend and you need to setup a database ... will describe later)
+=head2 Frontend
+
+The DbToRia frontend is written in JavaScript, using the qooxdoo library.
+
+To rebuild, download a copy of the Qooxdoo SDK:
+
+ wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-1.4-sdk.zip
+ unzip qooxdoo-1.4-sdk.zip
+ cd frontend
+
+Now if you just want to build the production ready version of the
+frontend
+
+ ./generate.sh ../qooxdoo-1.4-sdk build
+
+it is now accessible on L<http://localhost:3000>
+
+If you want start hacking and debuging the frontend, build the source version
+by calling
+
+ ./generate.sh ../qooxdoo-1.4-sdk source
+
+you can call this one on L<http://localhost:3000/source>.
+
