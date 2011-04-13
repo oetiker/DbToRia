@@ -162,6 +162,19 @@ dbtoria.exe installer.
 Status: available,
 Effort: ?
 
+=head3 Example applications
+
+=over
+
+=item Time tracking / project management
+
+=item Publication database
+
+=back
+
+Status: available,
+Effort: ?
+
 =head2 Documentation
 
 =head3 Installation
@@ -189,6 +202,8 @@ Effort: ?
 =over
 
 =item Lint check for all js files.
+
+=item Fix all FIX ME things in the code.
 
 =item Fix SVN Id strings.
 
