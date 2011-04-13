@@ -8,6 +8,7 @@ export PERL=perl
 export PERL_CPANM_HOME="$install"
 export PERL_CPANM_OPT="--notest --local-lib $install"
 export PATH=$install/bin:$PATH
+export PERL5LIB=$install/lib/perl5
 
 #./build_mongodb.sh $install
 [ -e $install/bin/cpanm ] || curl -L cpanmin.us | perl - App::cpanminus
