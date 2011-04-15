@@ -307,9 +307,8 @@ sub getEditView {
 
 =head2 getForm (table,recordId)
 
-transitional method to get both the form description AND the default
-data. If the recordId is null, the form will contain the default
-values
+Transitional method to get both the form description AND the default
+data. If recordId is null, the form will contain the default values.
 
 =cut
 
@@ -317,7 +316,16 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    die "Override in Driver";
+    my $rec = $self->getRecord($tableId,$recordId);
+    my $view = $self->getEditView($tableId);
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
+            $field->{initialText} = $crec->{$field->{valueCol}};
+        }
+        $field->{initial} = $rec->{$field->{name}}
+    }
+    return $view;
 }
 
 
