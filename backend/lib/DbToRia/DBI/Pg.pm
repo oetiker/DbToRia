@@ -47,7 +47,7 @@ sub mapType {
     return $map->{$type} || die error(9844,'Unknown Database Type: "'.$type.'"');
 }
 
-   
+
 =head2 getAllTables()
 
 Returns a list of tables and views available from the system.
@@ -55,7 +55,7 @@ Returns a list of tables and views available from the system.
 =cut
 
 sub getAllTables {
-    my $self = shift;      
+    my $self = shift;
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
@@ -73,9 +73,9 @@ sub getAllTables {
 
 =head2 getTableStructure(table)
 
-Returns meta information about the table structure directly from he database
-This uses the mapType methode from the database driver to map the internal
-datatypes to DbToRia compatible datatypes.
+Returns meta information about the table structure directly from he
+database This uses the mapType methode from the database driver to map
+the internal datatypes to DbToRia compatible datatypes.
 
 =cut
 
@@ -92,7 +92,7 @@ sub getTableStructure {
             $foreignKeys{$fk->{FK_COLUMN_NAME}} = {
                 table => $fk->{UK_TABLE_NAME},
                 column => $fk->{UK_COLUMN_NAME}
-            };    
+            };
         }
     }
     my %primaryKeys;
@@ -139,7 +139,8 @@ sub getTableStructure {
 
 =head2 getRecord (table,recordId)
 
-Returns hash of data for the record matching the indicated key. Data gets converted on the way out.
+Returns hash of data for the record matching the indicated key. Data
+gets converted on the way out.
 
 =cut
 
@@ -150,9 +151,9 @@ sub getRecord {
     my $recordId = $dbh->quote(shift);
     my $tableIdQ = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
-    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId"); 
+    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId");
     $sth->execute();
-    my $row = $sth->fetchrow_hashref;    
+    my $row = $sth->fetchrow_hashref;
     my $structure = $self->getTableStructure($tableId);
     my $typeMap = $structure->{typeMap};
     my %newRow;
@@ -164,8 +165,9 @@ sub getRecord {
 
 =head2 getForm (table,recordId)
 
-transitional method to get both the form description AND the default data. If the recordId is null, the form will contain
-the default values
+transitional method to get both the form description AND the default
+data. If the recordId is null, the form will contain the default
+values
 
 =cut
 
@@ -174,7 +176,7 @@ sub getForm {
     my $tableId = shift;
     my $recordId = shift;
     my $rec = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);    
+    my $view = $self->getEditView($tableId);
     for my $field (@$view){
         if ($field->{type} eq 'ComboTable'){
             my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
@@ -187,9 +189,11 @@ sub getForm {
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
 
-Returns the selected columns from the table. Using firstRow and lastRow the number of results can be limited.
+Returns the selected columns from the table. Using firstRow and
+lastRow the number of results can be limited.
 
-If firstRow is undefined, the complete table contents will be returned.
+If firstRow is undefined, the complete table contents will be
+returned.
 
 The columns argument is an array of column identifiers
 
@@ -206,7 +210,7 @@ Return format:
    [ [], ... ],
    [ ... ]
 
-    
+
 =cut
 
 sub getTableDataChunk {
@@ -230,9 +234,9 @@ sub getTableDataChunk {
         . join(',',map{/^NULL$/ ? 'NULL' : $dbh->quote_identifier($_)} @$columns)
         . ' FROM '
         . $dbh->quote_identifier($table);
-	
+
     $query .= ' '.$self->buildWhere($filter);
-    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
+    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
     warn $query,"\n";
     my $sth = $dbh->prepare($query);
@@ -245,8 +249,8 @@ sub getTableDataChunk {
             $new_row[$i] = $self->dbToFe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
-    }    
-    return \@data
+    }
+    return \@data;
 }
 
 =head2 getNumRows(table,filter)
@@ -259,10 +263,10 @@ sub getRowCount {
     my $self = shift;
     my $table = shift;
     my $filter = shift;
-    
+
     my $dbh = $self->getDbh();
 	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
-	
+
     $query .= $self->buildWhere($filter);
     return ($dbh->selectrow_array($query))[0];
 }
@@ -274,7 +278,7 @@ Update the record with the given recId using the data.
 =cut
 
 sub updateTableData {
-    my $self	  = shift;    
+    my $self	  = shift;
     my $table     = shift;
     my $recId     = shift;
     my $data	  = shift;
@@ -284,19 +288,19 @@ sub updateTableData {
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
     my $structure = $self->getTableStructure($table);
     my $primaryKey = $structure->{meta}{primary}[0];
-    my $typeMap = $structure->{typeMap}; 
+    my $typeMap = $structure->{typeMap};
 
-    my @set;  
+    my @set;
     for my $key (keys %$data) {
         push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     $update .= 'SET '.join(', ',@set) if @set;
-    
+
     my @where = ( $dbh->quote_identifier($primaryKey) . ' = ' . $dbh->quote($recId));
     $update .= ' WHERE '. join (' AND ',@where) if @where;
 
     $dbh->begin_work;
-    my $rows = $dbh->do($update);    
+    my $rows = $dbh->do($update);
     if ($rows > 1){
         $dbh->rollback();
         die error(33874,"Statement $update would affect $rows rows. Rolling back.");
@@ -325,15 +329,15 @@ sub insertTableData {
 
     my @keys;
     my @values;
-    
+
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
         push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
-    
+
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
     my $sth = $dbh->prepare($insert);
-    
+
     $sth->execute();
     return $dbh->last_insert_id(undef,undef,$table,$primaryKey);
 }
@@ -380,17 +384,17 @@ Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or   
+the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =head1 AUTHOR
 
