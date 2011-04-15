@@ -51,19 +51,19 @@ Returns a list of tables available.
 =cut
 
 sub getAllTables {
-    my $self = shift;  
+    my $self = shift;
 
     # just return if tableList already exists
     return $self->{tableList} if $self->{tableList};
     my $dbh	= $self->getDbh();
-    
+
     # SQLite needs "undef" while '' is o.k. for Pg.
     my $sth = $dbh->table_info(undef,undef,undef, 'TABLE');
- 
+
     my %tables;
     while ( my $table = $sth->fetchrow_hashref ) {
         next unless $table->{TABLE_TYPE} =~ /TABLE/i; # does SQLite have "views", too?
-        
+
         $tables{$table->{TABLE_NAME}} = {
             type => $table->{TABLE_TYPE},
             name => $table->{REMARKS} || $table->{TABLE_NAME}
@@ -71,5 +71,5 @@ sub getAllTables {
     }
     $self->{tableList} = \%tables;
     return $self->{tableList};
-    
+
 }

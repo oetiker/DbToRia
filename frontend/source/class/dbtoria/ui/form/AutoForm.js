@@ -29,15 +29,15 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         var model = this.__model = {};
 
         var form = this;
-        var validationMgr = form.getValidationManager();        
-        for (var i=0; i<fl; i++) { 
+        var validationMgr = form.getValidationManager();
+        for (var i=0; i<fl; i++) {
             var desc = formDesc[i];
             var control;
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
             switch(desc.type)
             {
-                case "GroupHeader":
+                case "GroupHeader": /* from nequal, not yet used in DbToRia */
                     form.addGroupHeader(trlab);
                     continue;
 
@@ -45,7 +45,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     control = dbtoria.ui.form.ControlBuilder.createControl(desc, model);
                     break;
             }
-            form.add(control, trlab, null, desc.name);            
+            form.add(control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
                 control.set({
                     required: true,
@@ -57,7 +57,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     var rx = new RegExp(desc.check.rx);
                     var name = desc.name;
                     var msg = form['tr'](desc.check.msg);
-                    validationMgr.add(control,function(value,item){ 
+                    validationMgr.add(control,function(value,item){
                         var valid = rx.test(model[name] || '');
                         if (!valid){
                             item.setInvalidMessage(msg);
