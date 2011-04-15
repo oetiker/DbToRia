@@ -26,3 +26,81 @@ With this set you are ready to run dbtoria with its built in webserver for testi
  ./backend/bin/dbtoria.pl daemon
 
 (oh and you need to build the frontend and you need to setup a database ... will describe later)
+
+--------------------------------------------------------
+steps performed by :m) to get the frontend up & running:
+--------------------------------------------------------
+
+(note: 
+first installed Postgres and initialized Pg-DB with 
+backend/t/init/init_pg_test_db.sql
+configured backend/etc/dbtoria.cfg with the following dsn:
+dsn = DBI:Pg:database=dbtoria_test_db;host=localhost
+and then ran test perl backend/t/01_simple.t to check that
+DB is accessible.)
+
+download http://qooxdoo.org/download ('latest stable')
+unzip sdk to /my/favourite/path
+	(enter your path here..)
+
+cd frontend
+
+bash generate.sh /my/favourite/path/qooxdoo-1.4-sdk/ source-all
+
+(waiting some time..)
+
+This is what the output looked like:
+============================================================================
+    INITIALIZING: FRONTEND
+============================================================================
+>>> Configuration: config.json
+>>> Resolving config includes...
+  - Warning: ! Shadowing job "libraries" with local one
+  - Warning: ! Shadowing job "build" with local one
+  - Warning: ! Shadowing job "pretty" with local one
+>>> Jobs: source-all
+>>> Resolving jobs...
+>>> Incorporating job defaults...
+>>> Resolving macros...
+>>> Resolving libs/manifests...
+      - downloaded contrib: ComboTable/trunk
+
+============================================================================
+    EXECUTING: SOURCE-ALL::SOURCE-ALL-SCRIPT
+============================================================================
+>>> Initializing cache...
+  - Cleaning compile cache, as tool chain has changed
+  - Deleting compile cache
+>>> Scanning libraries...
+  - Scanning /tmp/ti_QX_CACHE/downloads/ComboTable/trunk...
+  - Scanning /home/ti/daten/programmieren/qooxdoo-sdk/qooxdoo-1.4-sdk//framework...
+  - Scanning /home/ti/daten/programmieren/oetiker/dbtoria/DbToRia/frontend...
+>>> Warning: Excludes may break code ([u'qx.test.*', u'dbtoria.test.*', u'dbtoria.simulation.*'])
+  - Warning: Skipping unresolvable exclude entry: "dbtoria.simulation.*"
+>>> Resolving dependencies
+  -  _____________________________________________________________________________________________________________________________________________________________________*___________________________________________________________________________________________________________________________________*______*******_____*******___________*_______*________*________*___________*____*______________________******________________________________________________________________________****_______****************______________*_______*___*****__________***___________******_____******___________***********_________****************__*********_________________________________*******************_________*****_____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________**********************************____*********************************************************************___*****_____********************************************************_________**__**_____***********************************************************____________________**********______________________________________*******************************___********************************************_____****************************___*************************************______________*_______******************__**************************************************__****______*******************__***********************_____________________________*******************************************_*****___******************************************************___***********__********************
+  - Warning: Hint: Unknown global symbol referenced: j (dbtoria.db.Table:218)
+  - Warning: Hint: Unknown global symbol referenced: getTableStructure (dbtoria.db.Table:441)
+  - Warning: Hint: Unknown global symbol referenced: okButton (dbtoria.dialog.Choice:117)
+  - Processing explicitly configured includes/excludes...
+  - Sorting 755 classes ...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+>>> Generate source version...
+  - Processing translations for 3 locales 
+    - Package 0:  10% 20% 30% 40% 50% 60% 70% 80% 90% 100%
+  - Generating boot script...
+>>> Done (1m43.22)
+----------------------------------------------------------------------------
+ln -s /my/favourite/path/qooxdoo-sdk/ qooxdoo-sdk
+
+in a browser (firefox with firebug active), open
+http://localhost:3000/source/index.html
+
+..but only getting a white window. :-(
+
+Mojo-output (server console):
+Tue Apr 12 08:34:47 2011 debug Mojolicious::Plugin::RequestTimer:24 [22356]: GET /qooxdoo-sdk/qooxdoo-1.4-sdk/framework/source/class/qx/bom/client/Event.js (Mozilla/5.0 (X11; U; Linux i686; de; rv:1.9.2.13) Gecko/20101206 Ubuntu/10.04 (lucid) Firefox/3.6.13).
+Tue Apr 12 08:34:47 2011 debug Mojolicious::Routes:418 [22356]: Dispatching callback.
+Tue Apr 12 08:34:47 2011 debug Mojolicious::Plugin::EplRenderer:61 [22356]: Template "abframeworksourcec.html.ep" not found.
+Tue Apr 12 08:34:47 2011 debug Mojo::Server:48 [22356]: Waiting for delayed response, forgot to render or resume?
+
+what have I missed out?
