@@ -12,9 +12,9 @@ DbToRia::DBI::base - base class for database drivers
 
 =head1 DESCRIPTION
 
-DbToRia uses DBI for database introspection wherever possible. For the non
-generic bits it uses the services of a database driver module. This is the base class for
-implementing such driver modules.
+DbToRia uses DBI for database introspection wherever possible. For the
+non generic bits it uses the services of a database driver
+module. This is the base class for implementing such driver modules.
 
 A driver module must implement the following methods:
 
@@ -53,7 +53,8 @@ sub new {
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
 
-Returns the selected columns from the table. Using firstRow and lastRow the number of results can be limited.
+Returns the selected columns from the table. Using firstRow and
+lastRow the number of results can be limited.
 
 The columns argument is an array of column identifiers
 
@@ -70,7 +71,7 @@ Return format:
    [ [], ... ],
    [ ... ]
 
-    
+
 =cut
 
 sub getTableDataChunk {
@@ -103,7 +104,7 @@ Update the record with the given recId using the data.
 =cut
 
 sub updateTableData {
-    my $self	  = shift;    
+    my $self	  = shift;
     my $tableId     = shift;
     my $recordId     = shift;
     my $data	  = shift;
@@ -149,7 +150,7 @@ sub getDbh {
     my $driver = (DBI->parse_dsn($self->dsn))[1];
     my $key = ($self->username||'???').($self->password||'???');
     my $dbh = $self->dbhCache->{$key};
-    if (not defined $dbh or $dbh->ping){        
+    if (not defined $dbh or $dbh->ping){
         $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
             RaiseError => 0,
             PrintError => 0,
@@ -166,7 +167,7 @@ sub getDbh {
             ShowErrorStatement => 1,
             LongReadLen=> 5*1024*1024,
         });
-    }    
+    }
     return $dbh;
 }
 
@@ -178,7 +179,7 @@ Returns a map of tables with associated meta information.
 =cut
 
 sub getAllTables {
-    my $self = shift;    
+    my $self = shift;
     die "Override in Driver";
     return $self->{tableList};
 }
@@ -199,7 +200,8 @@ sub getTableStructure {
 
 =head2 getRecord (table,recordId)
 
-Returns hash of data for the record matching the indicated key. Data gets converted on the way out.
+Returns hash of data for the record matching the indicated key. Data
+gets converted on the way out.
 
 =cut
 
@@ -220,16 +222,17 @@ return tables and views filtered for menu display.
 
 sub getTables {
     my $self = shift;
-    my $tables = dclone($self->getAllTables(@_));     
+    my $tables = dclone($self->getAllTables(@_));
     for my $engine (@{$self->metaEngines}){
-        $engine->massageTables($tables);            
+        $engine->massageTables($tables);
     }
     return $tables;
 }
 
 =head2 getListView(table)
 
-returns information on how to display the table content in a tabular format
+returns information on how to display the table content in a tabular
+format
 
 =cut
 
@@ -238,7 +241,7 @@ sub prepListView {
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
     my @return;
-    for my $row (@{$structure->{columns}}){        
+    for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
         push @return, { map { $_ => $row->{$_} } qw (id type name size) };
     };
@@ -276,27 +279,27 @@ sub getEditView {
         date => 'Date',
         boolean => 'CheckBox',
         float => 'TextField',
-    };   
+    };
 
-    for my $row (@{$structure->{columns}}){
-        my $r = {
-           name => $row->{id},
-           label => $row->{name},
+    for my $col (@{$structure->{columns}}){
+        my $c = {
+           name => $col->{id},
+           label => $col->{name},
         };
-        if ($row->{references}){
-            $r->{type} = 'ComboTable';
-            $r->{tableId} = $row->{references}{table},
-            my $rstruct = $self->getTableStructure($r->{tableId});
-            $r->{idCol} = $row->{references}{column},
-            $r->{valueCol} = ${$rstruct->{columns}}[1]{id};
+        if ($col->{references}){
+            $c->{type}     = 'ComboTable';
+            $c->{tableId}  = $col->{references}{table},
+            $c->{idCol}    = $col->{references}{column},
+            my $rstruct    = $self->getTableStructure($c->{tableId});
+            $c->{valueCol} = ${$rstruct->{columns}}[1]{id}; # show value in col 1 in ComboBox
         }
         else {
-            $r->{type} = $widgetMap->{$row->{type}} || die { code=>2843, message=>"No Widget for Field Type: $row->{type}"};
+            $c->{type} = $widgetMap->{$col->{type}} || die { code=>2843, message=>"No Widget for Field Type: $col->{type}"};
         }
-        push @return,$r;
-    }  
+        push @return,$c;
+    }
     for my $engine (@{$self->metaEngines}){
-        $engine->massageEditView($tableId,\@return);            
+        $engine->massageEditView($tableId,\@return);
     }
     return \@return;
 }
@@ -304,8 +307,8 @@ sub getEditView {
 
 =head2 getForm (table,recordId)
 
-transitional method to get both the form description AND the default data. If the recordId is null, the form will contain
-the default values
+Transitional method to get both the form description AND the default
+data. If recordId is null, the form will contain the default values.
 
 =cut
 
@@ -313,7 +316,16 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    die "Override in Driver";
+    my $rec = $self->getRecord($tableId,$recordId);
+    my $view = $self->getEditView($tableId);
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
+            $field->{initialText} = $crec->{$field->{valueCol}};
+        }
+        $field->{initial} = $rec->{$field->{name}}
+    }
+    return $view;
 }
 
 
@@ -360,7 +372,8 @@ sub mapType {
 
 =head2 dbToFe(value,type)
 
-Convert the data returned from an sql query to something suitable for the frontend according to the database type.
+Convert the data returned from an sql query to something suitable for
+the frontend according to the database type.
 
 =cut
 
@@ -387,7 +400,7 @@ sub feToDb {
     my $type = shift;
     my $ourtype = $self->mapType($type);
     if ($ourtype eq 'boolean'){
-        $value = $value ? 1 : 0;   
+        $value = $value ? 1 : 0;
     }
     return $value;
 }
@@ -404,17 +417,17 @@ Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or   
+the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =head1 AUTHOR
 
