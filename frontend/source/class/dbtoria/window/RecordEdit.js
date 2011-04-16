@@ -15,6 +15,10 @@
 #asset(qx/icon/${qx.icontheme}/16/actions/dialog-cancel.png)
 ************************************************************************ */
 
+// FIX ME:
+//   - documentation
+//   - SVN ID
+
 /**
  * Login Popup that performs authentication.
  */
@@ -98,7 +102,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * TODOC
          *
          * @param rules {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         _fillForm : function(rules) {
             var form = new dbtoria.ui.form.AutoForm(rules);
