@@ -12,7 +12,28 @@ Collect ideas while working/using DbToRiA.
 
 =item
 
-Double click on table row should open edit form.
+Improved recordEdit window:
+
+=over 
+
+=item 
+
+=item 
+
+put input form into scrollbox
+
+=item
+
+multi-columns with special handling of wide input fields
+
+=item  
+
+split-pane tableWindow with records in top pane and edit form in lower
+pane
+
+=item
+
+Printing of tables.
 
 =item
 
