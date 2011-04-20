@@ -114,7 +114,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 var tableId = ret.tableId;
                 var columnIds = [];
                 var columnLabels = {};
-                for (var i=0;i<columns.length;i++){
+                var i, nCols = columns.length;
+                for (i=0; i<nCols; i++){
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
                 }
@@ -122,8 +123,34 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 that.__table = new dbtoria.window.Table(model);
                 that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
                 that.__table.addListener("cellDblclick", that.__editRecord, that);
+                for (i=0; i<nCols; i++){
+                    that.debug('Adding contextMenuHandler to col '+i);
+                    that.__table.setContextMenuHandler(i, that.__contextMenuHandler, that);
+                }
                 that.add(that.__table, { flex : 1 });
             },'getListView',tableId);
+        },
+
+        __contextMenuHandler: function(col, row, table, dataModel, contextMenu) {
+            var editEntry   = new qx.ui.menu.Button(this.tr("Edit"));
+            editEntry.addListener("execute", this.__editRecord, this);
+            var deleteEntry = new qx.ui.menu.Button(this.tr("Delete")).set({enabled: false});
+            deleteEntry.addListener("execute", this.__deleteRecord, this);
+            var dupEntry = new qx.ui.menu.Button(this.tr("Copy")).set({enabled: false});
+            dupEntry.addListener("execute", this.__dupRecord, this);
+            contextMenu.add(editEntry);
+            contextMenu.add(deleteEntry);
+            contextMenu.add(dupEntry);
+
+            return true;
+        },
+
+        __deleteRecord : function(e) {
+            window.alert('Not yet implemented');
+        },
+
+        __dupRecord : function(e) {
+            window.alert('Not yet implemented');
         },
 
         __editRecord : function(e) {

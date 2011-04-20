@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,10 +25,10 @@ qx.Class.define("dbtoria.Application", {
 
     members : {
         /**
-         * This method contains the initial application code and gets called 
+         * This method contains the initial application code and gets called
          *  during startup of the application
          *
-         * @return {void} 
+         * @return {void}
          */
         main : function() {
             // call super class
