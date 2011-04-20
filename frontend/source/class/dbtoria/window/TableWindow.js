@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
     extend : qx.ui.window.Window,
     construct : function(tableId, tableName) {
         this.__tableName = tableName;
+        this.__tableId   = tableId;
         this.base(arguments, this.tr('Table: %1', tableName));
         this.set({
             contentPadding : 0,
@@ -69,15 +70,16 @@ qx.Class.define("dbtoria.window.TableWindow", {
     },
 
     members : {
-        __table: null,
-        __tbEdit: null,
-        __tbDelete: null,
+        __table:     null,
+        __tbEdit:    null,
+        __tbDelete:  null,
         __currentId: null,
         __tableName: null,
+        __tableId:   null,
         /**
          * Display a table overview with data
          *
-         * @return {void} 
+         * @return {void}
          */
         __buildUi : function(tableId) {
             var toolbar = new qx.ui.toolbar.ToolBar();
@@ -88,15 +90,14 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png").set({enabled: false});
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png").set({enabled: false});
+
             toolbar.add(newButton);
             newButton.addListener('execute',function(e){
                 new dbtoria.window.RecordEdit(tableId,null,"New "+this.__tableName);
             },this);
-            toolbar.add(editButton);
 
-            editButton.addListener('execute',function(e){
-                new dbtoria.window.RecordEdit(tableId,this.__currentId,"Edit "+this.__tableName);
-            },this);
+            toolbar.add(editButton);
+            editButton.addListener('execute', this.__editRecord, this);
 
             toolbar.add(dupButton);
             toolbar.add(deleteButton);
@@ -120,8 +121,13 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 var model = new dbtoria.db.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.window.Table(model);
                 that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
+                that.__table.addListener("cellDblclick", that.__editRecord, that);
                 that.add(that.__table, { flex : 1 });
             },'getListView',tableId);
+        },
+
+        __editRecord : function(e) {
+            new dbtoria.window.RecordEdit(this.__tableId, this.__currentId, "Edit "+this.__tableName);
         },
 
         __switchRecord : function(e) {
