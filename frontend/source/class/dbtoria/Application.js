@@ -34,9 +34,13 @@ qx.Class.define("dbtoria.Application", {
             // call super class
             this.base(arguments);
 
-            // enable logging in debug variant
-            if (qx.core.Variant.isSet("qx.debug", "off")) {
+            // Enable logging in debug variant
+            if ((qx.core.Environment.get("qx.debug"))) {
+                // support native logging capabilities, e.g. Firebug for Firefox
                 qx.log.appender.Native;
+
+                // support additional cross-browser console. Press F7
+                // to toggle visibility
                 qx.log.appender.Console;
             }
 
