@@ -30,7 +30,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         var grid = new qx.ui.layout.Grid(5, 5);
 
         this.set({
-            showMinimize         : false,
+            showMinimize         : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
             contentPaddingTop    : 10,
@@ -44,8 +44,23 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.getLayout().setRowFlex(1, 1);
         var rpc = dbtoria.communication.Rpc.getInstance();
         rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
+        dbtoria.window.Desktop.getInstance().add(this);
         this.moveTo(300, 40);
         this.open();
+
+        // on clicking the minimize button a new button on the taskbar is
+        // generated which allows to restore the window again
+        this.addListener("minimize", function(e) {
+            var taskbarButton = new qx.ui.toolbar.Button(title, "icon/16/mimetypes/text-plain.png");
+            var tb = dbtoria.window.Taskbar.getInstance();
+            tb.add(taskbarButton);
+            taskbarButton.addListener("execute", function(e) {
+                this.open();
+                tb.remove(taskbarButton);
+            },
+            this);
+        },
+        this);
 
         var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
             allowGrowX : false,
