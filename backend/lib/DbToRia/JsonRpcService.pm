@@ -55,6 +55,7 @@ session settings are correct and users are connected with their own login.
 =cut
 
 our %allow_access = (
+    getConfig           => 1,
     login               => 1,
     logout              => 1,
     getTables           => 2,
@@ -173,6 +174,11 @@ sub deleteTableData {
 sub getTableStructure {
     my $self = shift;
     return $self->DBI->getTableStructure(@_);
+}
+
+sub getConfig {
+    my $self = shift;
+    return { filterOps => $self->DBI->getFilterOpsArray(@_) };
 }
 
 

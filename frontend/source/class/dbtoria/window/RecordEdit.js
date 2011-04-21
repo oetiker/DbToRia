@@ -20,17 +20,19 @@
 //   - SVN ID
 
 /**
- * Login Popup that performs authentication.
+ * Popup window for editing a database record.
  */
  //?! Shouldn't it be 'Login Popo to edit new ebtry'? :m) 
 qx.Class.define("dbtoria.window.RecordEdit", {
-    extend : qx.ui.window.Window,
+    extend : dbtoria.window.DesktopWindow,
 
     construct : function(tableId, recordId, title) {
-        this.base(arguments, title, 'icon/16/apps/utilities-text-editor.png');
+        this.base(arguments);
         var grid = new qx.ui.layout.Grid(5, 5);
 
         this.set({
+            caption              : title,
+            icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
@@ -48,20 +50,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         dbtoria.window.Desktop.getInstance().add(this);
         this.moveTo(300, 40);
         this.open();
-
-        // on clicking the minimize button a new button on the taskbar is
-        // generated which allows to restore the window again
-        this.addListener("minimize", function(e) {
-            var taskbarButton = new qx.ui.toolbar.Button(title, "icon/16/mimetypes/text-plain.png");
-            var tb = dbtoria.window.Taskbar.getInstance();
-            tb.add(taskbarButton);
-            taskbarButton.addListener("execute", function(e) {
-                this.open();
-                tb.remove(taskbarButton);
-            },
-            this);
-        },
-        this);
 
         var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
             allowGrowX : false,

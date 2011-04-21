@@ -328,6 +328,50 @@ sub getForm {
     return $view;
 }
 
+=head2 getFilterOpsArray()
+
+Return an array of DBMS specific comparison operators to be used in filtering.
+
+The default is ['=', '!=' ], however, this function should be
+overwritten in the DBMS drivers.
+
+=cut
+
+sub getFilterOpsArray {
+    my $self = shift;
+    return [{op   => '=',                    type => 'simpleValue', help => 'equal'},
+            {op   => '!=',                   type => 'simpleValue', help => 'not equal'},
+            {op   => '<',                    type => 'simpleValue', help => 'less than'},
+            {op   => '>',                    type => 'simpleValue', help => 'greater than'},
+            {op   => '<=',                   type => 'simpleValue', help => 'less or equal'},
+            {op   => '>=',                   type => 'simpleValue', help => 'greater or equal'},
+            {op   => 'IS NULL',              type => 'noValue',     help => 'value not defined'},
+            {op   => 'IS NOT NULL',          type => 'noValue',     help => 'value defined'},
+           ];
+}
+
+
+=head2 getFilterOpsHash()
+
+Return a hash of DBMS specific comparison operators to be used in
+filtering. This hash is built from a call to getFilterOpsArray() and
+cached.
+
+=cut
+
+our %filterOpsHash;
+
+sub getFilterOpsHash {
+    my $self = shift;
+    if (not defined $self->{filterOpsHash}) {
+        for my $opHash (@{$self->getFilterOpsArray()}) {
+            my $op = $opHash->{op};
+            $self->{filterOpsHash}{$op} = $opHash->{type};
+        }
+    }
+    return $self->{filterOpsHash};
+}
+
 
 =head2 buildWhere(filter)
 
@@ -344,10 +388,14 @@ sub buildWhere {
     my $filter = shift or return '';
     my $dbh = $self->getDbh();
     my @where;
+    my $filterOpsHash = $self->getFilterOpsHash();
     for my $key (keys %$filter) {
         my $value = $filter->{$key}{value};
-        my $op = $filter->{$key}{op};
-        die error(90732,"Unknown operator '$op'") if not $op ~~ ['==','<','>','like','ilike'];
+        my $op    = $filter->{$key}{op};
+        my $type  = $filterOpsHash->{$op};
+        die error(90732,"Unknown operator '$op'") if not exists $filterOpsHash->{$op};
+        # FIX ME: deal with special operators
+        die error(90733,"Operator type '$type' not supported yet") if $type ne 'simpleValue';
         push @where, $dbh->quote_identifier($key) ." $op ". $dbh->quote($value);
     }
     return 'WHERE '. join(' AND ',@where);
