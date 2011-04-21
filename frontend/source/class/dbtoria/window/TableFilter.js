@@ -20,7 +20,7 @@
 #asset(dbtoria/*)
 #asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
 #asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
-
+#asset(qx/icon/${qx.icontheme}/16/actions/help-about.png)
 ************************************************************************ */
 
 /**
@@ -117,11 +117,15 @@ qx.Class.define("dbtoria.window.TableFilter", {
             }
 
             var opSelectBox = new qx.ui.form.SelectBox();
-            opSelectBox.setWidth(50);
-            var ops = ['=', '<', '>', '<=', '>=', 'like', 'ilike', '...'];
+            opSelectBox.setWidth(180);
+            var ops = dbtoria.data.Config.getInstance().getFilterOps();
             len = ops.length;
+            var tooltip;
             for (i =0; i<len; i++) {
-                item = new qx.ui.form.ListItem(ops[i], null, ops[i]);
+                this.debug('help='+ops[i].help);
+                tooltip = new qx.ui.tooltip.ToolTip(ops[i].help, "icon/16/actions/help-about.png");
+                item    = new qx.ui.form.ListItem(ops[i].op, null, ops[i].op);
+                item.setToolTip(tooltip);
                 opSelectBox.add(item);
             }
 
