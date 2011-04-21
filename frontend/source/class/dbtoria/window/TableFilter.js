@@ -156,6 +156,7 @@ qx.Class.define("dbtoria.window.TableFilter", {
             });
 
             var refreshButton = new qx.ui.form.Button(this.tr("Refresh Filter"));
+            refreshButton.setEnabled(false);
             var addButton = new qx.ui.form.Button(this.tr("Add Critera"));
 
             // on clicking the filter refresh button the tableWindow
