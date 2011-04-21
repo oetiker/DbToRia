@@ -81,6 +81,7 @@ qx.Class.define("dbtoria.window.TableFilter", {
         __dbTable : null,
         __columns : null,
         __filterCallback: null,
+        __fieldSelectBox: null,
 
         // used to add and remove filter criteria
         __rowCounter : 0,
@@ -104,7 +105,16 @@ qx.Class.define("dbtoria.window.TableFilter", {
 //            checkBox.setChecked(true);
             checkBox.setValue(true);
 
+            var textField1 = new qx.ui.form.TextField();
+            textField1.setWidth(100);
+
+            var textField2 = new qx.ui.form.TextField();
+            textField2.setWidth(100);
+
+            var labelAnd = new qx.ui.basic.Label('AND');
+
             var fieldSelectBox = new qx.ui.form.SelectBox();
+            this.__fieldSelectBox = fieldSelectBox;
 
             // generate list of columns
             var columns = this.__columns;
@@ -117,20 +127,27 @@ qx.Class.define("dbtoria.window.TableFilter", {
             }
 
             var opSelectBox = new qx.ui.form.SelectBox();
+            opSelectBox.addListener('changeSelection',
+                                       function() {
+                                           this.__changeOp(opSelectBox,
+                                                           textField1,
+                                                           textField2,
+                                                           labelAnd);
+                                       }, this);
+
             opSelectBox.setWidth(180);
             var ops = dbtoria.data.Config.getInstance().getFilterOps();
             len = ops.length;
             var tooltip;
             for (i =0; i<len; i++) {
-                this.debug('help='+ops[i].help);
-                tooltip = new qx.ui.tooltip.ToolTip(ops[i].help, "icon/16/actions/help-about.png");
+                tooltip =
+                    new qx.ui.tooltip.ToolTip(ops[i].help,
+                                              "icon/16/actions/help-about.png");
                 item    = new qx.ui.form.ListItem(ops[i].op, null, ops[i].op);
                 item.setToolTip(tooltip);
+                item.setUserData('type', ops[i].type);
                 opSelectBox.add(item);
             }
-
-            var textField = new qx.ui.form.TextField();
-            textField.setWidth(200);
 
             this.getLayout().setRowAlign(this.__rowCounter, "left", "middle");
             this.getLayout().setColumnFlex(3, 1);
@@ -150,9 +167,19 @@ qx.Class.define("dbtoria.window.TableFilter", {
                 column : 2
             });
 
-            this.add(textField, {
+            this.add(textField1, {
                 row    : this.__rowCounter,
                 column : 3
+            });
+
+            this.add(labelAnd, {
+                row    : this.__rowCounter,
+                column : 4
+            });
+
+            this.add(textField2, {
+                row    : this.__rowCounter,
+                column : 5
             });
 
             var refreshButton = new qx.ui.form.Button(this.tr("Refresh Filter"));
@@ -177,24 +204,52 @@ qx.Class.define("dbtoria.window.TableFilter", {
 
             this.add(refreshButton, {
                 row    : this.__rowCounter,
-                column : 4
+                column : 6
             });
 
             this.add(addButton, {
                 row    : this.__rowCounter,
-                column : 5
+                column : 7
             });
 
             this.__selection.push({
                 fieldSelectBox : fieldSelectBox,
                 opSelectBox    : opSelectBox,
-                textField      : textField,
+                textField1     : textField1,
+                textField2     : textField2,
                 checkBox       : checkBox
             });
 
             this.__rowCounter++;
         },
 
+
+        /**
+         * Callback for changeSelection on opSelectBox
+         *
+         */
+        __changeOp : function(selectBox, textField1, textField2, labelAnd) {
+            var selection = selectBox.getSelection()[0];
+            var type = selection.getUserData('type');
+            this.debug('operator type: '+type);
+            switch (type) {
+            case 'simpleValue':
+                textField1.show();
+                labelAnd.exclude();
+                textField2.exclude();
+                break;
+            case 'dualValue':
+                textField1.show();
+                labelAnd.show();
+                textField2.show();
+                break;
+            case 'noValue':
+                textField1.exclude();
+                labelAnd.exclude();
+                textField2.exclude();
+                break;
+            }
+        },
 
         /**
          * Return current filter
@@ -211,9 +266,10 @@ qx.Class.define("dbtoria.window.TableFilter", {
 
                 if (selection.checkBox.getValue()) {
                     var tmp = {
-                        field: selection.fieldSelectBox.getSelection()[0],
-                        op:    selection.opSelectBox.getSelection()[0],
-                        value: selection.textField.getValue()
+                        field:  selection.fieldSelectBox.getSelection()[0],
+                        op:     selection.opSelectBox.getSelection()[0],
+                        value1: selection.textField1.getValue(),
+                        value2: selection.textField2.getValue()
                     };
                     filter.push(tmp);
                 }
