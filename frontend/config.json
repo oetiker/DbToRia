@@ -53,6 +53,7 @@
     "libraries" : {
        "library" : [{
          "manifest"   : "contrib://ComboTable/trunk/Manifest.json"
+//         "manifest"   : "/usr/pack/qooxdoo-1.4.0-za/qooxdoo-contrib/ComboTable/trunk/Manifest.json"
        }]
      },
      "pretty" :
