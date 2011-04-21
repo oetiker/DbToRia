@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,19 +25,18 @@
  * This class provides a window to choose a table
  *
  * The database is asked for all available tables. A list of buttons is
- * generated and a click on them opens the detailled TableView. 
+ * generated and a click on them opens the detailled TableView.
  */
 qx.Class.define("dbtoria.window.TableSelection", {
     extend : qx.ui.menu.Menu,
     construct : function() {
         this.base(arguments);
         var rpc = dbtoria.communication.Rpc.getInstance();
-        var desktop = dbtoria.window.Desktop.getInstance();
         var that = this;
         var tableMenu = new qx.ui.menu.Menu();
         var viewMenu = new qx.ui.menu.Menu();
         this.add(new qx.ui.menu.Button(this.tr('Tables'),null,null,tableMenu));
-        this.add(new qx.ui.menu.Button(this.tr('Views'),null,null,viewMenu)); 
+        this.add(new qx.ui.menu.Button(this.tr('Views'),null,null,viewMenu));
         rpc.callAsyncSmart(function(ret) {
             // generate a button for each table
             var tables = [];
@@ -59,10 +58,10 @@ qx.Class.define("dbtoria.window.TableSelection", {
                         viewMenu.add(menuButton);
                     }
                     menuButton.addListener("execute", function(e) {
-                        desktop.add(new dbtoria.window.TableWindow(tableId, item.name));
+                        new dbtoria.window.TableWindow(tableId, item.name);
                     }, this);
                 }
-            )
+            );
         },
         'getTables');
     }
