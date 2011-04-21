@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,18 +25,22 @@ qx.Class.define("dbtoria.Application", {
 
     members : {
         /**
-         * This method contains the initial application code and gets called 
+         * This method contains the initial application code and gets called
          *  during startup of the application
          *
-         * @return {void} 
+         * @return {void}
          */
         main : function() {
             // call super class
             this.base(arguments);
 
-            // enable logging in debug variant
-            if (qx.core.Variant.isSet("qx.debug", "off")) {
+            // Enable logging in debug variant
+            if ((qx.core.Environment.get("qx.debug"))) {
+                // support native logging capabilities, e.g. Firebug for Firefox
                 qx.log.appender.Native;
+
+                // support additional cross-browser console. Press F7
+                // to toggle visibility
                 qx.log.appender.Console;
             }
 

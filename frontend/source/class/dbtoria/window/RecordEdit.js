@@ -20,17 +20,19 @@
 //   - SVN ID
 
 /**
- * Login Popup that performs authentication.
+ * Popup window for editing a database record.
  */
 qx.Class.define("dbtoria.window.RecordEdit", {
-    extend : qx.ui.window.Window,
+    extend : dbtoria.window.DesktopWindow,
 
     construct : function(tableId, recordId, title) {
-        this.base(arguments, title, 'icon/16/apps/utilities-text-editor.png');
+        this.base(arguments);
         var grid = new qx.ui.layout.Grid(5, 5);
 
         this.set({
-            showMinimize         : false,
+            caption              : title,
+            icon                 : 'icon/16/apps/utilities-text-editor.png',
+            showMinimize         : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
             contentPaddingTop    : 10,
@@ -44,6 +46,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.getLayout().setRowFlex(1, 1);
         var rpc = dbtoria.communication.Rpc.getInstance();
         rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
+        dbtoria.window.Desktop.getInstance().add(this);
         this.moveTo(300, 40);
         this.open();
 
