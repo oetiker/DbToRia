@@ -102,7 +102,6 @@ qx.Class.define("dbtoria.window.TableFilter", {
          */
         addSelectionProperty : function() {
             var checkBox = new qx.ui.form.CheckBox();
-//            checkBox.setChecked(true);
             checkBox.setValue(true);
 
             var textField1 = new qx.ui.form.TextField();
@@ -138,7 +137,9 @@ qx.Class.define("dbtoria.window.TableFilter", {
             opSelectBox.setWidth(180);
             var ops = dbtoria.data.Config.getInstance().getFilterOps();
             len = ops.length;
-            var tooltip;
+            var tooltip =
+              new qx.ui.tooltip.ToolTip('', "icon/16/actions/help-about.png");;
+            opSelectBox.setToolTip(tooltip);
             for (i =0; i<len; i++) {
                 tooltip =
                     new qx.ui.tooltip.ToolTip(ops[i].help,
@@ -250,6 +251,7 @@ qx.Class.define("dbtoria.window.TableFilter", {
                 textField2.exclude();
                 break;
             }
+            selectBox.getToolTip().setLabel(selection.getToolTip().getLabel());
         },
 
         /**
