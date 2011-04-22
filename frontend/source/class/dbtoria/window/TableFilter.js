@@ -184,14 +184,16 @@ qx.Class.define("dbtoria.window.TableFilter", {
             });
 
             var refreshButton = new qx.ui.form.Button(this.tr("Refresh Filter"));
-            refreshButton.setEnabled(false);
+//            refreshButton.setEnabled(false);
             var addButton = new qx.ui.form.Button(this.tr("Add Critera"));
 
             // on clicking the filter refresh button the tableWindow
             // is updated with the current filter
-            refreshButton.addListener("execute", function(e) {
-                this.__filterCallback(this.__getFilter());
-            }, this);
+            refreshButton.addListener("execute",
+                                      function(e) {
+                                          this.debug('Calling __filterCallback()');
+                                          this.__filterCallback(this.__getFilter());
+                                      }, this);
 
             addButton.addListener("execute", function(e) {
                 this.tableFilter.addSelectionProperty();
