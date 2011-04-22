@@ -40,6 +40,9 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
             // height         : 500,
         // });
 
+        // add to desktop
+        dbtoria.window.Desktop.getInstance().add(this);
+
         // on clicking the minimize button a new button on the taskbar is
         // generated which allows to restore the window again
         this.addListener("minimize",
@@ -57,9 +60,6 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
                                                        this);
                          },
                          this);
-//      this.addListenerOnce("close", function(e) {
-//           this.close();
-//      });
     },
 
     members : {
