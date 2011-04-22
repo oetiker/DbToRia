@@ -271,8 +271,8 @@ qx.Class.define("dbtoria.window.TableFilter", {
 
                 if (selection.checkBox.getValue()) {
                     var tmp = {
-                        field:  selection.fieldSelectBox.getSelection()[0],
-                        op:     selection.opSelectBox.getSelection()[0],
+                        field:  selection.fieldSelectBox.getSelection()[0].getModel(),
+                        op:     selection.opSelectBox.getSelection()[0].getModel(),
                         value1: selection.textField1.getValue(),
                         value2: selection.textField2.getValue()
                     };
