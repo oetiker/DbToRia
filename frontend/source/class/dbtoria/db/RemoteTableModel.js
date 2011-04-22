@@ -53,6 +53,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             var that = this;
             this.__rpc.callAsync(function(ret,exc) {
                 if (exc) {
+                    dbtoria.dialog.MsgBox.getInstance().exc(exc);
                     ret = 0;
                 }
                 that._onRowCountLoaded(ret);
@@ -112,6 +113,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             var that = this;
             this.__rpc.callAsync(function(ret,exc) {
                 if (exc){
+                    dbtoria.dialog.MsgBox.getInstance().exc(exc);
                     ret = [];
                 }
                 var data = [];
