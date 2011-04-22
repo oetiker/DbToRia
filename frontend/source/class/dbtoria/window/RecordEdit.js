@@ -22,13 +22,16 @@
 /**
  * Popup window for editing a database record.
  */
- //?! Shouldn't it be 'Login Popo to edit new ebtry'? :m) 
 qx.Class.define("dbtoria.window.RecordEdit", {
     extend : dbtoria.window.DesktopWindow,
 
     construct : function(tableId, recordId, title) {
         this.base(arguments);
+
         var grid = new qx.ui.layout.Grid(5, 5);
+        grid.setRowFlex(0, 1); // make row 0 flexible
+        grid.setColumnFlex(0, 1);
+        grid.setRowFlex(1, 1);
 
         this.set({
             caption              : title,
@@ -43,8 +46,14 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             height               : 300
         });
 
-        this.getLayout().setColumnFlex(0, 1);
-        this.getLayout().setRowFlex(1, 1);
+        var scrollContainer = new qx.ui.container.Scroll();
+        this.__scrollContainer = scrollContainer;
+        this.add(scrollContainer, {
+                   row     : 0,
+                   column  : 0,
+                   colSpan : 2
+                 });
+
         var rpc = dbtoria.communication.Rpc.getInstance();
         rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
         this.moveTo(300, 40);
@@ -85,7 +94,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 },
                 'insertTableData', tableId,  this.__formModel);
             }
-           
+
             else {
                 var msg = dbtoria.dialog.MsgBox.getInstance();
                 msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
@@ -100,8 +109,10 @@ qx.Class.define("dbtoria.window.RecordEdit", {
     },
 
     members : {
-        __formModel : null,
-        __form: null,
+        __formModel       : null,
+        __form            : null,
+        __scrollContainer : null,
+
         /**
          * TODOC
          *
@@ -113,11 +124,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             this.__formModel = form.getModel();
             var formControl = new dbtoria.ui.form.renderer.Monster(form);
 
-            this.add(formControl, {
-                row     : 0,
-                column  : 0,
-                colSpan : 2
-            });
+            this.__scrollContainer.add(formControl);
             this.__form = form;
         }
     }
