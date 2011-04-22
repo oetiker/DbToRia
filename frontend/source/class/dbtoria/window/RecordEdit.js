@@ -22,6 +22,7 @@
 /**
  * Popup window for editing a database record.
  */
+ //?! Shouldn't it be 'Login Popo to edit new ebtry'? :m) 
 qx.Class.define("dbtoria.window.RecordEdit", {
     extend : dbtoria.window.DesktopWindow,
 
@@ -82,8 +83,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                     that.close();
                     that.destroy();
                 },
-                'updateTableData', tableId, recordId, this.__formModel);
+                'insertTableData', tableId,  this.__formModel);
             }
+           
             else {
                 var msg = dbtoria.dialog.MsgBox.getInstance();
                 msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
