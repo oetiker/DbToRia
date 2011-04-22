@@ -183,13 +183,13 @@ qx.Class.define("dbtoria.window.TableFilter", {
                 column : 5
             });
 
-            var refreshButton = new qx.ui.form.Button(this.tr("Refresh Filter"));
-//            refreshButton.setEnabled(false);
+            var applyButton = new qx.ui.form.Button(this.tr("Apply Filter"));
+//            applyButton.setEnabled(false);
             var addButton = new qx.ui.form.Button(this.tr("Add Critera"));
 
-            // on clicking the filter refresh button the tableWindow
+            // on clicking the filter apply button the tableWindow
             // is updated with the current filter
-            refreshButton.addListener("execute",
+            applyButton.addListener("execute",
                                       function(e) {
                                           this.debug('Calling __filterCallback()');
                                           this.__filterCallback(this.__getFilter());
@@ -198,15 +198,15 @@ qx.Class.define("dbtoria.window.TableFilter", {
             addButton.addListener("execute", function(e) {
                 this.tableFilter.addSelectionProperty();
                 this.addButton.destroy();
-                this.refreshButton.destroy();
+                this.applyButton.destroy();
             },
             {
                 tableFilter   : this,
                 addButton     : addButton,
-                refreshButton : refreshButton
+                applyButton : applyButton
             });
 
-            this.add(refreshButton, {
+            this.add(applyButton, {
                 row    : this.__rowCounter,
                 column : 6
             });
