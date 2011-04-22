@@ -47,7 +47,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.getLayout().setRowFlex(1, 1);
         var rpc = dbtoria.communication.Rpc.getInstance();
         rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
-        dbtoria.window.Desktop.getInstance().add(this);
         this.moveTo(300, 40);
         this.open();
 
