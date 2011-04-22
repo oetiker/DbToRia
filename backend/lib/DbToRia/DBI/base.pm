@@ -332,8 +332,7 @@ sub getForm {
 
 Return an array of DBMS specific comparison operators to be used in filtering.
 
-The default is ['=', '!=' ], however, this function should be
-overwritten in the DBMS drivers.
+The following operators are available in PostgreSQL, SQLite, and MySQL.
 
 =cut
 
@@ -347,6 +346,18 @@ sub getFilterOpsArray {
             {op   => '>=',                   type => 'simpleValue', help => 'greater or equal'},
             {op   => 'IS NULL',              type => 'noValue',     help => 'value not defined'},
             {op   => 'IS NOT NULL',          type => 'noValue',     help => 'value defined'},
+
+            {op   => 'LIKE',                 type => 'simpleValue',
+             help => 'substring matching with wildcards'},
+            {op   => 'NOT LIKE',             type => 'simpleValue',
+             help => 'substring matching with wildcards'},
+
+            {op   => 'IN',                   type => 'simpleValue', help => 'contained in list'},
+            {op   => 'NOT IN',               type => 'simpleValue', help => 'contained in list'},
+
+            # 'IS TRUE', 'IS NOT TRUE',
+            # 'IS FALSE', 'IS NOT FALSE',
+
            ];
 }
 

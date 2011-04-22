@@ -74,6 +74,28 @@ sub getAllTables {
 
 }
 
+=head2 getFilterOpsArray()
+
+Return an array of DBMS specific comparison operators to be used in
+filtering.
+
+=cut
+
+sub getFilterOpsArray {
+    my $self = shift;
+    my @ops = @{$self->SUPER::getFilterOpsArray()};
+    push @ops, (
+                {op   => 'GLOB',                type => 'simpleValue',
+                 help => 'case-sensitive substring matching with Unix-glob wildcards'},
+
+                # the following are placeholders and not functional in
+                # standard SQLite as of version 3.7.6.2
+                # MATCH, REGEXP
+           );
+    return \@ops;
+}
+
+
 =head2 getTableStructure(table)
 
 Returns meta information about the table structure.
@@ -85,11 +107,11 @@ datatypes to DbToRia compatible datatypes.
 sub getTableStructure {
     my $self = shift;
     my $table = shift;
-    
+
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
     my $dbh = $self->getDbh();
-    
+
     # foreign key support has to be enabled in sqlite, it is off by default.
     # foreign keys are not supported here; DBD::sqlite has no documented foreign_key_info, this
     # is just copied over from Pg.pm
@@ -99,10 +121,10 @@ sub getTableStructure {
             $foreignKeys{$fk->{FK_COLUMN_NAME}} = {
                 table => $fk->{UK_TABLE_NAME},
                 column => $fk->{UK_COLUMN_NAME}
-            };    
+            };
         }
     }
-    
+
     my %primaryKeys;
     my @primaryKey;
 	if ( my $pksth = $dbh->primary_key_info(undef, undef, $table) ){
@@ -111,10 +133,10 @@ sub getTableStructure {
             push @primaryKey, $pk->{COLUMN_NAME};
         }
     }
-    
+
     # call column_info for metadata on columns
 	my $sth = $dbh->column_info(undef, undef, $table, undef);
-    
+
     my @columns;
     my %typeMap;
 	while( my $col = $sth->fetchrow_hashref ) {
@@ -144,10 +166,10 @@ sub getTableStructure {
     for my $engine (@{$self->metaEngines}){
         $engine->massageTableStructure($table,$self->{tableStructure}{$table});
     }
-    
+
     return $self->{tableStructure}{$table};
-    
-} 
+
+}
 
 =head2 getRecord (table,recordId)
 
@@ -163,17 +185,17 @@ sub getRecord {
     my $self = shift;
     my $tableId = shift;
     my $dbh = $self->getDbh();
-    
+
     my $recordId = $dbh->quote(shift);
     my $tableIdQ = $dbh->quote_identifier($tableId);
-    
+
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
-    
-    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId"); 
+
+    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId");
     $sth->execute();
-    
+
     # only one record is equal to a given primary key..
-    my $row = $sth->fetchrow_hashref;    
+    my $row = $sth->fetchrow_hashref;
     my $structure = $self->getTableStructure($tableId);
     my $typeMap = $structure->{typeMap};
     my %newRow;
@@ -198,7 +220,7 @@ sub getForm {
     my $tableId = shift;
     my $recordId = shift;
     my $rec = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);    
+    my $view = $self->getEditView($tableId);
     for my $field (@$view){
         if ($field->{type} eq 'ComboTable'){
             my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
@@ -211,11 +233,12 @@ sub getForm {
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
 
-Returns the selected columns from the table. Using firstRow and lastRow the number of results can be limited.
+Returns the selected columns from the table. Using firstRow and
+lastRow the number of results can be limited.
 
 If firstRow is undefined, the complete table contents will be returned.
 
-The columns argument is an array of column identifiers
+The columns argument is an array of column identifiers.
 
 The following options are supported:
 
@@ -230,7 +253,7 @@ Return format:
    [ [], ... ],
    [ ... ]
 
-    
+
 =cut
 
 sub getTableDataChunk {
@@ -254,9 +277,9 @@ sub getTableDataChunk {
         . join(',',map{/^NULL$/ ? 'NULL' : $dbh->quote_identifier($_)} @$columns)
         . ' FROM '
         . $dbh->quote_identifier($table);
-	
+
     $query .= ' '.$self->buildWhere($filter);
-    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;	
+    $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
     warn $query,"\n";
     my $sth = $dbh->prepare($query);
@@ -269,7 +292,7 @@ sub getTableDataChunk {
             $new_row[$i] = $self->dbToFe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }
         push @data,\@new_row;
-    }    
+    }
     return \@data
 }
 
@@ -283,10 +306,10 @@ sub getRowCount {
     my $self = shift;
     my $table = shift;
     my $filter = shift;
-    
+
     my $dbh = $self->getDbh();
 	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
-	
+
     $query .= $self->buildWhere($filter);
     return ($dbh->selectrow_array($query))[0];
 }
@@ -298,7 +321,7 @@ Update the record with the given recId using the data.
 =cut
 
 sub updateTableData {
-    my $self	  = shift;    
+    my $self	  = shift;
     my $table     = shift;
     my $recId     = shift;
     my $data	  = shift;
@@ -310,17 +333,17 @@ sub updateTableData {
     my $primaryKey = $structure->{meta}{primary}[0];
     my $typeMap = $structure->{typeMap}; 
 
-    my @set;  
+    my @set;
     for my $key (keys %$data) {
         push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     $update .= 'SET '.join(', ',@set) if @set;
-    
+
     my @where = ( $dbh->quote_identifier($primaryKey) . ' = ' . $dbh->quote($recId));
     $update .= ' WHERE '. join (' AND ',@where) if @where;
 
     $dbh->begin_work;
-    my $rows = $dbh->do($update);    
+    my $rows = $dbh->do($update);
     if ($rows > 1){
         $dbh->rollback();
         die error(33874,"Statement $update would affect $rows rows. Rolling back.");
@@ -349,16 +372,16 @@ sub insertTableData {
 
     my @keys;
     my @values;
-    
+
     for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
         push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
-    
+
     $insert .= '('.join(',',@keys).') VALUES ('.join(',',@values).')';
-    
+
     my $sth = $dbh->prepare($insert);
-    
+
     $sth->execute();
     return $dbh->last_insert_id(undef,undef,$table,$primaryKey);
 }

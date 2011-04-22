@@ -86,30 +86,36 @@ sub getFilterOpsArray {
              help => 'value within range (not yet implemented)'},
             {op   => 'NOT BETWEEN',          type => 'dualValue',
              help => 'value outside range (not yet implemented)'},
-            # substring matching with wildcards
-            {op   => 'LIKE',                 type => 'simpleValue', help => ''},
-            {op   => 'NOT LIKE',             type => 'simpleValue', help => ''},
-            {op   => 'ILIKE',                type => 'simpleValue', help => ''},
-            {op   => 'NOT ILIKE',            type => 'simpleValue', help => ''},
-            # pattern matching
-            {op   => 'SIMLIAR TO',           type => 'simpleValue', help => ''},
-            {op   => 'NOT SIMLIAR TO',       type => 'simpleValue', help => ''},
-            # regexp pattern matching
-            {op   => '~',                    type => 'simpleValue', help => ''},
-            {op   => '~*',                   type => 'simpleValue', help => ''},
-            {op   => '!~',                   type => 'simpleValue', help => ''},
-            {op   => '!~*',                  type => 'simpleValue', help => ''},
-            # contained in a list
-            {op   => 'IN',                   type => 'simpleValue', help => ''},
-            {op   => 'NOT IN',               type => 'simpleValue', help => ''},
-            # for comparisons with NULL values
-            {op   => 'IS DISTINCT FROM',     type => 'simpleValue', help => ''},
-            {op   => 'IS NOT DISTINCT FROM', type => 'simpleValue', help => ''},
+
+            {op   => 'ILIKE',                type => 'simpleValue',
+             help => 'case-insensitive substring matching with wildcards'},
+            {op   => 'NOT ILIKE',            type => 'simpleValue',
+             help => 'case-insensitive substring matching with wildcards'},
+
+            {op   => 'SIMLIAR TO',           type => 'simpleValue',
+             help => 'pattern matching'},
+            {op   => 'NOT SIMLIAR TO',       type => 'simpleValue',
+             help => 'pattern matching'},
+
+            {op   => '~',                    type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '~*',                   type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '!~',                   type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '!~*',                  type => 'simpleValue',
+             help => 'regexp pattern matching'},
+
+            {op   => 'IS DISTINCT FROM',     type => 'simpleValue',
+             help => 'comparisons with NULL values'},
+            {op   => 'IS NOT DISTINCT FROM', type => 'simpleValue',
+             help => 'comparisons with NULL values'},
+
             # the following are only valid with boolean types
-            # 'IS TRUE', 'IS NOT TRUE',
-            # 'IS FALSE', 'IS NOT FALSE',
             # 'IS UNKOWN', 'IS NOT UNKNOW',
-    ];
+
+            # ANY, SOME, ALL
+           ];
 }
 
 =head2 getTableStructure(table)
