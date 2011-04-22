@@ -94,7 +94,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             toolbar.add(refreshButton);
             toolbar.add(exportButton);
             toolbar.add(filterButton);
-            filterButton.addListener('execute', this.__filterTable, this);
+            filterButton.addListener('execute', qx.lang.Function.bind(this.__filterTable, this), this);
 
             this.add(toolbar);
             var rpc = dbtoria.communication.Rpc.getInstance();
@@ -148,11 +148,14 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __filterTable : function(e) {
+            var that = this;
             new dbtoria.window.TableFilter(this.tr("Filter: %1", this.__tableName),
                                            this.__columns,
                                            function(filter) {
+                                               this.debug('__filterTable(): calling setFilter()');
+                                               that.__table.getTableModel().setFilter(filter);
                                                // qx.dev.Debug.debugObject(filter);
-                                               window.alert('Filter callback not yet implemented, filter='+filter);
+                                               // window.alert('Filter callback not yet implemented, filter='+filter);
                                            }
                                           );
         },

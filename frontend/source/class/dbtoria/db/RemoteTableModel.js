@@ -81,6 +81,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
          * @param oldValue {Integer} Old TagId
          */
         _applyFilter : function(newValue, oldValue) {
+            this.debug('_applyFilter(): calling reloadData()');
             this.reloadData();
         },
 
