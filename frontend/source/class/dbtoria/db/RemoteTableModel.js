@@ -1,17 +1,11 @@
 /* ************************************************************************
 
    Copyrigtht: OETIKER+PARTNER AG
-   License:    Proprietary
+   License:    GPL
    Authors:    Tobias Oetiker
    Utf8Check:  äöü
 
-   $Id: MessreiheTableModel.js 453 2011-01-26 06:22:50Z oetiker $
-
 ************************************************************************ */
-
-// FIX ME:
-//  - documentation (Messreihen is not relevant here)
-//  - license
 
 /**
  * An {@link qx.ui.table.model.Remote} implementation for accessing
@@ -57,7 +51,10 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
          */
         _loadRowCount : function() {
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret) {
+            this.__rpc.callAsync(function(ret,exc) {
+                if (exc) {
+                    ret = 0;
+                }
                 that._onRowCountLoaded(ret);
             }, 'getRowCount', this.__tableId,this.getFilter());
         },
@@ -113,7 +110,10 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
                 rpcArgs.filter = filter;
             }
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret) {
+            this.__rpc.callAsync(function(ret,exc) {
+                if (exc){
+                    ret = [];
+                }
                 var data = [];
                 var col = that.__columnIdList;
                 for (var i=0;i<ret.length;i++){
