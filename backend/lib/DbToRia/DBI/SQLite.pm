@@ -28,7 +28,6 @@ Map a native database column type to a DbToRia field type:
 use Mojo::Base 'DbToRia::DBI::base';
 use DbToRia::Exception qw(error);
 use Mojo::JSON;
-use DBI;
 
 our $map = {
     (map { $_ => 'varchar' } ('TEXT'   )),
