@@ -17,6 +17,14 @@
 
 ************************************************************************ */
 
+/*
+ * TODOs:
+ *   - show number of filtered rows in table legend, e.g.  x (y) rows
+ *   - change appearance of filter button when filter active
+ *   - perhaps integrate filter configuration into TableWindow instead of
+ *     using a separate window
+ */
+
 /* ************************************************************************
 
 #asset(dbtoria/*)
