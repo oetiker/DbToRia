@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+
 # some tests to ensure functionality of db driver.
 # by :m)
 
@@ -10,10 +11,14 @@
 use strict;
 
 use FindBin;
+
+# use a local config file
+$ENV{DBTORIA_CONF} = $FindBin::Bin.'/01_simple.cfg';
+
 use lib $FindBin::Bin.'/../lib';
 
 use lib $FindBin::Bin.'/../../thirdparty/lib/perl5';
-use Test::More tests => 68;
+use Test::More tests => 70;
 use Test::Mojo;
 
 use_ok 'MojoX::Dispatcher::Qooxdoo::Jsonrpc';
@@ -24,6 +29,9 @@ my $t = Test::Mojo->new(app => DbToRia::MojoApp->new());
 # Gain Login: works with proper db in place only (see README)
 
 # Request ok, using existent service and method (login).
+$t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"getConfig","params":[]}')
+    ->content_like(qr/"LIKE"/,'getConfig successful');
+
 $t  ->post_ok('/jsonrpc','{"id":1,"service":"DbToRia","method":"login","params":[{"username":"dbtoria_test_user", "password": "abc"}]}')
     ->json_content_is({id=>1,result=>1},'login successful')
     ->content_type_is('application/json; charset=utf-8')
