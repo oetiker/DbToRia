@@ -80,8 +80,8 @@ filtering.
 
 sub getFilterOpsArray {
     my $self = shift;
-    my @ops = @{$self->SUPER::getFilterOpsArray()};
-    push @ops, (
+    return [
+            @{$self->SUPER::getFilterOpsArray()},
             {op   => 'BETWEEN',              type => 'dualValue',
              help => 'value within range (not yet implemented)'},
             {op   => 'NOT BETWEEN',          type => 'dualValue',
@@ -109,8 +109,7 @@ sub getFilterOpsArray {
             # 'IS TRUE', 'IS NOT TRUE',
             # 'IS FALSE', 'IS NOT FALSE',
             # 'IS UNKOWN', 'IS NOT UNKNOW',
-           );
-    return \@ops;
+    ];
 }
 
 =head2 getTableStructure(table)
