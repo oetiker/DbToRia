@@ -425,21 +425,6 @@ sub buildWhere {
         else {
             die error(90733,"Operator type '$type' not supported.");
         }
-        # given ($type) {
-        #     when ('noValue') {
-        #         $where = $dbh->quote_identifier($field) ." $op ";
-        #     }
-        #     when ('simpleValue') {
-        #         $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1);
-        #     }
-        #     when ('dualValue') {
-        #         $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1)
-        #                                                 ." AND ". $dbh->quote($value2);
-        #     }
-        #     default {
-        #         die error(90733,"Operator type '$type' not supported.");
-        #     }
-        # }
         push @wheres, $where;
     }
     return 'WHERE '. join(' AND ',@wheres);
