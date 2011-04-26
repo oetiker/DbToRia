@@ -2,6 +2,7 @@
    Copyright: 2009 OETIKER+PARTNER AG
    License:   GPLv3 or later
    Authors:   Tobi Oetiker <tobi@oetiker.ch>
+              Fritz Zaucker <fritz.zaucker@oetiker.ch?
    Utf8Check: äöü
 ************************************************************************ */
 
@@ -30,22 +31,16 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
 
         var form = this;
         var validationMgr = form.getValidationManager();
+        var controlMap = {};
+        this.__controlMap = controlMap;
         for (var i=0; i<fl; i++) {
             var desc = formDesc[i];
-            var control;
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
-            switch(desc.type)
-            {
-                case "GroupHeader": /* from nequal, not yet used in DbToRia */
-                    form.addGroupHeader(trlab);
-                    continue;
+            controlMap[desc.name] =
+                dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__modelCallback, this));
 
-                default:
-                    control = dbtoria.ui.form.ControlBuilder.createControl(desc, model);
-                    break;
-            }
-            form.add(control, trlab, null, desc.name);
+            form.add(controlMap[desc.name].control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
                 control.set({
                     required: true,
@@ -72,7 +67,11 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
 
     members : {
         __model : null,
+        __controlMap: null,
 
+        __modelCallback: function(key, value) {
+            this.__model[key] = value;
+        },
 
         /**
          * Return the form model.
@@ -81,6 +80,12 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
          */
         getModel : function() {
             return this.__model;
-        }
+        },
+
+        setModel: function(dataMap) {
+            for (var k in dataMap) {
+               this.__controlMap[k].setter(dataMap[k]);
+            }
+      }
     }
 });

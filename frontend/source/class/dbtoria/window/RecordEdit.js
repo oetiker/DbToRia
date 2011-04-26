@@ -57,13 +57,13 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             allowGrowX : false,
             allowGrowY : false
         });
-        
+
         btnCnl.addListener("execute", function(e) {
             this.close();
             this.destroy();
         },
         this);
-    
+
         btnRow.add(btnCnl);
 
         var btnApp = new qx.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png").set({
@@ -103,9 +103,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
         _fillForm : function(rules) {
-            var form = new dbtoria.ui.form.AutoForm(rules);
+            var form         = new dbtoria.ui.form.AutoForm(rules);
             this.__formModel = form.getModel();
-            var formControl = new dbtoria.ui.form.renderer.Monster(form);
+            var formControl  = new dbtoria.ui.form.renderer.Monster(form);
 
             this.__scrollContainer.add(formControl);
             this.__form = form;
