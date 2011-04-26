@@ -24,7 +24,6 @@ A driver module must implement the following methods:
 use strict;
 use warnings;
 
-use Data::Dumper;
 use DbToRia::Exception qw(error);
 use Storable qw(dclone);
 use Mojo::Base -base;
@@ -400,7 +399,6 @@ create a where fragment based on a filter map and array of the form
 sub buildWhere {
     my $self = shift;
     my $filter = shift or return '';
-    print STDERR Dumper $filter;
     my $dbh = $self->getDbh();
     my @wheres;
     my $filterOpsHash = $self->getFilterOpsHash();
