@@ -14,10 +14,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
     statics : {
         /**
-         * create a control and bind its value to the model map
+         * create a control and bind its value to the formData map
          *
          * @param desc {var} TODOC
-         * @param model {var} TODOC
+         * @param formData {var} TODOC
          * @return {var} TODOC
          * @throws TODOC
          *
@@ -82,7 +82,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *
          */
 
-        createControl : function(desc, modelCallback) { /* rename model to data ... */
+        createControl : function(desc, formDataCallback) {
             var control = null;
             var setter  = null;
 
@@ -243,7 +243,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
             if (control.getModel) {
                 control.addListener('changeModel',function(e){
-                    modelCallback(desc.name, e.getData());
+                    formDataCallback(desc.name, e.getData());
                 },this);
             }
             else if (control.getModelSelection) {
@@ -256,12 +256,12 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     else {
                         value = selected.toArray();
                     }
-                    modelCallback(desc.name, e.getData());
+                    formDataCallback(desc.name, e.getData());
                 },this);
             }
             else {
                 control.addListener('changeValue', function(e) {
-                    modelCallback(desc.name, e.getData());
+                    formDataCallback(desc.name, e.getData());
                 },this);
             }
 

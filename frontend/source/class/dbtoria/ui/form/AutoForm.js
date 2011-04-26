@@ -27,7 +27,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
     construct : function(formDesc) {
         this.base(arguments);
         var fl = formDesc.length;
-        var model = this.__model = {};
+        var formData = this.__formData = {};
 
         var form = this;
         var validationMgr = form.getValidationManager();
@@ -38,7 +38,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
             controlMap[desc.name] =
-                dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__modelCallback, this));
+                dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__formDataCallback, this));
 
             form.add(controlMap[desc.name].control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
@@ -53,7 +53,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     var name = desc.name;
                     var msg = form['tr'](desc.check.msg);
                     validationMgr.add(control,function(value,item){
-                        var valid = rx.test(model[name] || '');
+                        var valid = rx.test(formData[name] || '');
                         if (!valid){
                             item.setInvalidMessage(msg);
                             item.setValid(valid);
@@ -66,23 +66,23 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
     },
 
     members : {
-        __model : null,
+        __formData : null,
         __controlMap: null,
 
-        __modelCallback: function(key, value) {
-            this.__model[key] = value;
+        __formDataCallback: function(key, value) {
+            this.__formData[key] = value;
         },
 
         /**
-         * Return the form model.
+         * Return the form formData.
          *
          * @return {var} TODOC
          */
-        getModel : function() {
-            return this.__model;
+        getFormData : function() {
+            return this.__formData;
         },
 
-        setModel: function(dataMap) {
+        setFormData: function(dataMap) {
             for (var k in dataMap) {
                this.__controlMap[k].setter(dataMap[k]);
             }

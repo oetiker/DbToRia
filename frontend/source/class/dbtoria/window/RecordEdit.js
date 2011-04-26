@@ -104,7 +104,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
         _fillForm : function(rules) {
             var form         = new dbtoria.ui.form.AutoForm(rules);
-            this.__formModel = form.getModel();
+            this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
 
             this.__scrollContainer.add(formControl);
