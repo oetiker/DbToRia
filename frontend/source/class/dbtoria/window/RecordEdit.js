@@ -28,60 +28,47 @@ qx.Class.define("dbtoria.window.RecordEdit", {
     construct : function(tableId, recordId, title) {
         this.base(arguments);
 
-        var grid = new qx.ui.layout.Grid(5, 5);
-        grid.setRowFlex(0, 1); // make row 0 flexible
-        grid.setColumnFlex(0, 1);
-        grid.setRowFlex(1, 1);
-
         this.set({
             caption              : title,
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
-            contentPaddingTop    : 10,
+            contentPaddingTop    : 20,
             contentPaddingBottom : 10,
-            layout               : grid,
+            layout               : new qx.ui.layout.VBox(10),
             width                : 400,
             height               : 300
         });
 
         var scrollContainer = new qx.ui.container.Scroll();
         this.__scrollContainer = scrollContainer;
-        this.add(scrollContainer, {
-                   row     : 0,
-                   column  : 0,
-                   colSpan : 2
-                 });
+        this.add(scrollContainer, { flex: 1 });
 
         var rpc = dbtoria.communication.Rpc.getInstance();
         rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
         this.moveTo(300, 40);
         this.open();
 
+        var btnRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5,'right'));
+        this.add(btnRow);
+
         var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
             allowGrowX : false,
-            alignX     : 'right',
-            allowGrowY : false,
-            alignY     : 'bottom'
+            allowGrowY : false
         });
-
+        
         btnCnl.addListener("execute", function(e) {
             this.close();
             this.destroy();
         },
         this);
-
-        this.add(btnCnl, {
-            row    : 1,
-            column : 0
-        });
+    
+        btnRow.add(btnCnl);
 
         var btnApp = new qx.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png").set({
             allowGrowX : false,
-            allowGrowY : false,
-            alignY     : 'bottom',
-            marginTop  : 20
+            allowGrowY : false
         });
 
         btnApp.addListener("execute", function(e) {
@@ -101,11 +88,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
         },
         this);
-
-        this.add(btnApp, {
-            row    : 1,
-            column : 1
-        });
+        btnRow.add(btnApp);
     },
 
     members : {
