@@ -64,12 +64,13 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             if (oldString == newString){
                 return;
             }
-            var filter = {};
+            var filter = [];
 
-            filter[String(this.__columnIdList[1])] = {
-                op: 'ilike',
-                value: '%' + newString + '%'
-            };
+            filter.push({
+                field: String(this.__columnIdList[1]),
+                op: 'LIKE',
+                value1: '%' + newString + '%'
+            });
             this.setFilter(filter);
         },
 
