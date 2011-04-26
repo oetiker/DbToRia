@@ -25,11 +25,12 @@
 qx.Class.define("dbtoria.window.RecordEdit", {
     extend : dbtoria.window.DesktopWindow,
 
-    construct : function(tableId, recordId, title) {
+    construct : function(tableId, tableName) {
         this.base(arguments);
+        this.__tableId   = tableId;
+        this.__tableName = tableName;
 
         this.set({
-            caption              : title,
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
             contentPaddingLeft   : 20,
@@ -45,10 +46,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.__scrollContainer = scrollContainer;
         this.add(scrollContainer, { flex: 1 });
 
-        var rpc = dbtoria.communication.Rpc.getInstance();
-        rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
+        this.__rpc = dbtoria.communication.Rpc.getInstance();
+        this.__rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', tableId);
         this.moveTo(300, 40);
-        this.open();
 
         var btnRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5,'right'));
         this.add(btnRow);
@@ -60,7 +60,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
 
         btnCnl.addListener("execute", function(e) {
             this.close();
-            this.destroy();
         },
         this);
 
@@ -89,12 +88,79 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         },
         this);
         btnRow.add(btnApp);
+
+        this.addListener("appear", function(e) {
+            var recordId = this.__recordId;
+            if (recordId == null) {
+                this.__setDefaults();
+            }
+            else {
+                this.__setFormData();
+            }
+        }, this);
+
+
     },
 
     members : {
         __formModel       : null,
         __form            : null,
         __scrollContainer : null,
+        __tableId         : null,
+        __tableName       : null,
+        __recordId        : null,
+        __rpc             : null,
+
+        /* TODOC
+         *
+         * @param record {var} TODOC
+         * @return {void}
+         */
+        setRecord : function(recordId) {
+            this.__recordId = recordId;
+            this.debug('setRecord(): record='+recordId);
+            if (recordId == null) {
+                this.__setDefaults();
+            }
+            else {
+                if (this.isVisible()) {
+                    this.__setFormData();
+                }
+            }
+        },
+
+        /**
+         * TODOC
+         *
+         * @return {void}
+         */
+         __setDefaults : function() {
+             this.debug('Called __setDefaultDefaults()');
+             this.setCaption("New "+this.__tableName);
+         },
+
+        /**
+         * TODOC
+         *
+         * @return {void}
+         */
+         __setFormData : function(recordId) {
+             this.debug('Called __setFormData()');
+             this.setCaption("Edit "+this.__tableName);
+             this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecord',
+                                       this.__tableId, this.__recordId);
+
+         },
+
+        /**
+         * TODOC
+         *
+         * @param rules {var} TODOC
+         * @return {void}
+         */
+        __setFormDataHandler : function(data) {
+            this.__form.setFormData(data);
+        },
 
         /**
          * TODOC

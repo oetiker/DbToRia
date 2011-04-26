@@ -61,17 +61,19 @@ qx.Class.define("dbtoria.window.TableWindow", {
         });
 
         this.__buildUi(tableId);
+        this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
         this.open();
     },
 
     members : {
-        __table:     null,
-        __tbEdit:    null,
-        __tbDelete:  null,
-        __currentId: null,
-        __tableName: null,
-        __tableId:   null,
-        __columns:   null,
+        __table:      null,
+        __tbEdit:     null,
+        __tbDelete:   null,
+        __currentId:  null,
+        __tableName:  null,
+        __tableId:    null,
+        __columns:    null,
+        __recordEdit: null,
 
         /**
          * Display a table overview with data
@@ -90,7 +92,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
             toolbar.add(newButton);
             newButton.addListener('execute',function(e){
-                new dbtoria.window.RecordEdit(tableId,null,"New "+this.__tableName);
+                this.__recordEdit.setRecord(null);
+                this.__recordEdit.open();
             },this);
 
             toolbar.add(editButton);
@@ -152,7 +155,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __editRecord : function(e) {
-            new dbtoria.window.RecordEdit(this.__tableId, this.__currentId, "Edit "+this.__tableName);
+            this.__recordEdit.setRecord(this.__currentId);
+            this.__recordEdit.open();
         },
 
         __filterTable : function(e) {
