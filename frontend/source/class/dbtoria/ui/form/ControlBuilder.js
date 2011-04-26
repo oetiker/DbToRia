@@ -92,6 +92,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = String(desc.initial);
                     }
+                    setter = function(value) {
+                        control.setValue(String(value));
+                    };
 
                     break;
 
@@ -101,6 +104,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = String(desc.initial);
                     }
+                    setter = function(value) {
+                        control.setValue(String(value));
+                    };
 
                     break;
 
@@ -109,6 +115,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         readOnly  : true,
                         decorator : null
                     });
+                    setter = function(value) {
+                        control.setValue(String(value));
+                    };
 
                     break;
 
@@ -123,6 +132,11 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     }
 
                     control.set({ allowGrowX : false });
+                    setter = function(value) {
+                        qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
+
+                      control.setValue(new Date(value));
+                    };
                     break;
 
                 case "CheckBox":
@@ -134,19 +148,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     break;
 
-                // case "Spinner":
-                //     control = new qx.ui.form.Spinner();
-
-                //     if (desc.min) {
-                //         control.setMinimum(desc.min);
-                //     }
-
-                //     if (desc.max) {
-                //         control.setMaximum(desc.max);
-                //     }
-
-                //     break;
-
                 case "ComboTable":
                     var l = {};
                     l[desc.idCol] = 'id';
@@ -156,71 +157,17 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     control.setModel(String(desc.initial));
                     control.setValue(String(desc.initialText));
                     delete desc.initial;
+
+                    setter = function(value) {
+                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
+                        control.setModel(value);
+                    };
+
                     break;
-                // case "SelectBox":
-                //     control = new qx.ui.form.SelectBox();
-                //     this._addListItems(control, desc.data);
-                //     break;
-
-                // case "MultiPick":
-                //     control = new dbtoria.ui.form.CheckBoxGroup();
-                //     control.set({
-                //         allowGrowY : false,
-                //         allowGrowX : true
-                //     });
-
-                //     this._addCheckItems(control, desc.data);
-                //     break;
-
-                // case "OpAndValue":
-                //     if (!qx.lang.Type.isArray(desc.initial)) {
-                //         desc.initial = [ desc.data[0], null ];
-                //     }
-
-                //     control = new dbtoria.ui.form.OpAndValue(desc.data, desc.initial[0], desc.initial[1]);
-
-                //     // do not set this twice
-                //     delete desc['initial'];
-                //     control.set({
-                //         allowGrowY : false,
-                //         allowGrowX : true
-                //     });
-
-                //     break;
-
-                // case "OpAndDate":
-                //     if (!qx.lang.Type.isArray(desc.initial)) {
-                //         desc.initial = [ desc.data[0], null ];
-                //     }
-
-                //     control = new dbtoria.ui.form.OpAndDate(desc.data, desc.initial[0], desc.initial[1]);
-
-                //     // do not set this twice
-                //     delete desc['initial'];
-                //     control.set({
-                //         allowGrowY : false,
-                //         allowGrowX : true
-                //     });
-
-                //     break;
 
                 default:
                     throw new Error("Control '" + desc.type + "' is not yet supported");
                     break;
-            }
-
-            if (control.setModelSelection) {
-                setter = function(value) {
-                             if (!qx.lang.Type.isArray(value)) {
-                                 value = [ value ];
-                             }
-                             control.setModelSelection([value]);
-                         };
-            }
-            else {
-                setter = function(value) {
-                            control.setValue(value);
-                         };
             }
 
             if (desc.hasOwnProperty('width')) {

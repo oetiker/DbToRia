@@ -83,8 +83,10 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         },
 
         setFormData: function(dataMap) {
+            this.debug('setFormData() called');
             for (var k in dataMap) {
-               this.__controlMap[k].setter(dataMap[k]);
+                this.debug('Setting key='+k+', value='+dataMap[k]);
+                this.__controlMap[k].setter(dataMap[k]);
             }
       }
     }
