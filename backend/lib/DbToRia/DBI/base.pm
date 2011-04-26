@@ -20,8 +20,11 @@ A driver module must implement the following methods:
 
 =cut
 
+# use 5.12.1;
 use strict;
 use warnings;
+
+use Data::Dumper;
 use DbToRia::Exception qw(error);
 use Storable qw(dclone);
 use Mojo::Base -base;
@@ -397,19 +400,34 @@ create a where fragment based on a filter map and array of the form
 sub buildWhere {
     my $self = shift;
     my $filter = shift or return '';
+    print STDERR Dumper $filter;
     my $dbh = $self->getDbh();
-    my @where;
+    my @wheres;
     my $filterOpsHash = $self->getFilterOpsHash();
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key}{value};
-        my $op    = $filter->{$key}{op};
-        my $type  = $filterOpsHash->{$op};
+    for my $f (@$filter) {
+        my $field  = $f->{field};
+        my $value1 = $f->{value1};
+        my $value2 = $f->{value2};
+        my $op     = $f->{op};
+        my $type   = $filterOpsHash->{$op};
         die error(90732,"Unknown operator '$op'") if not exists $filterOpsHash->{$op};
-        # FIX ME: deal with special operators
-        die error(90733,"Operator type '$type' not supported yet") if $type ne 'simpleValue';
-        push @where, $dbh->quote_identifier($key) ." $op ". $dbh->quote($value);
+        my $where;
+        if ($type eq 'noValue') {
+            $where = $dbh->quote_identifier($field) ." $op ";
+        }
+        elsif ($type eq 'simpleValue') {
+            $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1);
+        }
+        elsif ($type eq 'dualValue') {
+            $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1)
+                                                    ." AND ". $dbh->quote($value2);
+        }
+        else {
+            die error(90733,"Operator type '$type' not supported.");
+        }
+        push @wheres, $where;
     }
-    return 'WHERE '. join(' AND ',@where);
+    return 'WHERE '. join(' AND ',@wheres);
 }
 
 =head2 map_type(type_name)
