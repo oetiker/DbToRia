@@ -9,6 +9,6 @@
 ************************************************************************ */
 
 qx.Theme.define("dbtoria.theme.Appearance", {
-    extend      : qx.theme.modern.Appearance,
+    extend      : qx.theme.simple.Appearance,
     appearances : {}
 });
