@@ -6,22 +6,28 @@
 
    Copyright:
     2009 David Angleitner, Switzerland
+    2011 Oetiker+Partner AG, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
    Authors:
     * David Angleitner
+    * Fritz Zaucker
 
 ************************************************************************ */
 
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
-#asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/help-about.png)
 ************************************************************************ */
+
+/**
+ * TODOs:
+ *   - use dbtoria/ui/form/ControlBuilder.js to build form
+ *   - more MS Access like layout
+ */
 
 /**
  * This class provides the filter functionality in the table window
@@ -53,13 +59,11 @@ qx.Class.define("dbtoria.window.TableFilter", {
         this.__columns        = columns;
         this.__filterCallback = filterCallback;
 
-//        this.setLayout(new qx.ui.layout.Grid(5, 5));
         this.set({
-                     // Why doesn't this work???
-                     layout: new qx.ui.layout.Grid(5, 5),
-                     showMinimize: false,
-                     showMaximize: false,
-                     modal: true});
+            layout: new qx.ui.layout.Grid(5, 5),
+            showMinimize: false,
+            showMaximize: false,
+            modal: true});
 
         this.__selection = new Array();
 
@@ -77,11 +81,8 @@ qx.Class.define("dbtoria.window.TableFilter", {
         */
 
     members : {
-        // db table
-        __dbTable : null,
         __columns : null,
         __filterCallback: null,
-        __fieldSelectBox: null,
 
         // used to add and remove filter criteria
         __rowCounter : 0,
@@ -113,7 +114,6 @@ qx.Class.define("dbtoria.window.TableFilter", {
             var labelAnd = new qx.ui.basic.Label('AND');
 
             var fieldSelectBox = new qx.ui.form.SelectBox();
-            this.__fieldSelectBox = fieldSelectBox;
 
             // generate list of columns
             var columns = this.__columns;
@@ -184,7 +184,6 @@ qx.Class.define("dbtoria.window.TableFilter", {
             });
 
             var applyButton = new qx.ui.form.Button(this.tr("Apply Filter"));
-//            applyButton.setEnabled(false);
             var addButton = new qx.ui.form.Button(this.tr("Add Critera"));
 
             // on clicking the filter apply button the tableWindow
@@ -271,8 +270,8 @@ qx.Class.define("dbtoria.window.TableFilter", {
 
                 if (selection.checkBox.getValue()) {
                     var tmp = {
-                        field:  selection.fieldSelectBox.getSelection()[0],
-                        op:     selection.opSelectBox.getSelection()[0],
+                        field:  selection.fieldSelectBox.getSelection()[0].getModel(),
+                        op:     selection.opSelectBox.getSelection()[0].getModel(),
                         value1: selection.textField1.getValue(),
                         value2: selection.textField2.getValue()
                     };
