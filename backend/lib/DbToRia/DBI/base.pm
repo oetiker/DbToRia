@@ -318,8 +318,8 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    my $rec = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);
+    my $rec = $self->getRecord($tableId,$recordId); # data
+    my $view = $self->getEditView($tableId);        # form
     for my $field (@$view){
         if ($field->{type} eq 'ComboTable'){
             my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
