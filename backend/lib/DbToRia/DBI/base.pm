@@ -20,8 +20,10 @@ A driver module must implement the following methods:
 
 =cut
 
+# use 5.12.1;
 use strict;
 use warnings;
+
 use DbToRia::Exception qw(error);
 use Storable qw(dclone);
 use Mojo::Base -base;
@@ -212,6 +214,32 @@ sub getRecord {
     die "Override in Driver";
 }
 
+=head2 getRecordDeref (table,recordId)
+
+Returns hash of data for the record matching the indicated key with
+foreign key references resolved.
+
+=cut
+
+sub getRecordDeref {
+    my $self     = shift;
+    my $tableId  = shift;
+    my $recordId = shift;
+
+    my $rec  = $self->getRecord($tableId, $recordId);
+
+    # resolve foreign key references
+    my $view = $self->getEditView($tableId);
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $key      = $field->{name};
+            $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
+        }
+    }
+    return $rec;
+}
+
+
 =head1 BASE METHODS
 
 =head2 getTables
@@ -316,8 +344,8 @@ sub getForm {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    my $rec = $self->getRecord($tableId,$recordId);
-    my $view = $self->getEditView($tableId);
+    my $rec = $self->getRecord($tableId,$recordId); # data
+    my $view = $self->getEditView($tableId);        # form
     for my $field (@$view){
         if ($field->{type} eq 'ComboTable'){
             my $crec = $self->getRecord($field->{tableId},$rec->{$field->{name}});
@@ -332,8 +360,7 @@ sub getForm {
 
 Return an array of DBMS specific comparison operators to be used in filtering.
 
-The default is ['=', '!=' ], however, this function should be
-overwritten in the DBMS drivers.
+The following operators are available in PostgreSQL, SQLite, and MySQL.
 
 =cut
 
@@ -347,6 +374,18 @@ sub getFilterOpsArray {
             {op   => '>=',                   type => 'simpleValue', help => 'greater or equal'},
             {op   => 'IS NULL',              type => 'noValue',     help => 'value not defined'},
             {op   => 'IS NOT NULL',          type => 'noValue',     help => 'value defined'},
+
+            {op   => 'LIKE',                 type => 'simpleValue',
+             help => 'substring matching with wildcards'},
+            {op   => 'NOT LIKE',             type => 'simpleValue',
+             help => 'substring matching with wildcards'},
+
+            {op   => 'IN',                   type => 'simpleValue', help => 'contained in list'},
+            {op   => 'NOT IN',               type => 'simpleValue', help => 'contained in list'},
+
+            # 'IS TRUE', 'IS NOT TRUE',
+            # 'IS FALSE', 'IS NOT FALSE',
+
            ];
 }
 
@@ -387,18 +426,32 @@ sub buildWhere {
     my $self = shift;
     my $filter = shift or return '';
     my $dbh = $self->getDbh();
-    my @where;
+    my @wheres;
     my $filterOpsHash = $self->getFilterOpsHash();
-    for my $key (keys %$filter) {
-        my $value = $filter->{$key}{value};
-        my $op    = $filter->{$key}{op};
-        my $type  = $filterOpsHash->{$op};
+    for my $f (@$filter) {
+        my $field  = $f->{field};
+        my $value1 = $f->{value1};
+        my $value2 = $f->{value2};
+        my $op     = $f->{op};
+        my $type   = $filterOpsHash->{$op};
         die error(90732,"Unknown operator '$op'") if not exists $filterOpsHash->{$op};
-        # FIX ME: deal with special operators
-        die error(90733,"Operator type '$type' not supported yet") if $type ne 'simpleValue';
-        push @where, $dbh->quote_identifier($key) ." $op ". $dbh->quote($value);
+        my $where;
+        if ($type eq 'noValue') {
+            $where = $dbh->quote_identifier($field) ." $op ";
+        }
+        elsif ($type eq 'simpleValue') {
+            $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1);
+        }
+        elsif ($type eq 'dualValue') {
+            $where = $dbh->quote_identifier($field) ." $op ". $dbh->quote($value1)
+                                                    ." AND ". $dbh->quote($value2);
+        }
+        else {
+            die error(90733,"Operator type '$type' not supported.");
+        }
+        push @wheres, $where;
     }
-    return 'WHERE '. join(' AND ',@where);
+    return 'WHERE '. join(' AND ',@wheres);
 }
 
 =head2 map_type(type_name)

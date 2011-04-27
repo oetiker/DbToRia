@@ -28,8 +28,6 @@ Map a native database column type to a DbToRia field type:
 use Mojo::Base 'DbToRia::DBI::base';
 use DbToRia::Exception qw(error);
 use Mojo::JSON;
-use DBI;
-
 
 our $map = {
     (map { $_ => 'varchar' } ('bit','bit varying','varbit','character varying','varchar','character','text','char','name')),
@@ -80,37 +78,42 @@ filtering.
 
 sub getFilterOpsArray {
     my $self = shift;
-    my @ops = @{$self->SUPER::getFilterOpsArray()};
-    push @ops, (
+    return [
+            @{$self->SUPER::getFilterOpsArray()},
             {op   => 'BETWEEN',              type => 'dualValue',
              help => 'value within range (not yet implemented)'},
             {op   => 'NOT BETWEEN',          type => 'dualValue',
              help => 'value outside range (not yet implemented)'},
-            # substring matching with wildcards
-            {op   => 'LIKE',                 type => 'simpleValue', help => ''},
-            {op   => 'NOT LIKE',             type => 'simpleValue', help => ''},
-            {op   => 'ILIKE',                type => 'simpleValue', help => ''},
-            {op   => 'NOT ILIKE',            type => 'simpleValue', help => ''},
-            # pattern matching
-            {op   => 'SIMLIAR TO',           type => 'simpleValue', help => ''},
-            {op   => 'NOT SIMLIAR TO',       type => 'simpleValue', help => ''},
-            # regexp pattern matching
-            {op   => '~',                    type => 'simpleValue', help => ''},
-            {op   => '~*',                   type => 'simpleValue', help => ''},
-            {op   => '!~',                   type => 'simpleValue', help => ''},
-            {op   => '!~*',                  type => 'simpleValue', help => ''},
-            # contained in a list
-            {op   => 'IN',                   type => 'simpleValue', help => ''},
-            {op   => 'NOT IN',               type => 'simpleValue', help => ''},
-            # for comparisons with NULL values
-            {op   => 'IS DISTINCT FROM',     type => 'simpleValue', help => ''},
-            {op   => 'IS NOT DISTINCT FROM', type => 'simpleValue', help => ''},
+
+            {op   => 'ILIKE',                type => 'simpleValue',
+             help => 'case-insensitive substring matching with wildcards'},
+            {op   => 'NOT ILIKE',            type => 'simpleValue',
+             help => 'case-insensitive substring matching with wildcards'},
+
+            {op   => 'SIMLIAR TO',           type => 'simpleValue',
+             help => 'pattern matching'},
+            {op   => 'NOT SIMLIAR TO',       type => 'simpleValue',
+             help => 'pattern matching'},
+
+            {op   => '~',                    type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '~*',                   type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '!~',                   type => 'simpleValue',
+             help => 'regexp pattern matching'},
+            {op   => '!~*',                  type => 'simpleValue',
+             help => 'regexp pattern matching'},
+
+            {op   => 'IS DISTINCT FROM',     type => 'simpleValue',
+             help => 'comparisons with NULL values'},
+            {op   => 'IS NOT DISTINCT FROM', type => 'simpleValue',
+             help => 'comparisons with NULL values'},
+
             # the following are only valid with boolean types
-            # 'IS TRUE', 'IS NOT TRUE',
-            # 'IS FALSE', 'IS NOT FALSE',
             # 'IS UNKOWN', 'IS NOT UNKNOW',
-           );
-    return \@ops;
+
+            # ANY, SOME, ALL
+           ];
 }
 
 =head2 getTableStructure(table)
@@ -187,21 +190,23 @@ gets converted on the way out.
 =cut
 
 sub getRecord {
-    my $self = shift;
-    my $tableId = shift;
-    my $dbh = $self->getDbh();
-    my $recordId = $dbh->quote(shift);
-    my $tableIdQ = $dbh->quote_identifier($tableId);
+    my $self     = shift;
+    my $tableId  = shift;
+    my $recordId = shift;
+
+    my $dbh        = $self->getDbh();
+    my $recordIdQ  = $dbh->quote($recordId);
+    my $tableIdQ   = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
-    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId");
+    my $sth        = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordIdQ");
     $sth->execute();
-    my $row = $sth->fetchrow_hashref;
-    my $structure = $self->getTableStructure($tableId);
-    my $typeMap = $structure->{typeMap};
+    my $row        = $sth->fetchrow_hashref;
+    my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
+
     my %newRow;
     for my $key (keys %$row) {
-        $newRow{$key} = $self->dbToFe($row->{$key},$typeMap->{$key});
-    };
+        $newRow{$key} = $self->dbToFe($row->{$key}, $typeMap->{$key});
+    }
     return \%newRow;
 }
 
@@ -302,6 +307,9 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
+    use Data::Dumper;
+    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
+#    return;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
@@ -339,6 +347,9 @@ sub insertTableData {
     my $table	  = shift;
     my $data	  = shift;
 
+    use Data::Dumper;
+    print STDERR Dumper "insertTableData(): table=$table, data=", $data;
+#    return;
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 

@@ -1,17 +1,11 @@
 /* ************************************************************************
 
    Copyrigtht: OETIKER+PARTNER AG
-   License:    Proprietary
+   License:    GPL
    Authors:    Tobias Oetiker
    Utf8Check:  äöü
 
-   $Id: MessreiheTableModel.js 453 2011-01-26 06:22:50Z oetiker $
-
 ************************************************************************ */
-
-// FIX ME:
-//  - documentation (Messreihen is not relevant here)
-//  - license
 
 /**
  * An {@link qx.ui.table.model.Remote} implementation for accessing
@@ -57,7 +51,11 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
          */
         _loadRowCount : function() {
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret) {
+            this.__rpc.callAsync(function(ret,exc) {
+                if (exc) {
+                    dbtoria.dialog.MsgBox.getInstance().exc(exc);
+                    ret = 0;
+                }
                 that._onRowCountLoaded(ret);
             }, 'getRowCount', this.__tableId,this.getFilter());
         },
@@ -66,12 +64,13 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
             if (oldString == newString){
                 return;
             }
-            var filter = {};
+            var filter = [];
 
-            filter[String(this.__columnIdList[1])] = {
-                op: 'ilike',
-                value: '%' + newString + '%'
-            };
+            filter.push({
+                field: String(this.__columnIdList[1]),
+                op: 'LIKE',
+                value1: '%' + newString + '%'
+            });
             this.setFilter(filter);
         },
 
@@ -83,6 +82,7 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
          * @param oldValue {Integer} Old TagId
          */
         _applyFilter : function(newValue, oldValue) {
+            this.debug('_applyFilter(): calling reloadData()');
             this.reloadData();
         },
 
@@ -113,7 +113,11 @@ qx.Class.define('dbtoria.db.RemoteTableModel', {
                 rpcArgs.filter = filter;
             }
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret) {
+            this.__rpc.callAsync(function(ret,exc) {
+                if (exc){
+                    dbtoria.dialog.MsgBox.getInstance().exc(exc);
+                    ret = [];
+                }
                 var data = [];
                 var col = that.__columnIdList;
                 for (var i=0;i<ret.length;i++){

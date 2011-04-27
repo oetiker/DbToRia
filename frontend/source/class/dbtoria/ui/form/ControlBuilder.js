@@ -14,10 +14,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
     statics : {
         /**
-         * create a control and bind its value to the model map
+         * create a control and bind its value to the formData map
          *
          * @param desc {var} TODOC
-         * @param model {var} TODOC
+         * @param formData {var} TODOC
          * @return {var} TODOC
          * @throws TODOC
          *
@@ -81,34 +81,25 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *
          *
          */
-        createControl : function(desc, model) {
+
+        createControl : function(desc, formDataCallback) {
             var control = null;
+            var setter  = null;
 
-            if (qx.lang.Type.isObject(model)) {
-                if (model.hasOwnProperty(desc.name)) {
-                    desc.initial = model[desc.name];
-                } else {
-                    model[desc.name] = desc.initial;
-                }
-            }
-
-            switch(desc.type)
-            {
+            switch(desc.type) {
                 case "TextField":
                     control = new qx.ui.form.TextField();
-
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = String(desc.initial);
                     }
-
-                    break;
-
-                case "PasswordField":
-                    control = new qx.ui.form.PasswordField();
-
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
+                    setter = function(value) {
+                        if (value == null) {
+                            control.setValue('');
+                        }
+                        else {
+                            control.setValue(String(value));
+                        }
+                    };
 
                     break;
 
@@ -117,6 +108,14 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         readOnly  : true,
                         decorator : null
                     });
+                    setter = function(value) {
+                        if (value == null) {
+                            control.setValue('');
+                        }
+                        else {
+                            control.setValue(String(value));
+                        }
+                    };
 
                     break;
 
@@ -127,10 +126,19 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         // handle epoch seconds
                         desc.initial = new Date(desc.initial * 1000);
                     } else if (desc.initial) {
-                        desc.initial = new Date(desc.initial); 
+                        desc.initial = new Date(desc.initial);
                     }
 
                     control.set({ allowGrowX : false });
+                    setter = function(value) {
+//                        qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
+                        if (value == null) {
+                            control.setValue(null);
+                        }
+                        else {
+                            control.setValue(new Date(value));
+                        }
+                    };
                     break;
 
                 case "CheckBox":
@@ -142,18 +150,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     break;
 
-                case "Spinner":
-                    control = new qx.ui.form.Spinner();
-
-                    if (desc.min) {
-                        control.setMinimum(desc.min);
-                    }
-
-                    if (desc.max) {
-                        control.setMaximum(desc.max);
-                    }
-
-                    break;
                 case "ComboTable":
                     var l = {};
                     l[desc.idCol] = 'id';
@@ -163,51 +159,18 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     control.setModel(String(desc.initial));
                     control.setValue(String(desc.initialText));
                     delete desc.initial;
-                    break;
-                case "SelectBox":
-                    control = new qx.ui.form.SelectBox();
-                    this._addListItems(control, desc.data);
-                    break;
 
-                case "MultiPick":
-                    control = new dbtoria.ui.form.CheckBoxGroup();
-                    control.set({
-                        allowGrowY : false,
-                        allowGrowX : true
-                    });
-
-                    this._addCheckItems(control, desc.data);
-                    break;
-
-                case "OpAndValue":
-                    if (!qx.lang.Type.isArray(desc.initial)) {
-                        desc.initial = [ desc.data[0], null ];
-                    }
-
-                    control = new dbtoria.ui.form.OpAndValue(desc.data, desc.initial[0], desc.initial[1]);
-
-                    // do not set this twice
-                    delete desc['initial'];
-                    control.set({
-                        allowGrowY : false,
-                        allowGrowX : true
-                    });
-
-                    break;
-
-                case "OpAndDate":
-                    if (!qx.lang.Type.isArray(desc.initial)) {
-                        desc.initial = [ desc.data[0], null ];
-                    }
-
-                    control = new dbtoria.ui.form.OpAndDate(desc.data, desc.initial[0], desc.initial[1]);
-
-                    // do not set this twice
-                    delete desc['initial'];
-                    control.set({
-                        allowGrowY : false,
-                        allowGrowX : true
-                    });
+                    setter = function(value) {
+//                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
+                        if (value == null) {
+                            control.setModel(0);
+                            control.setValue('undefined');
+                        }
+                        else {
+                            control.setModel(value.id);
+                            control.setValue(value.text);
+                        }
+                    };
 
                     break;
 
@@ -234,36 +197,35 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 }
             }
 
-            if (qx.lang.Type.isObject(model)) {
-                if (control.getModel){
-                    control.addListener('changeModel',function(e){
-                        model[desc.name] = e.getData(); 
-                    },this);
-                }
-                else if (control.getModelSelection) {
-                    control.addListener('changeSelection', function(e) {
-                        var selected = control.getModelSelection();
-                        var value;
-                        if (desc.type == "SelectBox") {
-                            value = selected.toArray()[0];
-                        } else {
-                            value = selected.toArray();
-                        }
-                        model[desc.name] = value;
-                    },this);
-                }
-                else {
-                    control.addListener('changeValue', function(e) {
-                        model[desc.name] = e.getData();
-                    },this);
-                }
+            if (control.getModel) {
+                control.addListener('changeModel',function(e){
+                    formDataCallback(desc.name, e.getData());
+                },this);
+            }
+            else if (control.getModelSelection) {
+                control.addListener('changeSelection', function(e) {
+                    var selected = control.getModelSelection();
+                    var value;
+                    if (desc.type == "SelectBox") {
+                        value = selected.toArray()[0];
+                    }
+                    else {
+                        value = selected.toArray();
+                    }
+                    formDataCallback(desc.name, e.getData());
+                },this);
+            }
+            else {
+                control.addListener('changeValue', function(e) {
+                    formDataCallback(desc.name, e.getData());
+                },this);
             }
 
             if (desc.required) {
                 control.setRequired(true);
             }
 
-            return control;
+            return { control: control, setter: setter };
         },
 
         /**
@@ -271,7 +233,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *
          * @param control {var} TODOC
          * @param data {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         _addListItems : function(control, data) {
             var vtr = this._vtr;
@@ -296,7 +258,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *
          * @param control {var} TODOC
          * @param data {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         _addCheckItems : function(control, data) {
             var vtr = this._vtr;

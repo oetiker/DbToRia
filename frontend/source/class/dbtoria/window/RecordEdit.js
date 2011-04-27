@@ -13,6 +13,11 @@
 #asset(qx/icon/${qx.icontheme}/16/apps/utilities-text-editor.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/dialog-apply.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/dialog-cancel.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/go-first.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/go-previous.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/go-next.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/go-last.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/help-about.png)
 ************************************************************************ */
 
 // FIX ME:
@@ -25,81 +30,193 @@
 qx.Class.define("dbtoria.window.RecordEdit", {
     extend : dbtoria.window.DesktopWindow,
 
-    construct : function(tableId, recordId, title) {
+    construct : function(tableId, tableName) {
         this.base(arguments);
-        var grid = new qx.ui.layout.Grid(5, 5);
+        this.__tableId   = tableId;
+        this.__tableName = tableName;
 
         this.set({
-            caption              : title,
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
-            contentPaddingTop    : 10,
+            contentPaddingTop    : 20,
             contentPaddingBottom : 10,
-            layout               : grid,
+            layout               : new qx.ui.layout.VBox(10),
             width                : 400,
             height               : 300
         });
 
-        this.getLayout().setColumnFlex(0, 1);
-        this.getLayout().setRowFlex(1, 1);
-        var rpc = dbtoria.communication.Rpc.getInstance();
-        rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getForm', tableId, recordId);
+        var scrollContainer = new qx.ui.container.Scroll();
+        this.__scrollContainer = scrollContainer;
+        this.add(scrollContainer, { flex: 1 });
+
+        this.__rpc = dbtoria.communication.Rpc.getInstance();
+        this.__rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', tableId);
         this.moveTo(300, 40);
-        this.open();
 
-        var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
-            allowGrowX : false,
-            alignX     : 'right',
-            allowGrowY : false,
-            alignY     : 'bottom'
-        });
+        // var btnRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5,'right'));
+        // this.add(btnRow);
 
-        btnCnl.addListener("execute", function(e) {
-            this.close();
-            this.destroy();
-        },
-        this);
+        // var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
+        //     allowGrowX : false,
+        //     allowGrowY : false
+        // });
 
-        this.add(btnCnl, {
-            row    : 1,
-            column : 0
-        });
+        // btnCnl.addListener("execute", function(e) {
+        //     this.close();
+        // },
+        // this);
 
-        var btnApp = new qx.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png").set({
-            allowGrowX : false,
-            allowGrowY : false,
-            alignY     : 'bottom',
-            marginTop  : 20
-        });
+        // btnRow.add(btnCnl);
 
-        btnApp.addListener("execute", function(e) {
-            if (this.__form.validate()){
-                var that = this;
+        // var btnApp = new qx.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png").set({
+        //     allowGrowX : false,
+        //     allowGrowY : false
+        // });
 
-                rpc.callAsyncSmart(function(id) {
-                    that.close();
-                    that.destroy();
-                },
-                'updateTableData', tableId, recordId, this.__formModel);
+        // btnApp.addListener("execute", function(e) {
+        //     if (this.__form.validate()){
+        //         var that = this;
+
+        //         rpc.callAsyncSmart(function(id) {
+        //             that.close();
+        //             that.destroy();
+        //         },
+        //         'insertTableData', tableId,  this.__formModel);
+        //     }
+
+        //     else {
+        //         var msg = dbtoria.dialog.MsgBox.getInstance();
+        //         msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
+        //     }
+        // },
+        // this);
+        // btnRow.add(btnApp);
+
+        this.add(this.__createNavigation());
+
+        this.addListener("appear", function(e) {
+            var recordId = this.__recordId;
+            if (recordId == null) {
+                this.__setDefaults();
             }
             else {
-                var msg = dbtoria.dialog.MsgBox.getInstance();
-                msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
+                this.__setFormData();
             }
-        },
-        this);
+        }, this);
 
-        this.add(btnApp, {
-            row    : 1,
-            column : 1
-        });
+        this.addListener("close", function(e) {
+            this.fireDataEvent('navigation', 'close');
+        }, this);
+
+
     },
 
+    events: {
+        "navigation" : "qx.event.type.Data"
+    }, // events
+
     members : {
-        __formModel : null,
-        __form: null,
+        __formModel       : null,
+        __form            : null,
+        __scrollContainer : null,
+        __tableId         : null,
+        __tableName       : null,
+        __recordId        : null,
+        __rpc             : null,
+
+
+      __createButton: function(icon, tooltip, target) {
+            var btn = new qx.ui.form.Button(null, icon);
+            btn.set({ allowGrowX : false, allowGrowY : false });
+            var tt = new qx.ui.tooltip.ToolTip(tooltip);
+            btn.setToolTip(tt);
+            btn.addListener('execute', function() {
+                this.fireDataEvent('navigation', target);
+            }, this);
+            return btn;
+        },
+
+        __createNavigation: function() {
+            var btnFirst   = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
+            var btnBack    = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
+            var btnNext    = this.__createButton("icon/16/actions/go-next.png",     this.tr("Go to next record"),     'next');
+            var btnLast    = this.__createButton("icon/16/actions/go-last.png",     this.tr("Jump to last record"),   'last');
+            var btnNew     = this.__createButton("icon/16/actions/help-about.png",  this.tr("Open new record"),       'new');
+
+            var btnRow     = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+            btnRow.add(btnFirst);
+            btnRow.add(btnBack);
+            btnRow.add(new qx.ui.core.Spacer(1,1), {flex:1});
+            btnRow.add(btnNext);
+            btnRow.add(btnLast);
+            btnRow.add(btnNew);
+            return btnRow;
+        },
+
+        /* TODOC
+         *
+         * @param record {var} TODOC
+         * @return {void}
+         */
+        setRecord : function(recordId) {
+            this.__recordId = recordId;
+//            this.debug('setRecord(): record='+recordId);
+            if (recordId == null) {
+                this.__setDefaults();
+            }
+            else {
+                if (this.isVisible()) {
+                    this.__setFormData();
+                }
+            }
+        },
+
+        /* TODOC
+         *
+         * @param record {var} TODOC
+         * @return {void}
+         */
+        getRecord : function() {
+            return this.__form.getFormData();
+        },
+
+        /**
+         * TODOC
+         *
+         * @return {void}
+         */
+         __setDefaults : function() {
+//             this.debug('Called __setDefaultDefaults()');
+             this.__form.clear();
+             this.setCaption("New "+this.__tableName);
+         },
+
+        /**
+         * TODOC
+         *
+         * @return {void}
+         */
+         __setFormData : function(recordId) {
+//             this.debug('Called __setFormData()');
+             this.__form.clear();
+             this.setCaption("Edit "+this.__tableName);
+             this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecordDeref',
+                                       this.__tableId, this.__recordId);
+
+         },
+
+        /**
+         * TODOC
+         *
+         * @param rules {var} TODOC
+         * @return {void}
+         */
+        __setFormDataHandler : function(data) {
+            this.__form.setFormData(data);
+        },
+
         /**
          * TODOC
          *
@@ -107,15 +224,11 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
         _fillForm : function(rules) {
-            var form = new dbtoria.ui.form.AutoForm(rules);
-            this.__formModel = form.getModel();
-            var formControl = new dbtoria.ui.form.renderer.Monster(form);
+            var form         = new dbtoria.ui.form.AutoForm(rules);
+            this.__formModel = form.getFormData();
+            var formControl  = new dbtoria.ui.form.renderer.Monster(form);
 
-            this.add(formControl, {
-                row     : 0,
-                column  : 0,
-                colSpan : 2
-            });
+            this.__scrollContainer.add(formControl);
             this.__form = form;
         }
     }
