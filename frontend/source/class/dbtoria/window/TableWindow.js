@@ -82,7 +82,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var tm     = this.__table.getTableModel();
             var row    = sm.getSelectedRanges()[0].minIndex;
             var maxRow = tm.getRowCount();
-            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
+//            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
             switch (target) {
             case 'first':
                 row = 0;
@@ -100,13 +100,17 @@ qx.Class.define("dbtoria.window.TableWindow", {
             case 'last':
                 row = maxRow-1;
                 break;
-            case 'new':
-                break;
             }
-            this.debug('__navigation(): newRow='+row);
-            sm.setSelectionInterval(row, row);
-            this.__table.scrollCellVisible(0, row);
-            this.__editRecord(row);
+
+            if (target == 'new') {
+                this.__newRecord();
+            }
+            else {
+//                this.debug('__navigation(): newRow='+row);
+                sm.setSelectionInterval(row, row);
+                this.__table.scrollCellVisible(0, row);
+                this.__editRecord(row);
+            }
         },
 
         /**
@@ -125,10 +129,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png").set({enabled: true});
 
             toolbar.add(newButton);
-            newButton.addListener('execute',function(e){
-                this.__recordEdit.setRecord(null);
-                this.__recordEdit.open();
-            },this);
+            newButton.addListener('execute', this.__newRecord, this);
 
             toolbar.add(editButton);
             editButton.addListener('execute', this.__editRecord, this);
@@ -190,6 +191,11 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
         __editRecord : function(e) {
             this.__recordEdit.setRecord(this.__currentId);
+            this.__recordEdit.open();
+        },
+
+        __newRecord : function(e) {
+            this.__recordEdit.setRecord(null);
             this.__recordEdit.open();
         },
 
