@@ -164,7 +164,7 @@ sub getTableStructure {
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
             primary    => $primaryKeys{$id},
-            pos        => $col->{ORDINAL_POSITION} 
+            pos        => $col->{ORDINAL_POSITION},
         };
         $typeMap{$id} = $col->{TYPE_NAME};
     }
@@ -190,21 +190,23 @@ gets converted on the way out.
 =cut
 
 sub getRecord {
-    my $self = shift;
-    my $tableId = shift;
-    my $dbh = $self->getDbh();
-    my $recordId = $dbh->quote(shift);
-    my $tableIdQ = $dbh->quote_identifier($tableId);
+    my $self     = shift;
+    my $tableId  = shift;
+    my $recordId = shift;
+
+    my $dbh        = $self->getDbh();
+    my $recordIdQ  = $dbh->quote($recordId);
+    my $tableIdQ   = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
-    my $sth = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordId");
+    my $sth        = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordIdQ");
     $sth->execute();
-    my $row = $sth->fetchrow_hashref;
-    my $structure = $self->getTableStructure($tableId);
-    my $typeMap = $structure->{typeMap};
+    my $row        = $sth->fetchrow_hashref;
+    my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
+
     my %newRow;
     for my $key (keys %$row) {
-        $newRow{$key} = $self->dbToFe($row->{$key},$typeMap->{$key});
-    };
+        $newRow{$key} = $self->dbToFe($row->{$key}, $typeMap->{$key});
+    }
     return \%newRow;
 }
 

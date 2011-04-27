@@ -62,6 +62,7 @@ our %allow_access = (
     getListView         => 2,
     getEditView         => 2,
     getRecord           => 2,
+    getRecordDeref      => 2,
     getForm             => 2,
     getTableStructure   => 2,
     getRowCount         => 2,
@@ -95,7 +96,7 @@ sub allow_rpc_access {
     my $method = shift;
     my $access = $allow_access{$method} or return 0;
     return ( $access == 1 or ( $access == 2 and $self->connect_db() ) ) ? 1 : 0
-}   
+}
 
 =head1 login({username=>u,password=>p})
 
@@ -139,6 +140,11 @@ sub getEditView {
 sub getRecord {
     my $self = shift;
     return $self->DBI->getRecord(@_);
+}
+
+sub getRecordDeref {
+    my $self = shift;
+    return $self->DBI->getRecordDeref(@_);
 }
 
 sub getForm {
