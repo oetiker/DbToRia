@@ -60,7 +60,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     }
                     setter = function(value) {
                         if (value == null) {
-                            control.setValue('');
+                            control.setValue(value);
                         }
                         else {
                             control.setValue(String(value));
@@ -76,7 +76,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     });
                     setter = function(value) {
                         if (value == null) {
-                            control.setValue('');
+                            control.setValue(value);
                         }
                         else {
                             control.setValue(String(value));
