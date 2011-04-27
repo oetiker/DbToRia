@@ -176,6 +176,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
          __setDefaults : function() {
 //             this.debug('Called __setDefaultDefaults()');
+             this.__form.clear();
              this.setCaption("New "+this.__tableName);
          },
 
@@ -186,8 +187,8 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
          __setFormData : function(recordId) {
 //             this.debug('Called __setFormData()');
-             this.setCaption("Edit "+this.__tableName);
              this.__form.clear();
+             this.setCaption("Edit "+this.__tableName);
              this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecordDeref',
                                        this.__tableId, this.__recordId);
 
