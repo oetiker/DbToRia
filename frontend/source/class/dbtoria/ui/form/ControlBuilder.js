@@ -33,11 +33,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *   filter:  "regexp",
          *   name:    "key",
          *   initial: "default value" },
-         * { type:    "PasswordField",
-         *   label:   "Label",
-         *   filter:  "regexp",
-         *   name:    "key",
-         *   initial: "default value" },
          * { type:    "Date",
          *   label:   "Label",
          *   name:    "key",
@@ -46,39 +41,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          *   label:   "Label",
          *   name:    "key",
          *   initial: true },
-         * { type:    "Spinner",
-         *   label:   "Label",
-         *   name:    "key",
-         *   initial: 23,
-         *   min:     1,
-         *   max:     40 },
-         * { type:    "SelectBox",
-         *   label:   "Label",
-         *   name:    "key",
-         *   initial: "Peter",
-         *   data:    ['Peter', 'Karl', 'Max']
-         * or data:   [{label: 'Peter', model: 11}, ...]
+         * { type:    "ComboTable",
+         *   TODOC
          * },
-         * { type:    "MultiPick",
-         *   label:   "Label",
-         *   name:    "key",
-         *   initial: [11,23],
-         *   data:    ['Peter', 'Karl', 'Max']
-         * or data:   [{label: 'Peter', model: 11}, ...]
-         * { type:    "OpAndValue",
-         *   label:   "Label",
-         *   name:    "key",
-         *   initial: ['>',null],
-         *   data:    ['>','=','<','!=','<=','>=']
-         * }
-         * { type:    "OpAndDate",
-         *   label:   "Label",
-         *   name:    "key",
-         *   initial: ['>',null],
-         *   data:    ['>','=','<','!=','<=','>=']
-         * }
          * </pre>
-         *
          *
          */
 
@@ -148,13 +114,23 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         desc.initial = desc.initial == 1;
                     }
 
+                    setter = function(value) {
+                        if (value == null) {
+                            control.setValue(false);
+                        }
+                        else {
+                            control.setValue(value);
+                        }
+                    };
+
                     break;
 
                 case "ComboTable":
                     var l = {};
                     l[desc.idCol] = 'id';
                     l[desc.valueCol] = 'value';
-                    var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,[desc.idCol,desc.valueCol],l);
+                    var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,
+                                                                      [desc.idCol,desc.valueCol], l);
                     control = new combotable.ComboTable(remoteModel);
                     control.setModel(String(desc.initial));
                     control.setValue(String(desc.initialText));
@@ -162,7 +138,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     setter = function(value) {
 //                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
-                        if (value == null) {
+                        if (value == null || value.id == undefined || value.id == null) {
                             control.setModel(0);
                             control.setValue('undefined');
                         }
