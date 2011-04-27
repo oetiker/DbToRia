@@ -2,6 +2,7 @@
    Copyright: 2009 OETIKER+PARTNER AG
    License:   GPLv3 or later
    Authors:   Tobi Oetiker <tobi@oetiker.ch>
+              Fritz Zaucker <fritz.zaucker@oetiker.ch?
    Utf8Check: äöü
 ************************************************************************ */
 
@@ -26,26 +27,20 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
     construct : function(formDesc) {
         this.base(arguments);
         var fl = formDesc.length;
-        var model = this.__model = {};
+        var formData = this.__formData = {};
 
         var form = this;
         var validationMgr = form.getValidationManager();
+        var controlMap = {};
+        this.__controlMap = controlMap;
         for (var i=0; i<fl; i++) {
             var desc = formDesc[i];
-            var control;
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
-            switch(desc.type)
-            {
-                case "GroupHeader": /* from nequal, not yet used in DbToRia */
-                    form.addGroupHeader(trlab);
-                    continue;
+            controlMap[desc.name] =
+                dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__formDataCallback, this));
 
-                default:
-                    control = dbtoria.ui.form.ControlBuilder.createControl(desc, model);
-                    break;
-            }
-            form.add(control, trlab, null, desc.name);
+            form.add(controlMap[desc.name].control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
                 control.set({
                     required: true,
@@ -58,7 +53,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     var name = desc.name;
                     var msg = form['tr'](desc.check.msg);
                     validationMgr.add(control,function(value,item){
-                        var valid = rx.test(model[name] || '');
+                        var valid = rx.test(formData[name] || '');
                         if (!valid){
                             item.setInvalidMessage(msg);
                             item.setValid(valid);
@@ -71,16 +66,34 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
     },
 
     members : {
-        __model : null,
+        __formData : null,
+        __controlMap: null,
 
+        __formDataCallback: function(key, value) {
+            this.__formData[key] = value;
+        },
 
         /**
-         * Return the form model.
+         * Return the form formData.
          *
          * @return {var} TODOC
          */
-        getModel : function() {
-            return this.__model;
-        }
+        getFormData : function() {
+            return this.__formData;
+        },
+
+        clear: function() {
+            for (var k in this.__controlMap) {
+                this.__controlMap[k].setter(null);
+            }
+        },
+
+        setFormData: function(dataMap) {
+//            this.debug('setFormData() called');
+            for (var k in dataMap) {
+//                this.debug('Setting key='+k+', value='+dataMap[k]);
+                this.__controlMap[k].setter(dataMap[k]);
+            }
+      }
     }
 });

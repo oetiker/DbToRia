@@ -6,22 +6,28 @@
 
    Copyright:
     2009 David Angleitner, Switzerland
+    2011 Oetiker+Partner AG, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
    Authors:
     * David Angleitner
+    * Fritz Zaucker
 
 ************************************************************************ */
 
 /* ************************************************************************
 
 #asset(dbtoria/*)
-#asset(qx/icon/${qx.icontheme}/22/actions/format-justify-left.png)
-#asset(qx/icon/${qx.icontheme}/16/status/dialog-error.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/help-about.png)
 ************************************************************************ */
+
+/**
+ * TODOs:
+ *   - use dbtoria/ui/form/ControlBuilder.js to build form
+ *   - more MS Access like layout
+ */
 
 /**
  * This class provides the filter functionality in the table window
@@ -53,13 +59,11 @@ qx.Class.define("dbtoria.window.TableFilter", {
         this.__columns        = columns;
         this.__filterCallback = filterCallback;
 
-//        this.setLayout(new qx.ui.layout.Grid(5, 5));
         this.set({
-                     // Why doesn't this work???
-                     layout: new qx.ui.layout.Grid(5, 5),
-                     showMinimize: false,
-                     showMaximize: false,
-                     modal: true});
+            layout: new qx.ui.layout.Grid(5, 5),
+            showMinimize: false,
+            showMaximize: false,
+            modal: true});
 
         this.__selection = new Array();
 
@@ -77,11 +81,8 @@ qx.Class.define("dbtoria.window.TableFilter", {
         */
 
     members : {
-        // db table
-        __dbTable : null,
         __columns : null,
         __filterCallback: null,
-        __fieldSelectBox: null,
 
         // used to add and remove filter criteria
         __rowCounter : 0,
@@ -102,7 +103,6 @@ qx.Class.define("dbtoria.window.TableFilter", {
          */
         addSelectionProperty : function() {
             var checkBox = new qx.ui.form.CheckBox();
-//            checkBox.setChecked(true);
             checkBox.setValue(true);
 
             var textField1 = new qx.ui.form.TextField();
@@ -114,7 +114,6 @@ qx.Class.define("dbtoria.window.TableFilter", {
             var labelAnd = new qx.ui.basic.Label('AND');
 
             var fieldSelectBox = new qx.ui.form.SelectBox();
-            this.__fieldSelectBox = fieldSelectBox;
 
             // generate list of columns
             var columns = this.__columns;
@@ -138,7 +137,9 @@ qx.Class.define("dbtoria.window.TableFilter", {
             opSelectBox.setWidth(180);
             var ops = dbtoria.data.Config.getInstance().getFilterOps();
             len = ops.length;
-            var tooltip;
+            var tooltip =
+              new qx.ui.tooltip.ToolTip('', "icon/16/actions/help-about.png");;
+            opSelectBox.setToolTip(tooltip);
             for (i =0; i<len; i++) {
                 tooltip =
                     new qx.ui.tooltip.ToolTip(ops[i].help,
@@ -182,27 +183,29 @@ qx.Class.define("dbtoria.window.TableFilter", {
                 column : 5
             });
 
-            var refreshButton = new qx.ui.form.Button(this.tr("Refresh Filter"));
+            var applyButton = new qx.ui.form.Button(this.tr("Apply Filter"));
             var addButton = new qx.ui.form.Button(this.tr("Add Critera"));
 
-            // on clicking the filter refresh button the tableWindow
+            // on clicking the filter apply button the tableWindow
             // is updated with the current filter
-            refreshButton.addListener("execute", function(e) {
-                this.__filterCallback(this.__getFilter());
-            }, this);
+            applyButton.addListener("execute",
+                                      function(e) {
+                                          this.debug('Calling __filterCallback()');
+                                          this.__filterCallback(this.__getFilter());
+                                      }, this);
 
             addButton.addListener("execute", function(e) {
                 this.tableFilter.addSelectionProperty();
                 this.addButton.destroy();
-                this.refreshButton.destroy();
+                this.applyButton.destroy();
             },
             {
                 tableFilter   : this,
                 addButton     : addButton,
-                refreshButton : refreshButton
+                applyButton : applyButton
             });
 
-            this.add(refreshButton, {
+            this.add(applyButton, {
                 row    : this.__rowCounter,
                 column : 6
             });
@@ -249,6 +252,7 @@ qx.Class.define("dbtoria.window.TableFilter", {
                 textField2.exclude();
                 break;
             }
+            selectBox.getToolTip().setLabel(selection.getToolTip().getLabel());
         },
 
         /**
@@ -266,8 +270,8 @@ qx.Class.define("dbtoria.window.TableFilter", {
 
                 if (selection.checkBox.getValue()) {
                     var tmp = {
-                        field:  selection.fieldSelectBox.getSelection()[0],
-                        op:     selection.opSelectBox.getSelection()[0],
+                        field:  selection.fieldSelectBox.getSelection()[0].getModel(),
+                        op:     selection.opSelectBox.getSelection()[0].getModel(),
                         value1: selection.textField1.getValue(),
                         value2: selection.textField2.getValue()
                     };

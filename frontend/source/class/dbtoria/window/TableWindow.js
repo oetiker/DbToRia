@@ -17,6 +17,14 @@
 
 ************************************************************************ */
 
+/*
+ * TODOs:
+ *   - show number of filtered rows in table legend, e.g.  x (y) rows
+ *   - change appearance of filter button when filter active
+ *   - perhaps integrate filter configuration into TableWindow instead of
+ *     using a separate window
+ */
+
 /* ************************************************************************
 
 #asset(dbtoria/*)
@@ -52,18 +60,69 @@ qx.Class.define("dbtoria.window.TableWindow", {
                      height         : 500
         });
 
+        this.__rpc = dbtoria.communication.Rpc.getInstance();
         this.__buildUi(tableId);
+        this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
+        this.__recordEdit.addListener('navigation', this.__navigation, this);
+
         this.open();
     },
 
     members : {
-        __table:     null,
-        __tbEdit:    null,
-        __tbDelete:  null,
-        __currentId: null,
-        __tableName: null,
-        __tableId:   null,
-        __columns:   null,
+        __table:      null,
+        __tbEdit:     null,
+        __tbDelete:   null,
+        __currentId:  null,
+        __tableName:  null,
+        __tableId:    null,
+        __columns:    null,
+        __recordEdit: null,
+        __rpc:        null,
+
+        __navigation : function(e) {
+            var target = e.getData();
+            var sm     = this.__table.getSelectionModel();
+            var tm     = this.__table.getTableModel();
+            var row    = sm.getSelectedRanges()[0].minIndex;
+
+            // save current record
+            this.__saveRecord();
+
+            // switch record
+            var maxRow = tm.getRowCount();
+//            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
+            switch (target) {
+            case 'first':
+                row = 0;
+                break;
+            case 'back':
+                if (row>0) {
+                    row--;
+                }
+                break;
+            case 'next':
+                if (row<maxRow-1) {
+                    row++;
+                }
+                break;
+            case 'last':
+                row = maxRow-1;
+                break;
+            case 'new':
+                this.__newRecord();
+                return;
+                break;
+            case 'close':
+                return;
+                break;
+            }
+
+            // switch
+            sm.setSelectionInterval(row, row);
+            this.__table.scrollCellVisible(0, row);
+            this.__editRecord(row);
+
+        },
 
         /**
          * Display a table overview with data
@@ -81,25 +140,23 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png").set({enabled: true});
 
             toolbar.add(newButton);
-            newButton.addListener('execute',function(e){
-                new dbtoria.window.RecordEdit(tableId,null,"New "+this.__tableName);
-            },this);
+            newButton.addListener('execute', this.__newRecord, this);
 
             toolbar.add(editButton);
             editButton.addListener('execute', this.__editRecord, this);
 
             toolbar.add(dupButton);
             toolbar.add(deleteButton);
+            deleteButton.addListener('execute', this.__deleteRecord, this);
             toolbar.addSpacer();
             toolbar.add(refreshButton);
             toolbar.add(exportButton);
             toolbar.add(filterButton);
-            filterButton.addListener('execute', this.__filterTable, this);
+            filterButton.addListener('execute', qx.lang.Function.bind(this.__filterTable, this), this);
 
             this.add(toolbar);
-            var rpc = dbtoria.communication.Rpc.getInstance();
             var that = this;
-            rpc.callAsyncSmart(function(ret){
+            this.__rpc.callAsyncSmart(function(ret){
                 var columns = ret.columns;
                 that.__columns = columns;
                 var tableId = ret.tableId;
@@ -135,8 +192,40 @@ qx.Class.define("dbtoria.window.TableWindow", {
             return true;
         },
 
+
         __deleteRecord : function(e) {
-            window.alert('Not yet implemented');
+            this.debug('__deleteRecord(): id='+this.__currentId);
+          this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__deleteRecordHandler, this),
+                                    'deleteTableData', this.__tableId, this.__currentId);
+        },
+
+        __deleteRecordHandler : function(ret) {
+            var sm  = this.__table.getSelectionModel();
+            var tm  = this.__table.getTableModel();
+            var row = sm.getSelectedRanges()[0].minIndex;
+            this.debug('__deleteRecordHandler(): row='+row);
+            tm.removeRow(row);
+        },
+
+        __saveRecord : function() {
+            this.debug('__saveRecord(): id='+this.__currentId);
+            var data = this.__recordEdit.getRecord();
+            if (this.__currentId == null) {
+                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                          'insertTableData', this.__tableId, data);
+            }
+            else {
+                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                          'updateTableData', this.__tableId, this.__currentId, data);
+            }
+        },
+
+        __saveRecordHandler : function(ret) {
+            var sm  = this.__table.getSelectionModel();
+            var tm  = this.__table.getTableModel();
+            var row = sm.getSelectedRanges()[0].minIndex;
+            this.debug('__saveRecordHandler(): row='+row);
+            tm.removeRow(row);
         },
 
         __dupRecord : function(e) {
@@ -144,15 +233,24 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __editRecord : function(e) {
-            new dbtoria.window.RecordEdit(this.__tableId, this.__currentId, "Edit "+this.__tableName);
+            this.__recordEdit.setRecord(this.__currentId);
+            this.__recordEdit.open();
+        },
+
+        __newRecord : function(e) {
+            this.__recordEdit.setRecord(null);
+            this.__recordEdit.open();
         },
 
         __filterTable : function(e) {
+            var that = this;
             new dbtoria.window.TableFilter(this.tr("Filter: %1", this.__tableName),
                                            this.__columns,
                                            function(filter) {
+//                                               this.debug('__filterTable(): calling setFilter()');
+                                               that.__table.getTableModel().setFilter(filter);
                                                // qx.dev.Debug.debugObject(filter);
-                                               window.alert('Filter callback not yet implemented, filter='+filter);
+                                               // window.alert('Filter callback not yet implemented, filter='+filter);
                                            }
                                           );
         },
