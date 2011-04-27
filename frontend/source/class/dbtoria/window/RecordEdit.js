@@ -106,6 +106,10 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
         }, this);
 
+        this.addListener("close", function(e) {
+            this.fireDataEvent('navigation', 'close');
+        }, this);
+
 
     },
 
@@ -167,6 +171,15 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                     this.__setFormData();
                 }
             }
+        },
+
+        /* TODOC
+         *
+         * @param record {var} TODOC
+         * @return {void}
+         */
+        getRecord : function() {
+            return this.__form.getFormData();
         },
 
         /**

@@ -84,6 +84,11 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var sm     = this.__table.getSelectionModel();
             var tm     = this.__table.getTableModel();
             var row    = sm.getSelectedRanges()[0].minIndex;
+
+            // save current record
+            this.__saveRecord();
+
+            // switch record
             var maxRow = tm.getRowCount();
 //            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
             switch (target) {
@@ -103,17 +108,20 @@ qx.Class.define("dbtoria.window.TableWindow", {
             case 'last':
                 row = maxRow-1;
                 break;
+            case 'new':
+                this.__newRecord();
+                return;
+                break;
+            case 'close':
+                return;
+                break;
             }
 
-            if (target == 'new') {
-                this.__newRecord();
-            }
-            else {
-//                this.debug('__navigation(): newRow='+row);
-                sm.setSelectionInterval(row, row);
-                this.__table.scrollCellVisible(0, row);
-                this.__editRecord(row);
-            }
+            // switch
+            sm.setSelectionInterval(row, row);
+            this.__table.scrollCellVisible(0, row);
+            this.__editRecord(row);
+
         },
 
         /**
@@ -196,6 +204,27 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var tm  = this.__table.getTableModel();
             var row = sm.getSelectedRanges()[0].minIndex;
             this.debug('__deleteRecordHandler(): row='+row);
+            tm.removeRow(row);
+        },
+
+        __saveRecord : function() {
+            this.debug('__saveRecord(): id='+this.__currentId);
+            var data = this.__recordEdit.getRecord();
+            if (this.__currentId == null) {
+                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                          'insertTableData', this.__tableId, data);
+            }
+            else {
+                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                          'updateTableData', this.__tableId, this.__currentId, data);
+            }
+        },
+
+        __saveRecordHandler : function(ret) {
+            var sm  = this.__table.getSelectionModel();
+            var tm  = this.__table.getTableModel();
+            var row = sm.getSelectedRanges()[0].minIndex;
+            this.debug('__saveRecordHandler(): row='+row);
             tm.removeRow(row);
         },
 
