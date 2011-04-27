@@ -147,7 +147,8 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          __setFormData : function(recordId) {
              this.debug('Called __setFormData()');
              this.setCaption("Edit "+this.__tableName);
-             this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecord',
+             this.__form.clear();
+             this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecordDeref',
                                        this.__tableId, this.__recordId);
 
          },

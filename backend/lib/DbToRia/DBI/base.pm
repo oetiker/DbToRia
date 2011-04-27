@@ -214,6 +214,32 @@ sub getRecord {
     die "Override in Driver";
 }
 
+=head2 getRecordDeref (table,recordId)
+
+Returns hash of data for the record matching the indicated key with
+foreign key references resolved.
+
+=cut
+
+sub getRecordDeref {
+    my $self     = shift;
+    my $tableId  = shift;
+    my $recordId = shift;
+
+    my $rec  = $self->getRecord($tableId, $recordId);
+
+    # resolve foreign key references
+    my $view = $self->getEditView($tableId);
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $key      = $field->{name};
+            $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
+        }
+    }
+    return $rec;
+}
+
+
 =head1 BASE METHODS
 
 =head2 getTables

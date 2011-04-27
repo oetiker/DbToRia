@@ -93,22 +93,27 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         desc.initial = String(desc.initial);
                     }
                     setter = function(value) {
-                        control.setValue(String(value));
+                        if (value == null) {
+                            control.setValue('');
+                        }
+                        else {
+                            control.setValue(String(value));
+                        }
                     };
 
                     break;
 
-                case "PasswordField":
-                    control = new qx.ui.form.PasswordField();
+                // case "PasswordField":
+                //     control = new qx.ui.form.PasswordField();
 
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
-                    setter = function(value) {
-                        control.setValue(String(value));
-                    };
+                //     if (qx.lang.Type.isNumber(desc.initial)) {
+                //         desc.initial = String(desc.initial);
+                //     }
+                //     setter = function(value) {
+                //         control.setValue(String(value));
+                //     };
 
-                    break;
+                //     break;
 
                 case "TextLabel":
                     control = new qx.ui.form.TextField().set({
@@ -116,7 +121,12 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                         decorator : null
                     });
                     setter = function(value) {
-                        control.setValue(String(value));
+                        if (value == null) {
+                            control.setValue('');
+                        }
+                        else {
+                            control.setValue(String(value));
+                        }
                     };
 
                     break;
@@ -134,8 +144,12 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     control.set({ allowGrowX : false });
                     setter = function(value) {
                         qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
-
-                      control.setValue(new Date(value));
+                        if (value == null) {
+                            control.setValue(null);
+                        }
+                        else {
+                            control.setValue(new Date(value));
+                        }
                     };
                     break;
 
@@ -160,7 +174,14 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     setter = function(value) {
                         qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
-                        control.setModel(value);
+                        if (value == null) {
+                            control.setModel(0);
+                            control.setValue('undefined');
+                        }
+                        else {
+                            control.setModel(value.id);
+                            control.setValue(value.text);
+                        }
                     };
 
                     break;
