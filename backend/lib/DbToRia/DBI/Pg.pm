@@ -116,7 +116,7 @@ sub getFilterOpsArray {
 =head2 getTableStructure(table)
 
 Returns meta information about the table structure directly from he
-database This uses the mapType methode from the database driver to map
+database. This uses the mapType methode from the database driver to map
 the internal datatypes to DbToRia compatible datatypes.
 
 =cut
@@ -161,7 +161,7 @@ sub getTableStructure {
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
             primary    => $primaryKeys{$id},
-            pos        => $col->{ORDINAL_POSITION} 
+            pos        => $col->{ORDINAL_POSITION},
         };
         $typeMap{$id} = $col->{TYPE_NAME};
     }
