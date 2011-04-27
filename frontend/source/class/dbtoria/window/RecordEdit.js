@@ -182,6 +182,15 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             return this.__form.getFormData();
         },
 
+        /* TODOC
+         *
+         * @param record {var} TODOC
+         * @return {void}
+         */
+        formDataChanged : function() {
+            return this.__form.getFormDataChanged();
+        },
+
         /**
          * TODOC
          *
@@ -215,6 +224,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
         __setFormDataHandler : function(data) {
             this.__form.setFormData(data);
+            this.__form.setFormDataChanged(false);
         },
 
         /**
