@@ -103,18 +103,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     break;
 
-                // case "PasswordField":
-                //     control = new qx.ui.form.PasswordField();
-
-                //     if (qx.lang.Type.isNumber(desc.initial)) {
-                //         desc.initial = String(desc.initial);
-                //     }
-                //     setter = function(value) {
-                //         control.setValue(String(value));
-                //     };
-
-                //     break;
-
                 case "TextLabel":
                     control = new qx.ui.form.TextField().set({
                         readOnly  : true,
@@ -143,7 +131,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     control.set({ allowGrowX : false });
                     setter = function(value) {
-                        qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
+//                        qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
                         if (value == null) {
                             control.setValue(null);
                         }
@@ -173,7 +161,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     delete desc.initial;
 
                     setter = function(value) {
-                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
+//                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
                         if (value == null) {
                             control.setModel(0);
                             control.setValue('undefined');

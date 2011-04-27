@@ -62,6 +62,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
         this.__buildUi(tableId);
         this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
+        this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.open();
     },
 
@@ -74,6 +75,10 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __tableId:    null,
         __columns:    null,
         __recordEdit: null,
+
+        __navigation : function(target) {
+            this.debug('__navigation(): target='+target.getData());
+        },
 
         /**
          * Display a table overview with data
@@ -164,7 +169,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             new dbtoria.window.TableFilter(this.tr("Filter: %1", this.__tableName),
                                            this.__columns,
                                            function(filter) {
-                                               this.debug('__filterTable(): calling setFilter()');
+//                                               this.debug('__filterTable(): calling setFilter()');
                                                that.__table.getTableModel().setFilter(filter);
                                                // qx.dev.Debug.debugObject(filter);
                                                // window.alert('Filter callback not yet implemented, filter='+filter);
