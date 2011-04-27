@@ -60,9 +60,11 @@ qx.Class.define("dbtoria.window.TableWindow", {
                      height         : 500
         });
 
+        this.__rpc = dbtoria.communication.Rpc.getInstance();
         this.__buildUi(tableId);
         this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
+
         this.open();
     },
 
@@ -75,6 +77,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __tableId:    null,
         __columns:    null,
         __recordEdit: null,
+        __rpc:        null,
 
         __navigation : function(e) {
             var target = e.getData();
@@ -136,6 +139,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
             toolbar.add(dupButton);
             toolbar.add(deleteButton);
+            deleteButton.addListener('execute', this.__deleteRecord, this);
             toolbar.addSpacer();
             toolbar.add(refreshButton);
             toolbar.add(exportButton);
@@ -143,9 +147,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
             filterButton.addListener('execute', qx.lang.Function.bind(this.__filterTable, this), this);
 
             this.add(toolbar);
-            var rpc = dbtoria.communication.Rpc.getInstance();
             var that = this;
-            rpc.callAsyncSmart(function(ret){
+            this.__rpc.callAsyncSmart(function(ret){
                 var columns = ret.columns;
                 that.__columns = columns;
                 var tableId = ret.tableId;
@@ -181,8 +184,19 @@ qx.Class.define("dbtoria.window.TableWindow", {
             return true;
         },
 
+
         __deleteRecord : function(e) {
-            window.alert('Not yet implemented');
+            this.debug('__deleteRecord(): id='+this.__currentId);
+          this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__deleteRecordHandler, this),
+                                    'deleteTableData', this.__tableId, this.__currentId);
+        },
+
+        __deleteRecordHandler : function(ret) {
+            var sm  = this.__table.getSelectionModel();
+            var tm  = this.__table.getTableModel();
+            var row = sm.getSelectedRanges()[0].minIndex;
+            this.debug('__deleteRecordHandler(): row='+row);
+            tm.removeRow(row);
         },
 
         __dupRecord : function(e) {

@@ -31,6 +31,7 @@ qx.Class.define("dbtoria.window.Table", {
             decorator              : null
         });
         this.getDataRowRenderer().setHighlightFocusRow(false);
-
     }
+
+
 });
