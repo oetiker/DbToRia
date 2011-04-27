@@ -208,6 +208,10 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __saveRecord : function() {
+            if (!this.__recordEdit.formDataChanged()) {
+                this.debug("Form data didn't change, not saving.");
+                return;
+            }
             this.debug('__saveRecord(): id='+this.__currentId);
             var data = this.__recordEdit.getRecord();
             if (this.__currentId == null) {

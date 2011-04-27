@@ -65,12 +65,26 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         }
     },
 
+    properties : {
+        formDataChanged : {
+            init     : false,
+            check    : "Boolean",
+            apply    : '_applyFormDataChanged',
+            nullable : false
+        }
+    },
+
     members : {
         __formData : null,
         __controlMap: null,
 
+        _applyFormDataChanged: function(newValue, oldValue) {
+            this.debug('formDataChanged='+newValue);
+        },
+
         __formDataCallback: function(key, value) {
             this.__formData[key] = value;
+            this.setFormDataChanged(true);
         },
 
         /**
