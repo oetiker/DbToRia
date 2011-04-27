@@ -83,7 +83,14 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var target = e.getData();
             var sm     = this.__table.getSelectionModel();
             var tm     = this.__table.getTableModel();
-            var row    = sm.getSelectedRanges()[0].minIndex;
+            var selection = sm.getSelectedRanges()[0];
+            var row;
+            if (selection == undefined || selection == null) {
+                row = 0; // FIX ME: is this sensible?
+            }
+            else {
+                row    = sm.getSelectedRanges()[0].minIndex;
+            }
 
             // save current record
             this.__saveRecord();
@@ -227,9 +234,14 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __saveRecordHandler : function(ret) {
             var sm  = this.__table.getSelectionModel();
             var tm  = this.__table.getTableModel();
-            var row = sm.getSelectedRanges()[0].minIndex;
+            var selection = sm.getSelectedRanges()[0];
+            var row;
+            if (selection == null || selection == undefined) {
+            }
+            else {
+                row = sm.getSelectedRanges()[0].minIndex;
+            }
             this.debug('__saveRecordHandler(): row='+row);
-            tm.removeRow(row);
         },
 
         __dupRecord : function(e) {
@@ -242,6 +254,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __newRecord : function(e) {
+            this.__currentId = null;
             this.__recordEdit.setRecord(null);
             this.__recordEdit.open();
         },
