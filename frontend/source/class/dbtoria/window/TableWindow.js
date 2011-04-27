@@ -76,8 +76,37 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __columns:    null,
         __recordEdit: null,
 
-        __navigation : function(target) {
-            this.debug('__navigation(): target='+target.getData());
+        __navigation : function(e) {
+            var target = e.getData();
+            var sm     = this.__table.getSelectionModel();
+            var tm     = this.__table.getTableModel();
+            var row    = sm.getSelectedRanges()[0].minIndex;
+            var maxRow = tm.getRowCount();
+            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
+            switch (target) {
+            case 'first':
+                row = 0;
+                break;
+            case 'back':
+                if (row>0) {
+                    row--;
+                }
+                break;
+            case 'next':
+                if (row<maxRow-1) {
+                    row++;
+                }
+                break;
+            case 'last':
+                row = maxRow-1;
+                break;
+            case 'new':
+                break;
+            }
+            this.debug('__navigation(): newRow='+row);
+            sm.setSelectionInterval(row, row);
+            this.__table.scrollCellVisible(0, row);
+            this.__editRecord(row);
         },
 
         /**
