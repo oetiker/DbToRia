@@ -28,19 +28,17 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         this.base(arguments);
         var fl = formDesc.length;
         var formData = this.__formData = {};
-
-        var form = this;
-        var validationMgr = form.getValidationManager();
-        var controlMap = {};
-        this.__controlMap = controlMap;
+        var validationMgr = this.getValidationManager();
+        var controlMap = this.__controlMap = {};
         for (var i=0; i<fl; i++) {
             var desc = formDesc[i];
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
-            controlMap[desc.name] =
+            var item = controlMap[desc.name] =
                 dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__formDataCallback, this));
+            var control = item.control;
 
-            form.add(controlMap[desc.name].control, trlab, null, desc.name);
+            this.add(control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
                 control.set({
                     required: true,
@@ -51,7 +49,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                 (function(){ /* give use local context - function factory */
                     var rx = new RegExp(desc.check.rx);
                     var name = desc.name;
-                    var msg = form['tr'](desc.check.msg);
+                    var msg = this['tr'](desc.check.msg);
                     validationMgr.add(control,function(value,item){
                         var valid = rx.test(formData[name] || '');
                         if (!valid){

@@ -53,11 +53,12 @@ qx.Class.define("dbtoria.window.TableWindow", {
         this.__tableId   = tableId;
         this.base(arguments);
         this.set({
-                     caption        : this.tr('Table: %1', tableName),
-                     contentPadding : 0,
-                     layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
-                     width          : 800,
-                     height         : 500
+            caption        : this.tr('Table: %1', tableName),
+            contentPadding : 0,
+            layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
+            width          : 800,
+            height         : 500,
+            loading        : true
         });
 
         this.__rpc = dbtoria.communication.Rpc.getInstance();
@@ -67,7 +68,6 @@ qx.Class.define("dbtoria.window.TableWindow", {
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
         this.__recordEdit.addListener('undo',       this.__undo, this);
         this.__recordEdit.addListener('done',       this.__done, this);
-
         this.open();
     },
 
@@ -203,6 +203,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
                     that.__table.setContextMenuHandler(i, that.__contextMenuHandler, that);
                 }
                 that.add(that.__table, { flex : 1 });
+                that.setLoading(false);
             },'getListView',tableId);
         },
 
