@@ -59,6 +59,7 @@ our %allow_access = (
     login               => 1,
     logout              => 1,
     getTables           => 2,
+    getToolbarTables    => 2,
     getListView         => 2,
     getEditView         => 2,
     getRecord           => 2,
@@ -125,6 +126,11 @@ sub logout{
 sub getTables {
     my $self = shift;
     return $self->DBI->getTables(@_);
+}
+
+sub getToolbarTables {
+    my $self = shift;
+    return $self->DBI->getToolbarTables(@_);
 }
 
 sub getListView {

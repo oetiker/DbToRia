@@ -186,6 +186,35 @@ sub getAllTables {
     return $self->{tableList};
 }
 
+=head2 getToolbarTables()
+
+Returns an array of tables to display in toolbar.
+
+=cut
+
+sub getToolbarTables {
+    my $self = shift;
+
+    my $tables = $self->getTables();
+    my @tableArray;
+
+    for my $table (keys %$tables) {
+        next unless $tables->{$table}{type} eq 'TABLE';
+        $tables->{$table}{tableId} = $table;
+        delete $tables->{$table}{type};
+        push @tableArray, $tables->{$table};
+    }
+    my $ta = \@tableArray;
+    for my $engine (@{$self->metaEngines}){
+        $ta = $engine->massageToolbarTables($ta);
+    }
+    $self->{toolbarTableList} = $ta;
+
+    use Data::Dumper;
+    print STDERR Dumper "toolbarTables=", $ta;
+    return $self->{toolbarTableList};
+}
+
 =head2 getTableStructure(table)
 
 Returns meta information about the table structure directly from he database

@@ -16,12 +16,6 @@ Improved recordEdit window:
 
 =over 
 
-=item 
-
-=item 
-
-put input form into scrollbox
-
 =item
 
 multi-columns with special handling of wide input fields
@@ -39,6 +33,25 @@ Printing of tables.
 
 Loading indicator for longer-running processes (e.g. first opening of
 a larger table).
+
+=item
+
+User-configurable toolbar.
+
+=item
+
+Save window configurations:
+
+=over
+
+=item 
+
+Save last state on logout and reload at login.
+
+=item 
+
+Save multiple settings on a per user basis and allow reloading
+these configurations
 
 =back
 

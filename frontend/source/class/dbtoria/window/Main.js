@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,7 +58,7 @@ qx.Class.define("dbtoria.window.Main", {
             height : '100%'
         });
 
-        var toolbar = new qx.ui.toolbar.ToolBar();
+        var toolbar = dbtoria.window.Toolbar.getInstance();
         this.add(toolbar);
 
         this.add(desktopContainer, { flex : 1 });
@@ -66,24 +66,5 @@ qx.Class.define("dbtoria.window.Main", {
         var taskbar = dbtoria.window.Taskbar.getInstance();
         this.add(taskbar);
 
-        
-        var menu = new dbtoria.window.TableSelection();
-        var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu).set({show: 'icon'});
-        toolbar.add(menuBtn);
-
-        toolbar.addSpacer();
-
-        var logoutBtn = new qx.ui.toolbar.Button(this.tr("Logout"), "icon/16/actions/application-exit.png").set({show: 'icon'});
-        toolbar.add(logoutBtn);
-
-        // call logout on the backend to destroy session
-        logoutBtn.addListener("execute", function(e) {
-            var rpc = dbtoria.communication.Rpc.getInstance();
-
-            rpc.callAsyncSmart(function() {
-                window.location.href = window.location.href;
-            }, 'logout');
-        },
-        this);
     }
 });

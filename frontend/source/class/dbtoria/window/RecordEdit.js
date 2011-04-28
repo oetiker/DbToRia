@@ -35,6 +35,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.__tableId   = tableId;
         this.__tableName = tableName;
 
+        var maxHeight = qx.bom.Document.getHeight() - 20;
+        var maxWidth =  qx.bom.Document.getWidth() - 20;
+
         this.set({
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
@@ -44,7 +47,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             contentPaddingBottom : 10,
             layout               : new qx.ui.layout.VBox(10),
             width                : 600,
-            height               : 500
+             maxHeight           : maxHeight,
+            allowGrowY : true
+//            height               : 500
         });
 
         var scrollContainer = new qx.ui.container.Scroll();
