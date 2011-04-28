@@ -192,6 +192,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
             this.debug('__saveRecord(): id='+this.__recordId);
             var data = this.getRecord();
+            this.setLoading(true);
             if (this.__recordId == null) {
                 this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
                                           'insertTableData', this.__tableId, data);
@@ -212,21 +213,22 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 this.fireEvent('refresh');
                 this.__setNewRecord();
             }
+            this.setLoading(false);
         },
 
-      __setNewRecord: function() {
-          var recordId = this.__newRecord;
-//            this.debug('setRecord(): record='+recordId);
-          this.__recordId = recordId;
-          if (recordId == null) {
-              this.__setDefaults();
-          }
-          else {
-              if (this.isVisible()) {
-                  this.__setFormData();
-              }
-          }
-      },
+        __setNewRecord: function() {
+            this.setLoading(true);
+            var recordId = this.__newRecord;
+//             this.debug('setRecord(): record='+recordId);
+            this.__recordId = recordId;
+            if (recordId == null) {
+                this.__setDefaults();
+                return;
+            }
+            if (this.isVisible()) {
+                this.__setFormData();
+            }
+        },
 
         /* TODOC
          *
@@ -246,6 +248,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
 //             this.debug('Called __setDefaultDefaults()');
              this.__form.clear();
              this.setCaption("New "+this.__tableName);
+             this.setLoading(false);
          },
 
         /**
@@ -255,7 +258,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
          __setFormData : function(recordId) {
 //             this.debug('Called __setFormData()');
-             this.__form.clear();
              this.setCaption("Edit "+this.__tableName);
              this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecordDeref',
                                        this.__tableId, this.__recordId);
@@ -271,6 +273,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __setFormDataHandler : function(data) {
             this.__form.setFormData(data);
             this.__form.setFormDataChanged(false);
+            this.setLoading(false);
         },
 
         /**
@@ -283,7 +286,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             var form         = new dbtoria.ui.form.AutoForm(rules);
             this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
-
             this.__scrollContainer.add(formControl);
             this.__form = form;
         }
