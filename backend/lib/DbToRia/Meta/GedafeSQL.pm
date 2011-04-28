@@ -88,13 +88,42 @@ sub massageEditView {
     my $tableId = shift;
     my $editView = shift;
     my $tables = $self->DBI->getAllTables();
-    for my $row (@$editView){    
+    for my $row (@$editView){
         next unless $row->{type} eq 'ComboTable';
         if (exists $tables->{$row->{tableId}.'_combo'}){
             $row->{tableId} .= '_combo';
             $row->{idCol} = 'id';
             $row->{valueCol} = 'text';
         }
+    }
+    for (my $i=0; $i<scalar @$editView; $i++) {
+        my $row = $editView->[$i];
+        if ($row->{name} =~ m/_id$/) {
+            splice @$editView, $i, 1;
+            last;
+        }
+    }
+}
+
+
+=head2 massageRecord(tableId, recordId, record)
+
+Updates the information that is returned to the backend for a single
+record.
+
+=cut
+
+sub massageRecord {
+    my $self     = shift;
+    my $tableId  = shift;
+    my $recordId = shift;
+    my $record   = shift;
+
+    for my $key (keys %$record){
+        print STDERR "key=$key\n";
+        next unless $key =~ m/_id$/;
+        delete $record->{$key};
+        last;
     }
 }
 

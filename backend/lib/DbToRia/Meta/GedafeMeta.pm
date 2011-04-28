@@ -96,7 +96,7 @@ sub massageTables {
     my $mt = $self->metaTables;
     for my $table (keys %$tables) {
         if ($table =~ /^meta_(fields|tables)$/){
-            delete $tables->{$table};            
+            delete $tables->{$table};
         }
         my $meta = $mt->{$table};
         next unless $meta;
@@ -104,7 +104,7 @@ sub massageTables {
             delete $tables->{$table};
             next;
         }
-    }    
+    }
 }
 
 =head2 massageTableStructure(tableId,tableStructure)
@@ -117,9 +117,9 @@ sub massageTableStructure {
     my $self = shift;
     my $tableId = shift;
     my $structure = shift;
-} 
+}
 
-=head2 massageListView(tableId,listView) 
+=head2 massageListView(tableId,listView)
 
 Updates the information on how to display the table content in a tabular format
 
@@ -141,6 +141,23 @@ sub massageEditView {
     my $self = shift;
     my $tableId = shift;
     my $editView = shift;
+
+    for my $row (@$editView) {
+        my $field = $row->{name};
+
+        # fix field type depending on meta fields entries
+        for my $table (keys %{$self->{metaFields}}) {
+            next unless exists $self->{metaFields}{$table}{$field}{widget};
+            my $widget = $self->{metaFields}{$table}{$field}{widget};
+            if ($widget eq 'area') {
+                $row->{type} = 'TextArea';
+            }
+            elsif ($widget eq 'readonly') {
+                $row->{type} = 'ReadOnly';
+            }
+        }
+    }
+
 }
 
 
@@ -154,7 +171,7 @@ Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or   
+the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,

@@ -11,7 +11,6 @@
 qx.Class.define("dbtoria.ui.form.ControlBuilder", {
     type : 'static',
 
-
     statics : {
         /**
          * create a control and bind its value to the formData map
@@ -24,10 +23,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          * returns a control according to the description given
          *
          * <pre class='javascript'>
-         * { type:    "TextLabel",
-         *   label:   "Info",
-         *   name:    "key",
-         *   initial: "default value" },
+         * { type:    "TextArea",
+         *   TODOC
+         * },
          * { type:    "TextField",
          *   label:   "Label",
          *   filter:  "regexp",
@@ -53,6 +51,23 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             var setter  = null;
 
             switch(desc.type) {
+                case "ReadOnly":
+                    control = new qx.ui.form.TextField();
+                    control.setEnabled(false);
+                    if (qx.lang.Type.isNumber(desc.initial)) {
+                        desc.initial = String(desc.initial);
+                    }
+                    setter = function(value) {
+                        if (value == null) {
+                            control.setValue(value);
+                        }
+                        else {
+                            control.setValue(String(value));
+                        }
+                    };
+
+                    break;
+
                 case "TextField":
                     control = new qx.ui.form.TextField();
                     if (qx.lang.Type.isNumber(desc.initial)) {
@@ -69,11 +84,8 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                     break;
 
-                case "TextLabel":
-                    control = new qx.ui.form.TextField().set({
-                        readOnly  : true,
-                        decorator : null
-                    });
+                case "TextArea":
+                    control = new qx.ui.form.TextArea();
                     setter = function(value) {
                         if (value == null) {
                             control.setValue(value);

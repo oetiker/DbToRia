@@ -133,5 +133,14 @@ S<Tobias Oetiker E<lt>tobi@oetiker.chE<gt>>,
 # mode: flyspell-prog
 # End:
 
+=head2 massageEditView(tableId,editView)
+
+Updates the information on how to display a single record for editing.
+
+=cut
+
+sub massageRecord {
+}
+
 1;
 
