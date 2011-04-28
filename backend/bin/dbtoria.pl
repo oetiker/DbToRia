@@ -1,4 +1,3 @@
-#!/usr/sepp/bin/perl-5.12.3-to
 #!/usr/bin/env perl
 use strict;
 use warnings;
