@@ -202,15 +202,15 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
         },
         __saveRecordHandler : function(data, exc, id) {
-            if (exc == null) {
-                this.debug('__saveRecordHandler() successful');
-//                this.fireDataEvent('navigation', {target: this.__target, refresh: true});
-                this.fireEvent('refresh');
-                this.__setNewRecord();
-            }
-            else {
+            if (exc) {
+                dbtoria.dialog.MsgBox.getInstance().exc(exc);
                 this.debug('__saveRecordHandler() failed');
                 this.fireEvent('undo');
+            }
+            else {
+                this.debug('__saveRecordHandler() successful');
+                this.fireEvent('refresh');
+                this.__setNewRecord();
             }
         },
 
