@@ -1,1 +1,7 @@
 dbtoria.cfg
+frontend/source/script/
+thirdparty/
+trunk_sync
+*~
+backend/public/
+frontend/qooxdoo
