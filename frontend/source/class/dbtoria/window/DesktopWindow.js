@@ -34,35 +34,73 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
     extend : qx.ui.window.Window,
     construct : function() {
         this.base(arguments);
-        // this.set({
-            // contentPadding : 0,
-            // width          : 800,
-            // height         : 500,
-        // });
-
-        // add to desktop
         dbtoria.window.Desktop.getInstance().add(this);
+  
+        var taskbar = dbtoria.window.Taskbar.getInstance();
+        var taskbarButton = new qx.ui.toolbar.Button(
+              this.getCaption(), "icon/16/mimetypes/text-plain.png"
+        ).set({
+            visibility: 'excluded'
+        });
+        taskbar.add(taskbarButton);
+        this.addListener("minimize", function(e) {
+            taskbar.setVisibility('visible');
+            taskbarButton.addListener("execute", function(e) {
+                this.open();
+                taskbar.setVisibility('excluded');
+            }, this );
+        },
+        this);
 
-        // on clicking the minimize button a new button on the taskbar is
-        // generated which allows to restore the window again
-        this.addListener("minimize",
-                         function(e) {
-                             var taskbarButton =
-                                 new qx.ui.toolbar.Button(this.getCaption(),
-                                                          "icon/16/mimetypes/text-plain.png");
-                             var taskbar = dbtoria.window.Taskbar.getInstance();
-                             taskbar.add(taskbarButton);
-                             taskbarButton.addListener("execute",
-                                                       function(e) {
-                                                           this.open();
-                                                           taskbar.remove(taskbarButton);
-                                                       },
-                                                       this);
-                         },
-                         this);
     },
-
+    properties: {
+        loading: {
+            init : false,
+            check: 'Boolean',
+            apply: '_applyLoading'            
+        }
+    },
     members : {
+        _createChildControlImpl : function(id, hash){
+            var control;
+            switch(id) {
+                case "stack":
+                    control = new qx.ui.container.Composite().set({
+                        layout: new qx.ui.layout.Grow(),
+                        allowGrowX: true,
+                        allowGrowY: true
+                    });
+                    this._add(control, {flex: 1});
+                    break;
+                case "pane":
+                    control = new qx.ui.container.Composite();
+                    this.getChildControl('stack').add(control);
+                    break;
+                case "loader":
+                    control = new qx.ui.basic.Atom(null,"dbtoria/loader.gif").set({
+                        visibility: 'hidden',
+                        show: 'icon',
+                        backgroundColor: '#fcfcfc',
+                        opacity: 0.7,
+                        allowGrowX: true,
+                        allowGrowY: true,
+                        alignX: 'center',
+                        alignY: 'middle',
+                        center: true
+                    });
+                    this.getChildControl('pane');
+                    this.getChildControl('stack').add(control);
+                    break;
+            }
+            return control || this.base(arguments, id, hash);
+        },
+        _applyLoading: function(newValue,oldValue){
+            if (newValue == oldValue){
+                return;
+            }            
+            this.getChildControl('loader').setVisibility(newValue ? 'visible' : 'hidden' );
+            this.debug('Loader ' + this.getChildControl('loader').getVisibility());
+        }
     }
 
 });
