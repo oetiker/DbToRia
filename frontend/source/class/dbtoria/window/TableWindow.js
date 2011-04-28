@@ -64,6 +64,9 @@ qx.Class.define("dbtoria.window.TableWindow", {
         this.__buildUi(tableId);
         this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
+        this.__recordEdit.addListener('refresh',    this.__refresh, this);
+        this.__recordEdit.addListener('undo',       this.__undo, this);
+        this.__recordEdit.addListener('done',       this.__done, this);
 
         this.open();
     },
@@ -78,6 +81,27 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __columns:    null,
         __recordEdit: null,
         __rpc:        null,
+        __lastRow:    null,
+        __lastId:     null,
+        __newRow:     null,
+
+        __refresh : function(e) {
+            this.__done();
+            this.__table.getTableModel().reloadData();
+        },
+
+        __undo : function(e) {
+            this.debug('__undo(): lastId='+this.__lastId+', lastRow='+this.__lastRow);
+            var row = this.__lastRow;
+            var sm     = this.__table.getSelectionModel();
+            sm.setSelectionInterval(row, row);
+        },
+
+        __done : function(e) {
+            this.__lastRow = this.__newRow;
+            this.__newRow  = null;
+            this.debug('__done(): lastRow='+this.__lastRow);
+        },
 
         __navigation : function(e) {
             var target = e.getData();
@@ -92,12 +116,9 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 row    = sm.getSelectedRanges()[0].minIndex;
             }
 
-            // save current record
-            this.__saveRecord();
-
             // switch record
             var maxRow = tm.getRowCount();
-//            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
+            this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
             switch (target) {
             case 'first':
                 row = 0;
@@ -127,7 +148,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             // switch
             sm.setSelectionInterval(row, row);
             this.__table.scrollCellVisible(0, row);
-            this.__editRecord(row);
+//            this.__editRecord(row);
 
         },
 
@@ -214,36 +235,6 @@ qx.Class.define("dbtoria.window.TableWindow", {
             tm.removeRow(row);
         },
 
-        __saveRecord : function() {
-            if (!this.__recordEdit.formDataChanged()) {
-                this.debug("Form data didn't change, not saving.");
-                return;
-            }
-            this.debug('__saveRecord(): id='+this.__currentId);
-            var data = this.__recordEdit.getRecord();
-            if (this.__currentId == null) {
-                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                          'insertTableData', this.__tableId, data);
-            }
-            else {
-                this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                          'updateTableData', this.__tableId, this.__currentId, data);
-            }
-        },
-
-        __saveRecordHandler : function(ret) {
-            var sm  = this.__table.getSelectionModel();
-            var tm  = this.__table.getTableModel();
-            var selection = sm.getSelectedRanges()[0];
-            var row;
-            if (selection == null || selection == undefined) {
-            }
-            else {
-                row = sm.getSelectedRanges()[0].minIndex;
-            }
-            this.debug('__saveRecordHandler(): row='+row);
-        },
-
         __dupRecord : function(e) {
             window.alert('Not yet implemented');
         },
@@ -273,11 +264,19 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __switchRecord : function(e) {
-            var table = this.__table;
-            var model = table.getTableModel();
+            var table  = this.__table;
+            var model  = table.getTableModel();
             var selMod = table.getSelectionModel();
-            var tbBtn = this.__tbBtn;
+            var tbBtn  = this.__tbBtn;
             var row;
+
+            var currentRow, currentSelection = selMod.getSelectedRanges()[0];
+            if (currentSelection != null && currentSelection != undefined) {
+                currentRow = currentSelection.minIndex;
+            }
+
+//            this.__lastId  = this.__currentId;
+            this.__newRow = currentRow;
 
             selMod.iterateSelection(function(ind) {
                 row = model.getRowData(ind);
@@ -293,6 +292,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 this.__tbDelete.setEnabled(false);
                 this.__currentId = null;
             }
+            this.__recordEdit.setRecord(this.__currentId);
         }
     }
 });
