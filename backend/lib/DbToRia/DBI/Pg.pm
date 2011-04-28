@@ -207,6 +207,9 @@ sub getRecord {
     for my $key (keys %$row) {
         $newRow{$key} = $self->dbToFe($row->{$key}, $typeMap->{$key});
     }
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageRecord($tableId, $recordId, \%newRow);
+    }
     return \%newRow;
 }
 
