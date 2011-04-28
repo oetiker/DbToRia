@@ -120,7 +120,6 @@ sub massageRecord {
     my $record   = shift;
 
     for my $key (keys %$record){
-        print STDERR "key=$key\n";
         next unless $key =~ m/_id$/;
         delete $record->{$key};
         last;
