@@ -47,18 +47,6 @@ While the basic functionality is already available, the feature set is
 still incomplete in order to replace Gedafe with DbToRia in an
 existing Gedafe application.
 
-=head3 Filter Builder Widget
-
-Upon clicking the search button in a DbToRia table view, a filter
-widget pops up which allows to filter the table contents similar to
-Gedafe.
-
-The set of available filter operators depends on the choice of database
-backend.
-
-Status: available,
-Effort: 8h
-
 =head3 Direct Access URL
 
 The filter and the selected sort order of a view or table is
@@ -71,19 +59,21 @@ Effort: 3h
 =head3 Configurable Toolbar Content
 
 The top row of the DbToRia frontend should contain a configurable set
-of toolbar buttons for directly accessing tables, view or reports. The
-buttons are configurable from the server side.
+of toolbar buttons for directly accessing tables, view or reports.
+
+=over
+
+=item
+
+Gedafe-compatible toolbar configuration based on table naming scheme.
+
+=item
+
+The buttons are configurable on a per-application base from the server
+side.
 
 Status: available,
 Effort: 4h
-
-=head3 AutoForm with Setable Content
-
-The AutoForm widget can be supplied with a new data set (model)
-from the database.
-
-Status: available,
-Effort: 8h
 
 =head3 Gedafe Friendly Names Cache
 
@@ -109,6 +99,7 @@ iframes and have support for printing.
 Status: available,
 Effort: 6h
 
+
 =head2 Additional Features
 
 The following feature extend the functionality of Gedafe.
@@ -119,14 +110,6 @@ Rows in read-only tables and views can be opened in a read-only edit form.
 
 Status: available,
 Effort: 2h
-
-=head3 Record Switching in Edit Form.
-
-Extend the Edit form with MS-Access-like navigation buttons at the bottom
-to allow switching between records without closing the Edit form.
-
-Status: available,
-Effort: 4h
 
 =head2 Installation
 
@@ -164,10 +147,6 @@ Effort: ?
 
 =head3 Example applications
 
-=over
-
-=item Time tracking / project management
-
 =item Publication database
 
 =back
@@ -194,12 +173,20 @@ Effort: ?
 
 =head3 Website
 
+Move to SilverStripe CMS.
+
 Status: available,
 Effort: ?
 
 =head3 Source Code
 
 =over
+
+=item Remove dead code
+
+=item Cleanup directory structure
+
+=item Modularize some larger classes.
 
 =item Lint check for all js files.
 

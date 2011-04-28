@@ -38,8 +38,33 @@ sub massageTables {
             delete $tables->{$table};
             next;
         }
-    }    
+    }
 }
+
+=head2 massageToolbarTables(tablelist)
+
+Updates the table toolbar list created by L<DbToRia::DBI::base::getToolbarTables>.
+
+=cut
+
+sub massageToolbarTables {
+    my $self = shift;
+    my $tables = shift;
+    my $i;
+    my @newTables;
+    for ($i=0; $i < scalar @$tables; $i++) {
+        my $name = $tables->[$i]->{name};
+#        print STDERR "name=$name\n";
+        next if $name =~ m/^Z /;
+        push @newTables, $tables->[$i];
+    }
+    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @newTables;
+    $tables = \@sortedTables;
+    return $tables;
+#    use Data::Dumper;
+#    print STDERR Dumper "toolbarTablesSorted=", $tables;
+}
+
 
 =head2 massageTableStructure(tableId,tableStructure)
 
@@ -53,7 +78,7 @@ sub massageTableStructure {
     my $structure = shift;
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
-        $structure->{columns}[0]{hidden} = 1;        
+        $structure->{columns}[0]{hidden} = 1;
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
         for (@{$structure->{columns}}){
             $_->{hidden} = 1 if $_->{name} eq 'meta_sort';
