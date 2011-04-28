@@ -1,0 +1,167 @@
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
+a img {
+	border: 0px;
+}
+
+a.link {
+	border-bottom: 1px dashed #000000;
+	color: inherit;
+	text-decoration: none;
+}
+
+a.pdf {
+	background: url(images/pdf.gif) no-repeat right;
+	padding-right: 20px;
+}
+
+body {
+	background: #E6ECF0;
+	font-family: "Trebuchet MS", Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+}
+
+div.comment {
+	color: #717171;
+	font-style: italic;
+	font-weight: normal;
+	padding-bottom: 10px;
+	text-align: left;
+	width: 700px;
+}
+
+p {
+	margin-bottom: 10px;
+}
+
+span.dbtoria {
+	font-style: italic;
+	font-weight: normal;
+}
+
+.right {
+	padding-right: 25px;
+	text-align: right;
+}
+
+#content {
+	background: url(images/content_background.png) no-repeat;
+	margin-left: 10px;
+	padding: 40px;
+	padding-bottom: 40px;
+	padding-top: 20px;
+	text-align: justify;
+	width: 920px;
+}
+
+#content h1 {
+	color: #C99E1C;
+	font-size: 15pt;
+	font-weight: bold;
+	margin-bottom: 5px;
+	margin-top: 30px;
+}
+
+#content ul {
+	list-style-type: none;
+	margin-bottom: 15px;
+	margin-left: 10px;
+}
+
+#content ul li {
+	background: url(images/bullet.gif) no-repeat 0px 2px;
+	font-weight: bold;
+	padding-left: 20px;
+}
+
+#content ul li a {
+	color: inherit;
+	text-decoration: none;
+}
+
+#content ul.single li {
+	font-weight: normal;
+}
+
+#copyright {
+	border-top: 4px solid #BBD2D9;
+	color: #8D8D8D;
+	font-size: 8pt;
+	margin: auto;
+	margin-bottom: 30px;
+	padding: 0px 20px;
+	padding-top: 5px;
+	text-align: left;
+	width: 960px;
+}
+
+#flags {
+	height: 23px;
+	padding-right: 15px;
+	padding-top: 5px;
+	text-align: right;
+}
+
+#flags a img {
+	border: 0px;
+}
+
+#header {
+	background: url(images/header.png);
+	height: 174px;
+	margin-left: 10px;
+	width: 1000px;
+}
+
+#header ul {
+	color: #FFFFFF;
+	font-size: 10pt;
+	padding-top: 115px;
+	text-align: right;
+	width: 950px;
+}
+
+#header ul li {
+	display: inline;
+	list-style-type: none;
+	padding: 0px 4px;
+}
+
+#header ul li a {
+	color: #FFFFFF;
+	text-decoration: none;
+}
+
+#header ul li a:hover {
+	color: #D2ECF4;
+}
+
+#header ul li img {
+	padding-left: 8px;
+	vertical-align: middle;
+}
+
+#header ul li.selected {
+	color: #F7CC75;
+	font-weight: bold;
+}
+
+#main {
+	background: url(images/main_background.png);
+	margin: auto;
+	min-height: 700px;
+	width: 1022px;
+}
+
+#screenshots {
+	margin-left: 30px;
+	width: 855px;
+}
+
+#screenshots img {
+	border: 2px solid #8D8D8D;
+	margin: 15px;
+}
