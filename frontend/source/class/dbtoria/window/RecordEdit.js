@@ -56,7 +56,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.__scrollContainer = scrollContainer;
         this.add(scrollContainer, { flex: 1 });
 
-        this.__rpc = dbtoria.communication.Rpc.getInstance();
+        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
         this.__rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', tableId);
         this.moveTo(300, 40);
 

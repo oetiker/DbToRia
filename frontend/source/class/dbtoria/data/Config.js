@@ -63,7 +63,7 @@ qx.Class.define( 'dbtoria.data.Config',
                 return;
             }
             this.__loading = true;
-            var rpc = dbtoria.communication.Rpc.getInstance();
+            var rpc = dbtoria.io.remote.Rpc.getInstance();
             rpc.callAsync( qx.lang.Function.bind(this.__refreshHandler, this),
                            'getConfig');
         },
@@ -77,7 +77,6 @@ qx.Class.define( 'dbtoria.data.Config',
         __refreshHandler:  function(data,exc,id) {
             this.debug('__refreshHandler() called');
             if (exc == null) {
-//                dbtoria.communication.Rpc.getInstance().setTimeout(Number(data.rpcTimeout)*1000);
                 this.setFilterOps(data.filterOps);
                 this.fireEvent('configUpdate');
                 this.__loaded = true;

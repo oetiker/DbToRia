@@ -62,7 +62,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             loading        : true
         });
 
-        this.__rpc = dbtoria.communication.Rpc.getInstance();
+        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
         this.__buildUi(tableId);
         this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
         this.__recordEdit.addListener('navigation', this.__navigation, this);

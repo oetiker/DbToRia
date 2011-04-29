@@ -103,7 +103,7 @@ qx.Class.define("dbtoria.dialog.Login", {
             }
         });
 
-        var rpc = dbtoria.communication.Rpc.getInstance();
+        var rpc = dbtoria.io.remote.Rpc.getInstance();
 
         login.addListener("execute", function(e) {
             this.setEnabled(false);
@@ -141,7 +141,7 @@ qx.Class.define("dbtoria.dialog.Login", {
          *
          * @param ret {Boolean} true if the login is ok and false if it is not ok.
          * @param exc {Exception} any error found during the login process.
-         * @return {void} 
+         * @return {void}
          */
         __loginHandler : function(ret, exc) {
             if (exc) {
