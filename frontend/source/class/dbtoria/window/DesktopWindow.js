@@ -102,7 +102,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
                 return;
             }
             this.getChildControl('loader').setVisibility(newValue ? 'visible' : 'hidden' );
-            this.debug('Loader ' + this.getChildControl('loader').getVisibility());
+//            this.debug('Loader ' + this.getChildControl('loader').getVisibility());
         }
     }
 
