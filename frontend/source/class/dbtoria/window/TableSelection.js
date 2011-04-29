@@ -73,7 +73,7 @@ qx.Class.define("dbtoria.window.TableSelection", {
                         pearlButton.setEnabled(true);
                     }
                     menuButton.addListener("execute", function(e) {
-                        new dbtoria.window.TableWindow(tableId, item.name);
+                        new dbtoria.window.TableWindow(tableId, item.name, true);
                     }, this);
                 }
             );
