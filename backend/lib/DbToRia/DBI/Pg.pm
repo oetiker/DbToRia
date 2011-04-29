@@ -59,7 +59,7 @@ sub getAllTables {
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
 	my %tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
-        next unless $table->{TABLE_TYPE} ~~ ['TABLE','VIEW'];
+        next unless $table->{TABLE_TYPE} eq 'TABLE' or $table->{TABLE_TYPE} eq 'VIEW';
 	    $tables{$table->{TABLE_NAME}} = {
             type => $table->{TABLE_TYPE},
             name => $table->{REMARKS} || $table->{TABLE_NAME}
