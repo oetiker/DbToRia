@@ -27,7 +27,7 @@
  * The qooxdoo table supports a cellMouseOver event but it is not possible to
  * attach an external listener for it, this class adds support for it.
  */
-qx.Class.define("dbtoria.table.Table", {
+qx.Class.define("dbtoria.ui.table.TableWithMouseOver", {
     extend : qx.ui.table.Table,
 
 

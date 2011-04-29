@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@
  * When the mouse is moved on the pane this class fires an event which contains
  * the cell the mouse is currently over
  */
-qx.Class.define("dbtoria.table.Scroller", {
+qx.Class.define("dbtoria.ui.table.pane.Scroller", {
     extend : qx.ui.table.pane.Scroller,
     events : { "cellMouseOver" : "qx.ui.table.pane.CellEvent" },
 
@@ -52,7 +52,7 @@ qx.Class.define("dbtoria.table.Scroller", {
          * Event handler. Called when the user moved the mouse over the pane.
          *
          * @param e {Map} the event.
-         * @return {void} 
+         * @return {void}
          */
         _onMousemovePane : function(e) {
             var table = this.getTable();
