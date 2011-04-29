@@ -71,12 +71,21 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             else {
                 this.__setFormData();
             }
+
         }, this);
 
         this.addListener("close", function(e) {
             this.__saveRecord('close');
         }, this);
 
+        this.addListener('keyup', function(e) {
+            if (e.getKeyIdentifier() == 'Enter') {
+                this.close();
+            }
+            if (e.getKeyIdentifier() == 'Escape') {
+                this.__cancel();
+            }
+        });
 
     },
 
@@ -107,6 +116,11 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             return btn;
         },
 
+        __cancel: function() {
+            this.__form.setFormDataChanged(false); // abort, don't save afterwards
+            this.close();
+        },
+
         __createNavigation: function() {
             var btnFirst = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
             var btnBack  = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
@@ -118,8 +132,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                                                     this.tr('Abort editing without saving'));
 
             btnCnl.addListener("execute", function(e) {
-                this.__form.setFormDataChanged(false); // abort, don't save afterwards
-                this.close();
+                this.__cancel();
             }, this);
 
             var btnApp = new dbtoria.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png",
@@ -130,6 +143,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
 
             var btnOk  = new dbtoria.ui.form.Button(this.tr("OK"), "icon/16/actions/dialog-ok.png",
                                                     this.tr('Save form content to backend and close window'));
+            btnOk.focus();
             btnOk.addListener("execute", function(e) {
                 this.close(); // calls __saveRecord implicitely
             }, this);
