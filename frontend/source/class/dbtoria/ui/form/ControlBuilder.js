@@ -57,41 +57,52 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 case "TextField":
                     control = new dbtoria.ui.form.TextField();
                     break;
-
                 case "FloatField":
                     control = new dbtoria.ui.form.FloatField();
                     break;
-
                 case "IntField":
                     control = new dbtoria.ui.form.IntField();
                     break;
-
                 case "TextArea":
                     control = new dbtoria.ui.form.TextArea();
                     break;
-
                 case "Date":
                     control = new dbtoria.ui.form.DateField();
                     break;
-
                 case "CheckBox":
                     control = new dbtoria.ui.form.CheckBox();
                     break;
-
                 case "ComboTable":
-                    var l = {};
-                    l[desc.idCol] = 'id';
-                    l[desc.valueCol] = 'value';
-                    var remoteModel = new dbtoria.data.RemoteTableModel(desc.tableId,
-                                                                      [desc.idCol,desc.valueCol], l);
-                    control = new dbtoria.ui.form.ComboTable(remoteModel);
+                    control = new dbtoria.ui.form.ComboTable(desc);
                     break;
-
                 default:
                     throw new Error("Control '" + desc.type + "' is not yet supported");
                     break;
             }
-            this._setControlProperties(control,desc);
+            this._setControlProperties(control, desc, formDataCallback);
+
+            return control;
+        },
+
+        /**
+         * Set control properties
+         *
+         * @param desc {var} TODOC
+         * @return {void}
+         */
+        _setControlProperties: function(control, desc, formDataCallback) {
+            if (desc.tooltip) {
+                control.setToolTip(new qx.ui.tooltip.ToolTip(desc.tooltip));
+            }
+            if (desc.readOnly) {
+                control.setEnabled(false);
+            }
+            if (desc.required) {
+                control.setRequired(true);
+            }
+            if (desc.hasOwnProperty('width')) {
+                control.setWidth(desc.width);
+            }
 
             if (control.getModel) {
                 control.addListener('changeModel',function(e){
@@ -115,29 +126,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 control.addListener('changeValue', function(e) {
                     formDataCallback(desc.name, e.getData());
                 },this);
-            }
-
-            return control;
-        },
-
-        /**
-         * Set control properties
-         *
-         * @param desc {var} TODOC
-         * @return {void}
-         */
-        _setControlProperties: function(control,desc) {
-            if (desc.tooltip) {
-                control.setToolTip(new qx.ui.tooltip.ToolTip(desc.tooltip));
-            }
-            if (desc.readOnly) {
-                control.setEnabled(false);
-            }
-            if (desc.required) {
-                control.setRequired(true);
-            }
-            if (desc.hasOwnProperty('width')) {
-                control.setWidth(desc.width);
             }
         },
 
