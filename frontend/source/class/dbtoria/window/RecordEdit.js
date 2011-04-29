@@ -60,32 +60,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.__rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', tableId);
         this.moveTo(300, 40);
 
-        // var btnRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5,'right'));
-        // this.add(btnRow);
-
-        // var btnApp = new qx.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png").set({
-        //     allowGrowX : false,
-        //     allowGrowY : false
-        // });
-
-        // btnApp.addListener("execute", function(e) {
-        //     if (this.__form.validate()){
-        //         var that = this;
-
-        //         rpc.callAsyncSmart(function(id) {
-        //             that.close();
-        //             that.destroy();
-        //         },
-        //         'insertTableData', tableId,  this.__formModel);
-        //     }
-
-        //     else {
-        //         var msg = dbtoria.dialog.MsgBox.getInstance();
-        //         msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
-        //     }
-        // },
-        // this);
-        // btnRow.add(btnApp);
 
         this.add(this.__createNavigation());
 
@@ -122,12 +96,10 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __recordId        : null,
         __rpc             : null,
         __target          : null,
+        __postAction      : null,
 
-      __createButton: function(icon, tooltip, target) {
-            var btn = new qx.ui.form.Button(null, icon);
-            btn.set({ allowGrowX : false, allowGrowY : false });
-            var tt = new qx.ui.tooltip.ToolTip(tooltip);
-            btn.setToolTip(tt);
+        __createButton: function(icon, tooltip, target) {
+            var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
             btn.addListener('execute', function() {
                 this.__target = target;
                 this.fireDataEvent('navigation', target);
@@ -136,31 +108,42 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         },
 
         __createNavigation: function() {
-            var btnFirst   = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
-            var btnBack    = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
-            var btnNext    = this.__createButton("icon/16/actions/go-next.png",     this.tr("Go to next record"),     'next');
-            var btnLast    = this.__createButton("icon/16/actions/go-last.png",     this.tr("Jump to last record"),   'last');
-            var btnNew     = this.__createButton("icon/16/actions/help-about.png",  this.tr("Open new record"),       'new');
+            var btnFirst = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
+            var btnBack  = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
+            var btnNext  = this.__createButton("icon/16/actions/go-next.png",     this.tr("Go to next record"),     'next');
+            var btnLast  = this.__createButton("icon/16/actions/go-last.png",     this.tr("Jump to last record"),   'last');
+            var btnNew   = this.__createButton("icon/16/actions/help-about.png",  this.tr("Open new record"),       'new');
 
-            var btnCnl = new qx.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png").set({
-                allowGrowX : false,
-                allowGrowY : false
-            });
+            var btnCnl = new dbtoria.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png",
+                                                    this.tr('Abort editing without saving'));
 
             btnCnl.addListener("execute", function(e) {
                 this.__form.setFormDataChanged(false); // abort, don't save afterwards
                 this.close();
             }, this);
 
+            var btnApp = new dbtoria.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png",
+                                                    this.tr('Save form content to backend'));
+            btnApp.addListener("execute", function(e) {
+                this.__saveRecord('apply');
+            }, this);
+
+            var btnOk  = new dbtoria.ui.form.Button(this.tr("OK"), "icon/16/actions/dialog-ok.png",
+                                                    this.tr('Save form content to backend and close window'));
+            btnOk.addListener("execute", function(e) {
+                this.close(); // calls __saveRecord implicitely
+            }, this);
 
             var btnRow     = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
-            btnRow.add(btnCnl);
-            btnRow.add(new qx.ui.core.Spacer(1,1), {flex:1});
             btnRow.add(btnFirst);
             btnRow.add(btnBack);
             btnRow.add(btnNext);
             btnRow.add(btnLast);
             btnRow.add(btnNew);
+            btnRow.add(new qx.ui.core.Spacer(1,1), {flex:1});
+            btnRow.add(btnOk);
+            btnRow.add(btnCnl);
+            btnRow.add(btnApp);
             return btnRow;
         },
 
@@ -188,7 +171,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         },
 
         __saveRecord : function(recordId) {
-            this.__newRecord = recordId;
+            if (recordId != 'close' && recordId != 'apply') {
+                this.__newRecord = recordId;
+            }
             if (!this.formDataChanged()) {
                 this.debug("Form data didn't change, not saving.");
                 this.__setNewRecord();
@@ -196,17 +181,24 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 return;
             }
             this.debug('__saveRecord(): id='+this.__recordId);
-            var data = this.getRecord();
-            this.setLoading(true);
-            if (this.__recordId == null) {
-                this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                          'insertTableData', this.__tableId, data);
+            if (this.__form.validate()) {
+                var data = this.getRecord();
+                this.setLoading(true);
+                if (this.__recordId == null) {
+                    this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                         'insertTableData', this.__tableId, data);
+                }
+                else {
+                    this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
+                                         'updateTableData', this.__tableId, this.__recordId, data);
+               }
             }
             else {
-                this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                          'updateTableData', this.__tableId, this.__recordId, data);
+                var msg = dbtoria.dialog.MsgBox.getInstance();
+                msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
             }
         },
+
         __saveRecordHandler : function(data, exc, id) {
             if (exc) {
                 dbtoria.dialog.MsgBox.getInstance().exc(exc);

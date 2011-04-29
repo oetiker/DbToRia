@@ -20,7 +20,7 @@ Improved recordEdit window:
 
 multi-columns with special handling of wide input fields
 
-=item  
+=item
 
 split-pane tableWindow with records in top pane and edit form in lower
 pane
@@ -28,11 +28,6 @@ pane
 =item
 
 Printing of tables.
-
-=item
-
-Loading indicator for longer-running processes (e.g. first opening of
-a larger table).
 
 =item
 
@@ -44,7 +39,7 @@ Save window configurations:
 
 =over
 
-=item 
+=item
 
 Save last state on logout and reload at login.
 
