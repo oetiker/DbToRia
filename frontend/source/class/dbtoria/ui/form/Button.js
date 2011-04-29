@@ -29,6 +29,7 @@ qx.Class.define("dbtoria.ui.form.Button", {
             allowGrowX : false,
             allowGrowY : false,
             icon       : icon,
+            minWidth   : 80,
             label      : label
         });
     },
