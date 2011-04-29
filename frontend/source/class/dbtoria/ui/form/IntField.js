@@ -26,7 +26,7 @@ qx.Class.define("dbtoria.ui.form.IntField", {
         validator: function() {
             return function(value,control){
                         var msg = qx.locale.Manager.tr('This field must be an integer.');
-                        var valid = qx.lang.Type.isNumber(value);
+                        var valid = !isNaN(Number(value));
                         if (!valid){
                             control.setInvalidMessage(msg);
                             control.setValid(valid);
