@@ -22,6 +22,17 @@ qx.Class.define("dbtoria.ui.form.TextArea", {
     },
 
     members : {
+      validator: function() {
+            return function(value,control){
+                        var msg = qx.locale.Manager.tr('This field must be a string.');
+                        var valid = (qx.lang.Type.isString(value) || value == null);
+                        if (!valid){
+                            control.setInvalidMessage(msg);
+                            control.setValid(valid);
+                        }
+                        return valid;
+                   };
+        }
     }
 
 });

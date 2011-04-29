@@ -154,6 +154,7 @@ sub getTableStructure {
 	my @columns;
     my %typeMap;
 	while( my $col = $sth->fetchrow_hashref ) {
+#        use Data::Dumper; print STDERR Dumper "col=", $col;
         my $id = $col->{COLUMN_NAME};
         # return structure
         push @columns, {
@@ -161,6 +162,7 @@ sub getTableStructure {
             type       => $self->mapType($col->{TYPE_NAME}),
             name       => $col->{REMARKS} || $id,
             size       => $col->{COLUMN_SIZE},
+            default    => $col->{COLUMN_DEF},
             required   => $col->{NULLABLE} == 0,
             references => $foreignKeys{$id},
             primary    => $primaryKeys{$id},
@@ -211,6 +213,39 @@ sub getRecord {
         $engine->massageRecord($tableId, $recordId, \%newRow);
     }
     return \%newRow;
+}
+
+
+=head2 getDefaults (table)
+
+Returns hash of columns with default values.
+
+=cut
+
+sub getDefaults {
+    my $self     = shift;
+    my $tableId  = shift;
+print STDERR "getDefaults($tableId)\n";
+    my $dbh        = $self->getDbh();
+    my $columns    = $self->getTableStructure($tableId)->{columns};
+    my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
+
+    my %defaults;
+    for my $col (@$columns) {
+        my $id = $col->{id};
+        my $default = $col->{default};
+        next if not defined $default;
+        next if $default =~ m/nextval/; # don't trigger serial sequence
+        my $sth     = $dbh->prepare("SELECT $default");
+        $sth->execute();
+        my $row = $sth->fetchrow_arrayref;
+        $defaults{$id} = $self->dbToFe($row->[0], $typeMap->{$id});
+        print STDERR "default($id)=", $defaults{$id}, "\n";
+    }
+#    for my $engine (@{$self->metaEngines}){
+#        $engine->massageRecord($tableId, $recordId, \%newRow);
+#    }
+    return \%defaults;
 }
 
 

@@ -64,6 +64,8 @@ our %allow_access = (
     getEditView         => 2,
     getRecord           => 2,
     getRecordDeref      => 2,
+    getDefaults         => 2,
+    getDefaultsDeref    => 2,
     getForm             => 2,
     getTableStructure   => 2,
     getRowCount         => 2,
@@ -153,6 +155,16 @@ sub getRecordDeref {
     return $self->DBI->getRecordDeref(@_);
 }
 
+sub getDefaults {
+    my $self = shift;
+    return $self->DBI->getDefaults(@_);
+}
+
+sub getDefaultsDeref {
+    my $self = shift;
+    return $self->DBI->getDefaultsDeref(@_);
+}
+
 sub getForm {
     my $self = shift;
     return $self->DBI->getForm(@_);
@@ -160,7 +172,7 @@ sub getForm {
 
 sub getTableDataChunk {
     my $self = shift;
-    return $self->DBI->getTableDataChunk(@_); 
+    return $self->DBI->getTableDataChunk(@_);
 }
 
 sub getRowCount {
