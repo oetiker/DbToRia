@@ -216,8 +216,10 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 }
                 var model = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.ui.table.Table(model);
-                that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
-                that.__table.addListener("cellDblclick", that.__editRecord, that);
+                if (!viewMode) {
+                    that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
+                    that.__table.addListener("cellDblclick", that.__editRecord, that);
+                }
                 for (i=0; i<nCols; i++){
                     that.__table.setContextMenuHandler(i, that.__contextMenuHandler, that);
                 }
@@ -301,7 +303,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
             selMod.iterateSelection(function(ind) {
                 row = model.getRowData(ind);
             });
-
+          this.debug('__switchRecord(): row='+row);
+          qx.dev.Debug.debugObject(row);
             if (row) {
                 this.__currentId = row.ROWINFO[0];
                 this.__tbEdit.setEnabled(row.ROWINFO[1]);
