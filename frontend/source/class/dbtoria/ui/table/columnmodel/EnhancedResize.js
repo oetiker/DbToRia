@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,7 +23,7 @@
 
 /**
  * This is an enhanced resize behavior for the tables in DbToRia
- * 
+ *
  * It's rather complex and expensive, but since tables are the main
  * part of DbToRia it is thought to be acceptable because it enhances
  * the usability a lot.
@@ -45,9 +45,9 @@
  *
  * In non-scrolling mode a percentage value for each column is calculated - if
  * available from the first data rows, otherwise from the header name.
- * 
+ *
  */
-qx.Class.define("dbtoria.behavior.EnhancedResize", {
+qx.Class.define("dbtoria.ui.table.columnmodel.EnhancedResize", {
     extend : qx.ui.table.columnmodel.resizebehavior.Abstract,
 
 
@@ -103,7 +103,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *
          * @param tableColumnModel {var} TODOC
          * @param event {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         onAppear : function(tableColumnModel, event) {
             // set references for easy access
@@ -131,7 +131,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *
          * @param tableColumnModel {var} TODOC
          * @param event {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         onTableWidthChanged : function(tableColumnModel, event) {
             this.__tableWidth = this._getAvailableWidth(this.__tableColumnModel);
@@ -144,7 +144,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *
          * @param tableColumnModel {var} TODOC
          * @param event {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         onVerticalScrollBarChanged : function(tableColumnModel, event) {},
 
@@ -154,7 +154,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *
          * @param tableColumnModel {var} TODOC
          * @param event {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         onColumnWidthChanged : function(tableColumnModel, event) {
             var numColumns = this.__tableColumnModel.getVisibleColumnCount();
@@ -179,7 +179,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *
          * @param tableColumnModel {var} TODOC
          * @param event {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         onVisibilityChanged : function(tableColumnModel, event) {
             this._calculateColumnPercentage();
@@ -191,7 +191,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          * TODOC
          *
          * @param numColumns {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         _setNumColumns : function(numColumns) {},
 
@@ -199,7 +199,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
         /**
          * Calculate which percentage each column gets from total table width
          *
-         * @return {void} 
+         * @return {void}
          */
         _calculateColumnPercentage : function() {
             // only calculate percentage if we need no scrollbar
@@ -288,7 +288,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *  done according to percentage of column data or based on each columns
          *  name and data.
          *
-         * @return {void} 
+         * @return {void}
          */
         _updateColumnWidth : function() {
             var numColumns = this.__tableModel.getColumnCount();
@@ -381,7 +381,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
          *  scrolling is disabled and requested manually (e.g. by changing
          *  table width)
          *
-         * @return {void} 
+         * @return {void}
          */
         _revalidate : function() {
             var noScrollingOld = this.__scrolling;
@@ -396,7 +396,7 @@ qx.Class.define("dbtoria.behavior.EnhancedResize", {
 
         /**
          * Determine if there is a need to change to scrolling mode.
-         *  
+         *
          *  This is done by looking at the table headers and counting how many
          *  of them are cropped. If there is more than one, scrolling should be used.
          *
