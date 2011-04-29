@@ -1,12 +1,12 @@
 /* ************************************************************************
 
   DbToRia - Database to Rich Internet Application
-  
+
   http://www.dbtoria.org
 
    Copyright:
     2009 David Angleitner, Switzerland
-    
+
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@
 /**
  * Reference
  */
-qx.Class.define("dbtoria.cellrenderer.Reference", {
+qx.Class.define("dbtoria.ui.table.cellrenderer.Reference", {
     extend : qx.ui.table.cellrenderer.AbstractImage,
 
 
