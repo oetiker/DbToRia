@@ -18,7 +18,12 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
      * Create a customized comboTable.
      *
      */
-    construct : function(tableModel) {
+    construct : function(desc) {
+        var l = {};
+        l[desc.idCol] = 'id';
+        l[desc.valueCol] = 'value';
+        var tableModel = new dbtoria.data.RemoteTableModel(desc.tableId,
+                                                            [desc.idCol,desc.valueCol], l);
         this.base(arguments, tableModel);
     },
 
