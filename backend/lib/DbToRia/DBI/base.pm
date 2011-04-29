@@ -269,6 +269,43 @@ sub getRecordDeref {
 }
 
 
+=head2 getDefaults (table)
+
+Returns hash of columns with default values.
+
+=cut
+
+sub getDefaults {
+    my $self = shift;
+    my $tableId = shift;
+    die "Override in Driver";
+}
+
+=head2 getDefaultsDeref (table)
+
+Returns hash of columns with default values with
+foreign key references resolved.
+
+=cut
+
+sub getDefaultsDeref {
+    my $self     = shift;
+    my $tableId  = shift;
+
+    my $rec  = $self->getDefaults($tableId);
+
+    # resolve foreign key references
+    my $view = $self->getEditView($tableId);
+    for my $field (@$view){
+        if ($field->{type} eq 'ComboTable'){
+            my $key      = $field->{name};
+            $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
+        }
+    }
+    return $rec;
+}
+
+
 =head1 BASE METHODS
 
 =head2 getTables

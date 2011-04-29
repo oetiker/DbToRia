@@ -23,6 +23,17 @@ qx.Class.define("dbtoria.ui.form.IntField", {
     },
 
     members : {
+        validator: function() {
+            return function(value,control){
+                        var msg = qx.locale.Manager.tr('This field must be an integer.');
+                        var valid = qx.lang.Type.isNumber(value);
+                        if (!valid){
+                            control.setInvalidMessage(msg);
+                            control.setValid(valid);
+                        }
+                        return valid;
+                   };
+        }
     }
 
 });

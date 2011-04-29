@@ -25,14 +25,27 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
     members : {
         setter: function(value) {
             if (value == null || value.id == undefined || value.id == null) {
-                this.setModel(0);
-                this.setValue('undefined');
+                this.setModel(null);
+                this.setValue(qx.locale.Manager.tr('Select'));
             }
             else {
                 this.setModel(value.id);
                 this.setValue(value.text);
             }
+        },
+
+        validator: function() {
+            return function(value,control){
+                        var msg = qx.locale.Manager.tr('This field must not be undefined.');
+                        var valid = (value != qx.locale.Manager.tr('Select'));
+                        if (!valid){
+                            control.setInvalidMessage(msg);
+                            control.setValid(valid);
+                        }
+                        return valid;
+                   };
         }
+
     }
 
 });

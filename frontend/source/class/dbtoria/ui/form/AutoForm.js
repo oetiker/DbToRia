@@ -44,6 +44,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     requiredInvalidMessage: this.tr('This field is required')
                 });
             }
+            validationMgr.add(control,control.validator());
             if (desc.hasOwnProperty('check')) {
                 (function(){ /* give use local context - function factory */
                     var rx = new RegExp(desc.check.rx);

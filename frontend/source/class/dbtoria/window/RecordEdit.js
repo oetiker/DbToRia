@@ -179,15 +179,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
 //             this.__recordId = recordId;
         },
 
-        /* TODOC
-         *
-         * @param record {var} TODOC
-         * @return {void}
-         */
-        getRecord : function() {
-            return this.__form.getFormData();
-        },
-
         __saveRecord : function(recordId) {
             if (recordId != 'close' && recordId != 'apply') {
                 this.__newRecord = recordId;
@@ -200,7 +191,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
             this.debug('__saveRecord(): id='+this.__recordId);
             if (this.__form.validate()) {
-                var data = this.getRecord();
+                this.debug('Form validation ok');
+                var data = this.__form.getFormData();
+                qx.dev.Debug.debugObject(data);
                 this.setLoading(true);
                 if (this.__recordId == null) {
                     this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
@@ -212,6 +205,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                }
             }
             else {
+                this.debug('Form validation failed');
                 var msg = dbtoria.dialog.MsgBox.getInstance();
                 msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
             }
@@ -260,11 +254,25 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
          __setDefaults : function() {
-//             this.debug('Called __setDefaultDefaults()');
+//             this.debug('Called __setDefaults()');
              this.__form.clear();
              this.setCaption("New "+this.__tableName);
-             this.setLoading(false);
+             this.setLoading(true);
+             this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__getDefaultsHandler, this), 'getDefaultsDeref',
+                                       this.__tableId);
          },
+
+        /**
+         * TODOC
+         *
+         * @param rules {var} TODOC
+         * @return {void}
+         */
+        __getDefaultsHandler : function(data) {
+            this.__form.setFormData(data);
+            this.__form.setFormDataChanged(true);
+            this.setLoading(false);
+        },
 
         /**
          * TODOC
@@ -276,7 +284,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
              this.setCaption("Edit "+this.__tableName);
              this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setFormDataHandler, this), 'getRecordDeref',
                                        this.__tableId, this.__recordId);
-
          },
 
         /**

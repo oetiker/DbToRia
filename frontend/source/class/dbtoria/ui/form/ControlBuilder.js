@@ -35,16 +35,13 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          * { type:    "TextField",
          *   label:   "Label",
          *   filter:  "regexp",
-         *   name:    "key",
-         *   initial: "default value" },
+         *   name:    "key"},
          * { type:    "Date",
          *   label:   "Label",
-         *   name:    "key",
-         *   initial: "default value" },
+         *   name:    "key"},
          * { type:    "CheckBox",
          *   label:   "Label",
-         *   name:    "key",
-         *   initial: true },
+         *   name:    "key"},
          * { type:    "ComboTable",
          *   TODOC
          * },
@@ -76,17 +73,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
                 case "Date":
                     control = new dbtoria.ui.form.DateField();
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        // handle epoch seconds
-                        desc.initial *= 1000;
-                    }
                     break;
 
                 case "CheckBox":
                     control = new dbtoria.ui.form.CheckBox();
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = desc.initial == 1;
-                    }
                     break;
 
                 case "ComboTable":
@@ -96,10 +86,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     var remoteModel = new dbtoria.data.RemoteTableModel(desc.tableId,
                                                                       [desc.idCol,desc.valueCol], l);
                     control = new dbtoria.ui.form.ComboTable(remoteModel);
-                    desc.initial = {
-                        id: desc.initial,
-                      text: desc.initialText
-                    };
                     break;
 
                 default:
