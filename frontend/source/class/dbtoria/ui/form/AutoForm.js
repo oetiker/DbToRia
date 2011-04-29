@@ -34,9 +34,8 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             var desc = formDesc[i];
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
-            var item = controlMap[desc.name] =
+            var control = controlMap[desc.name] =
                 dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__formDataCallback, this));
-            var control = item.control;
 
             this.add(control, trlab, null, desc.name);
             if (desc.hasOwnProperty('required')) {
@@ -50,11 +49,11 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                     var rx = new RegExp(desc.check.rx);
                     var name = desc.name;
                     var msg = this['tr'](desc.check.msg);
-                    validationMgr.add(control,function(value,item){
+                    validationMgr.add(control,function(value,control){
                         var valid = rx.test(formData[name] || '');
                         if (!valid){
-                            item.setInvalidMessage(msg);
-                            item.setValid(valid);
+                            control.setInvalidMessage(msg);
+                            control.setValid(valid);
                         }
                         return valid;
                     });
@@ -101,11 +100,10 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         },
 
         setFormData: function(dataMap) {
-//            this.debug('setFormData() called');
             for (var k in dataMap) {
 //                this.debug('Setting key='+k+', value='+dataMap[k]);
                 this.__controlMap[k].setter(dataMap[k]);
             }
-      }
+        }
     }
 });
