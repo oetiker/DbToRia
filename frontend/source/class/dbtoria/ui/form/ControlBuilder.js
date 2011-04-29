@@ -52,53 +52,29 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
 
             switch(desc.type) {
                 case "ReadOnly":
-                    control = new qx.ui.form.TextField();
+                    control = new dbtoria.ui.form.TextField();
                     control.setEnabled(false);
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = String(desc.initial);
                     }
-                    setter = function(value) {
-                        if (value == null) {
-                            control.setValue(value);
-                        }
-                        else {
-                            control.setValue(String(value));
-                        }
-                    };
-
                     break;
 
                 case "TextField":
-                    control = new qx.ui.form.TextField();
+                    control = new dbtoria.ui.form.TextField();
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = String(desc.initial);
                     }
-                    setter = function(value) {
-                        if (value == null) {
-                            control.setValue(value);
-                        }
-                        else {
-                            control.setValue(String(value));
-                        }
-                    };
-
                     break;
 
                 case "TextArea":
-                    control = new qx.ui.form.TextArea();
-                    setter = function(value) {
-                        if (value == null) {
-                            control.setValue(value);
-                        }
-                        else {
-                            control.setValue(String(value));
-                        }
-                    };
-
+                    control = new dbtoria.ui.form.TextArea();
+                    if (qx.lang.Type.isNumber(desc.initial)) {
+                        desc.initial = String(desc.initial);
+                    }
                     break;
 
                 case "Date":
-                    control = new qx.ui.form.DateField();
+                    control = new dbtoria.ui.form.DateField();
 
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         // handle epoch seconds
@@ -106,35 +82,14 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     } else if (desc.initial) {
                         desc.initial = new Date(desc.initial);
                     }
-
-                    control.set({ allowGrowX : false });
-                    setter = function(value) {
-//                        qx.log.Logger.debug('Calling setValue(new Date(value)) for type='+desc.type);
-                        if (value == null) {
-                            control.setValue(null);
-                        }
-                        else {
-                            control.setValue(new Date(value));
-                        }
-                    };
                     break;
 
                 case "CheckBox":
-                    control = new qx.ui.form.CheckBox();
+                    control = new dbtoria.ui.form.CheckBox();
 
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = desc.initial == 1;
                     }
-
-                    setter = function(value) {
-                        if (value == null) {
-                            control.setValue(false);
-                        }
-                        else {
-                            control.setValue(value);
-                        }
-                    };
-
                     break;
 
                 case "ComboTable":
@@ -143,23 +98,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     l[desc.valueCol] = 'value';
                     var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,
                                                                       [desc.idCol,desc.valueCol], l);
-                    control = new combotable.ComboTable(remoteModel);
+                    control = new dbtoria.ui.form.ComboTable(remoteModel);
                     control.setModel(String(desc.initial));
                     control.setValue(String(desc.initialText));
                     delete desc.initial;
-
-                    setter = function(value) {
-//                        qx.log.Logger.debug('Calling setModel/setValue() for type='+desc.type);
-                        if (value == null || value.id == undefined || value.id == null) {
-                            control.setModel(0);
-                            control.setValue('undefined');
-                        }
-                        else {
-                            control.setModel(value.id);
-                            control.setValue(value.text);
-                        }
-                    };
-
                     break;
 
                 default:
@@ -212,8 +154,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             if (desc.required) {
                 control.setRequired(true);
             }
-
-            return { control: control, setter: setter };
+            return control;
         },
 
         /**
