@@ -79,18 +79,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     throw new Error("Control '" + desc.type + "' is not yet supported");
                     break;
             }
-            this._setControlProperties(control, desc, formDataCallback);
 
-            return control;
-        },
-
-        /**
-         * Set control properties
-         *
-         * @param desc {var} TODOC
-         * @return {void}
-         */
-        _setControlProperties: function(control, desc, formDataCallback) {
             if (desc.tooltip) {
                 control.setToolTip(new qx.ui.tooltip.ToolTip(desc.tooltip));
             }
@@ -127,6 +116,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     formDataCallback(desc.name, e.getData());
                 },this);
             }
+            return control;
         },
 
         /**
