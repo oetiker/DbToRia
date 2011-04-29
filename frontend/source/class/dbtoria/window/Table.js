@@ -15,10 +15,10 @@
  */
 qx.Class.define("dbtoria.window.Table", {
     extend : qx.ui.table.Table,
+    // Add the context menu mixin to the Table class
+    include : [ qx.ui.table.MTableContextMenu ],
 
     construct : function(tm) {
-        // Add the context menu mixin to the Table class
-        qx.Class.include(qx.ui.table.Table, qx.ui.table.MTableContextMenu);
 
         var tableOpts = {
             tableColumnModel : function(obj) {
