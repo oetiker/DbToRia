@@ -332,10 +332,10 @@ sub getEditView {
     my @return;
     my $widgetMap = {
         varchar => 'TextField',
-        integer => 'TextField',
-        date => 'Date',
+        integer => 'IntField',
+        float   => 'FloatField',
+        date    => 'Date',
         boolean => 'CheckBox',
-        float => 'TextField',
     };
 
     for my $col (@{$structure->{columns}}){
