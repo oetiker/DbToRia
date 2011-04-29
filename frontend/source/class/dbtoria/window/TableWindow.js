@@ -33,6 +33,7 @@
 #asset(qx/icon/${qx.icontheme}/16/actions/edit-delete.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/view-refresh.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/document-save-as.png)
+#asset(qx/icon/${qx.icontheme}/16/actions/document-print.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/system-search.png)
 #asset(qx/icon/${qx.icontheme}/16/actions/edit-copy.png)
 #asset(qx/icon/${qx.icontheme}/16/apps/utilities-text-editor.png)
@@ -163,24 +164,32 @@ qx.Class.define("dbtoria.window.TableWindow", {
             var editButton = this.__tbEdit = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png").set({enabled: false});
             var dupButton = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png").set({enabled: false});
             var deleteButton = this.__tbDelete = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png").set({enabled: false});
-            var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png").set({enabled: false});
+            var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
-            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png").set({enabled: true});
+            var printButton = new qx.ui.toolbar.Button(this.tr("Print"), "icon/16/actions/document-print.png").set({enabled: false});
+            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
 
-            toolbar.add(newButton);
             newButton.addListener('execute', this.__newRecord, this);
+            toolbar.add(newButton);
 
-            toolbar.add(editButton);
             editButton.addListener('execute', this.__editRecord, this);
+            toolbar.add(editButton);
 
             toolbar.add(dupButton);
-            toolbar.add(deleteButton);
+
             deleteButton.addListener('execute', this.__deleteRecord, this);
+            toolbar.add(deleteButton);
+
             toolbar.addSpacer();
+
+            refreshButton.addListener('execute', this.__refresh, this);
             toolbar.add(refreshButton);
+
             toolbar.add(exportButton);
-            toolbar.add(filterButton);
+            toolbar.add(printButton);
+
             filterButton.addListener('execute', qx.lang.Function.bind(this.__filterTable, this), this);
+            toolbar.add(filterButton);
 
             this.add(toolbar);
             var that = this;
