@@ -58,9 +58,8 @@ qx.Class.define("dbtoria.Application", {
                                    root.add(new dbtoria.window.Main(),
                                             { edge : 0 });
                                }, this);
-            this.debug('Calling config.refresh()');
             config.refresh();
-
         }
+
     }
 });
