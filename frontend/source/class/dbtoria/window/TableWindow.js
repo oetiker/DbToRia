@@ -60,20 +60,20 @@ qx.Class.define("dbtoria.window.TableWindow", {
             height         : 500,
             loading        : true
         });
+
+        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
+        this.__buildUi(tableId, viewMode);
         if (viewMode) {
             this.setCaption(this.tr('View: %1', this.__tableName));
         }
         else {
             this.setCaption(this.tr('Table: %1', this.__tableName));
+            this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName, viewMode);
+            this.__recordEdit.addListener('navigation', this.__navigation, this);
+            this.__recordEdit.addListener('refresh',    this.__refresh, this);
+            this.__recordEdit.addListener('undo',       this.__undo, this);
+            this.__recordEdit.addListener('done',       this.__done, this);
         }
-
-        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
-        this.__buildUi(tableId, viewMode);
-        this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName, viewMode);
-        this.__recordEdit.addListener('navigation', this.__navigation, this);
-        this.__recordEdit.addListener('refresh',    this.__refresh, this);
-        this.__recordEdit.addListener('undo',       this.__undo, this);
-        this.__recordEdit.addListener('done',       this.__done, this);
         this.open();
     },
 
@@ -303,8 +303,6 @@ qx.Class.define("dbtoria.window.TableWindow", {
             selMod.iterateSelection(function(ind) {
                 row = model.getRowData(ind);
             });
-          this.debug('__switchRecord(): row='+row);
-          qx.dev.Debug.debugObject(row);
             if (row) {
                 this.__currentId = row.ROWINFO[0];
                 this.__tbEdit.setEnabled(row.ROWINFO[1]);
