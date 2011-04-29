@@ -50,15 +50,8 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             var control = null;
             var setter  = null;
 
+            qx.dev.Debug.debugObject(desc);
             switch(desc.type) {
-                case "ReadOnly":
-                    control = new dbtoria.ui.form.TextField();
-                    control.setEnabled(false);
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
-                    break;
-
                 case "TextField":
                     control = new dbtoria.ui.form.TextField();
                     if (qx.lang.Type.isNumber(desc.initial)) {
@@ -108,7 +101,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     throw new Error("Control '" + desc.type + "' is not yet supported");
                     break;
             }
-
+            if (desc.readOnly) {
+                control.setEnabled(false);
+            }
             if (desc.hasOwnProperty('width')) {
                 control.setWidth(desc.width);
             }

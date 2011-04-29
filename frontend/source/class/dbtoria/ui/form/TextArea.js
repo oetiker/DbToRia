@@ -13,7 +13,7 @@ qx.Class.define("dbtoria.ui.form.TextArea", {
     extend : qx.ui.form.TextArea,
 
     /**
-     * @param formDesc {formDescription[]} Form description array.
+     * @param tooltip {String} optional tooltip text.
      *
      * Create a customized TextArea.
      *
@@ -21,7 +21,7 @@ qx.Class.define("dbtoria.ui.form.TextArea", {
     construct : function(tooltip) {
         this.base(arguments);
         if (tooltip) {
-            this.setToolTip(tooltip);
+            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
         }
     },
 

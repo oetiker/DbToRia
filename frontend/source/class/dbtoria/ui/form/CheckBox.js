@@ -13,7 +13,7 @@ qx.Class.define("dbtoria.ui.form.CheckBox", {
     extend : qx.ui.form.CheckBox,
 
     /**
-     * @param formDesc {formDescription[]} Form description array.
+     * @param tooltip {String} optional tooltip text.
      *
      * Create a customized CheckBox.
      *
@@ -21,7 +21,7 @@ qx.Class.define("dbtoria.ui.form.CheckBox", {
     construct : function(tooltip) {
         this.base(arguments);
         if (tooltip) {
-            this.setToolTip(tooltip);
+            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
         }
         this.set({allowGrowX : false});
     },

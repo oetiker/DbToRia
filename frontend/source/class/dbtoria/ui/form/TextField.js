@@ -13,14 +13,16 @@ qx.Class.define("dbtoria.ui.form.TextField", {
     extend : qx.ui.form.TextField,
 
     /**
-     * @param formDesc {formDescription[]} Form description array.
+     * @param tooltip {String} optional tooltip text.
      *
-     * Create a customized button.
+     * Create a customized TextField.
      *
      */
     construct : function(tooltip) {
         this.base(arguments);
-        var tt = new qx.ui.tooltip.ToolTip(tooltip);
+        if (tooltip) {
+            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
+        }
 //        this.set({});
     },
 
