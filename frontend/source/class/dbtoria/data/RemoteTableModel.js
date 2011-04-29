@@ -11,7 +11,7 @@
  * An {@link qx.ui.table.model.Remote} implementation for accessing
  * accessing Messreihen on the server.
  */
-qx.Class.define('dbtoria.db.RemoteTableModel', {
+qx.Class.define('dbtoria.data.RemoteTableModel', {
     extend : qx.ui.table.model.Remote,
 
     /**
