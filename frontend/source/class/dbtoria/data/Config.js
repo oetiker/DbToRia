@@ -53,8 +53,6 @@ qx.Class.define( 'dbtoria.data.Config',
         * Refresh config.
         */
         refresh: function() {
-            this.debug('__refresh() called');
-
             if (this.__loaded) {
                 this.fireEvent('configUpdate');
                 return;
@@ -75,12 +73,10 @@ qx.Class.define( 'dbtoria.data.Config',
          * @param id   {Integer} reference id for the RPC call.
          */
         __refreshHandler:  function(data,exc,id) {
-            this.debug('__refreshHandler() called');
             if (exc == null) {
                 this.setFilterOps(data.filterOps);
                 this.fireEvent('configUpdate');
                 this.__loaded = true;
-                this.debug('__refreshHandler(): config loaded');
             }
             else {
                 this.__loaded = false;
