@@ -13,15 +13,15 @@ qx.Class.define("dbtoria.ui.form.DateField", {
     extend : qx.ui.form.DateField,
 
     /**
-     * @param formDesc {formDescription[]} Form description array.
+     * @param tooltip {String} optional tooltip text.
      *
-     * Create a customized button.
+     * Create a customized DateField.
      *
      */
-    construct : function(label, icon, tooltip) {
+    construct : function(tooltip) {
         this.base(arguments);
         if (tooltip) {
-            this.setToolTip(tooltip);
+            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
         }
         this.set({allowGrowX : false});
     },

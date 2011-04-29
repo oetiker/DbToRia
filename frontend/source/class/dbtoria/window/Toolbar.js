@@ -86,7 +86,7 @@ qx.Class.define("dbtoria.window.Toolbar", {
                     btn.addListener("execute", function(e) {
                         new dbtoria.window.TableWindow(item.tableId, item.name);
                     }, this);
-                    qx.log.Logger.debug(that, item.name);
+//                    qx.log.Logger.debug(that, item.name);
                     that.__partTables.add(btn);
                 }
             );

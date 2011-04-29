@@ -210,8 +210,8 @@ sub getToolbarTables {
     }
     $self->{toolbarTableList} = $ta;
 
-    use Data::Dumper;
-    print STDERR Dumper "toolbarTables=", $ta;
+#    use Data::Dumper;
+#    print STDERR Dumper "toolbarTables=", $ta;
     return $self->{toolbarTableList};
 }
 

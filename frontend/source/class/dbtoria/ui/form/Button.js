@@ -13,20 +13,24 @@ qx.Class.define("dbtoria.ui.form.Button", {
     extend : qx.ui.form.Button,
 
     /**
-     * @param formDesc {formDescription[]} Form description array.
+     * @param label {String} text label.
+     * @param icon  {Icon}   icon.
+     * @param tooltip {String} tooltip text.
      *
      * Create a customized button.
      *
      */
     construct : function(label, icon, tooltip) {
         this.base(arguments);
-        var tt = new qx.ui.tooltip.ToolTip(tooltip);
-        this.set({ allowGrowX : false,
-                   allowGrowY : false,
-                   icon       : icon,
-                   label      : label,
-                   toolTip    : tt
-                 });
+        if (tooltip) {
+            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
+        }
+        this.set({
+            allowGrowX : false,
+            allowGrowY : false,
+            icon       : icon,
+            label      : label
+        });
     },
 
     members : {
