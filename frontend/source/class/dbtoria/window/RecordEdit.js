@@ -113,6 +113,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 this.__target = target;
                 this.fireDataEvent('navigation', target);
             }, this);
+            btn.setMinWidth(null);
             return btn;
         },
 
@@ -143,7 +144,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
 
             var btnOk  = new dbtoria.ui.form.Button(this.tr("OK"), "icon/16/actions/dialog-ok.png",
                                                     this.tr('Save form content to backend and close window'));
-            btnOk.focus();
             btnOk.addListener("execute", function(e) {
                 this.close(); // calls __saveRecord implicitely
             }, this);

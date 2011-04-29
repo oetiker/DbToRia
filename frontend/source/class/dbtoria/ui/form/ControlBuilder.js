@@ -50,7 +50,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             var control = null;
             var setter  = null;
 
-            qx.dev.Debug.debugObject(desc);
+//            qx.dev.Debug.debugObject(desc);
             switch(desc.type) {
                 case "TextField":
                     control = new dbtoria.ui.form.TextField();
