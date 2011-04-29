@@ -49,22 +49,27 @@
  */
 qx.Class.define("dbtoria.window.TableWindow", {
     extend : dbtoria.window.DesktopWindow,
-    construct : function(tableId, tableName) {
+        construct : function(tableId, tableName, viewMode) {
         this.__tableName = tableName;
         this.__tableId   = tableId;
         this.base(arguments);
         this.set({
-            caption        : this.tr('Table: %1', tableName),
             contentPadding : 0,
             layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
             width          : 800,
             height         : 500,
             loading        : true
         });
+        if (viewMode) {
+            this.setCaption(this.tr('View: %1', this.__tableName));
+        }
+        else {
+            this.setCaption(this.tr('Table: %1', this.__tableName));
+        }
 
         this.__rpc = dbtoria.io.remote.Rpc.getInstance();
-        this.__buildUi(tableId);
-        this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName);
+        this.__buildUi(tableId, viewMode);
+        this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName, viewMode);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
         this.__recordEdit.addListener('undo',       this.__undo, this);
@@ -76,6 +81,8 @@ qx.Class.define("dbtoria.window.TableWindow", {
         __table:      null,
         __tbEdit:     null,
         __tbDelete:   null,
+        __tbDup:      null,
+        __tbNew:      null,
         __currentId:  null,
         __tableName:  null,
         __tableId:    null,
@@ -153,32 +160,35 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
         },
 
+
         /**
          * Display a table overview with data
          *
          * @return {void}
          */
-        __buildUi : function(tableId) {
+      __buildUi : function(tableId, viewMode) {
             var toolbar = new qx.ui.toolbar.ToolBar();
-            var newButton = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
+            var newButton = this.__tbNew = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
             var editButton = this.__tbEdit = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png").set({enabled: false});
-            var dupButton = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png").set({enabled: false});
+            var dupButton = this.__tbDup = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png").set({enabled: false});
             var deleteButton = this.__tbDelete = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png").set({enabled: false});
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
             var printButton = new qx.ui.toolbar.Button(this.tr("Print"), "icon/16/actions/document-print.png").set({enabled: false});
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
 
-            newButton.addListener('execute', this.__newRecord, this);
-            toolbar.add(newButton);
+            if (!viewMode) {
+                newButton.addListener('execute', this.__newRecord, this);
+                toolbar.add(newButton);
 
-            editButton.addListener('execute', this.__editRecord, this);
-            toolbar.add(editButton);
+                editButton.addListener('execute', this.__editRecord, this);
+                toolbar.add(editButton);
 
-            toolbar.add(dupButton);
+                toolbar.add(dupButton);
 
-            deleteButton.addListener('execute', this.__deleteRecord, this);
-            toolbar.add(deleteButton);
+                deleteButton.addListener('execute', this.__deleteRecord, this);
+                toolbar.add(deleteButton);
+            }
 
             toolbar.addSpacer();
 

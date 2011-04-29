@@ -104,12 +104,8 @@ Effort: 6h
 
 The following feature extend the functionality of Gedafe.
 
-=head3 View Form
+None right now ...
 
-Rows in read-only tables and views can be opened in a read-only edit form.
-
-Status: available,
-Effort: 2h
 
 =head2 Installation
 

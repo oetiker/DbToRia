@@ -30,7 +30,7 @@
 qx.Class.define("dbtoria.window.RecordEdit", {
     extend : dbtoria.window.DesktopWindow,
 
-    construct : function(tableId, tableName) {
+    construct : function(tableId, tableName, viewMode) {
         this.base(arguments);
         this.__tableId   = tableId;
         this.__tableName = tableName;
@@ -61,7 +61,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.moveTo(300, 40);
 
 
-        this.add(this.__createNavigation());
+        this.add(this.__createNavigation(viewMode));
 
         this.addListener("appear", function(e) {
             var recordId = this.__recordId;
@@ -107,6 +107,19 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __target          : null,
         __postAction      : null,
 
+        __viewMode: function(enabled) {
+            this.__tbEdit.setEnabled(!enabled);
+            this.__tbDelete.setEnabled(!enabled);
+            this.__tbNew.setEnabled(!enabled);
+            this.__tbDup.setEnabled(!enabled);
+            if (enabled) {
+                this.setCaption(this.tr('View: %1', this.__tableName));
+            }
+            else {
+                this.setCaption(this.tr('Table: %1', this.__tableName));
+            }
+        },
+
         __createButton: function(icon, tooltip, target) {
             var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
             btn.addListener('execute', function() {
@@ -122,7 +135,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             this.close();
         },
 
-        __createNavigation: function() {
+        __createNavigation: function(viewMode) {
             var btnFirst = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
             var btnBack  = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
             var btnNext  = this.__createButton("icon/16/actions/go-next.png",     this.tr("Go to next record"),     'next');
@@ -153,11 +166,15 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             btnRow.add(btnBack);
             btnRow.add(btnNext);
             btnRow.add(btnLast);
-            btnRow.add(btnNew);
+            if (!viewMode) {
+                btnRow.add(btnNew);
+            }
             btnRow.add(new qx.ui.core.Spacer(1,1), {flex:1});
             btnRow.add(btnOk);
-            btnRow.add(btnCnl);
-            btnRow.add(btnApp);
+            if (!viewMode) {
+                btnRow.add(btnCnl);
+                btnRow.add(btnApp);
+            }
             return btnRow;
         },
 
