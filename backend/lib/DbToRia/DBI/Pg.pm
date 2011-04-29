@@ -310,9 +310,8 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
-    use Data::Dumper;
-    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
-#    return;
+#    use Data::Dumper;
+#    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
@@ -350,9 +349,8 @@ sub insertTableData {
     my $table	  = shift;
     my $data	  = shift;
 
-    use Data::Dumper;
-    print STDERR Dumper "insertTableData(): table=$table, data=", $data;
-#    return;
+#    use Data::Dumper;
+#    print STDERR Dumper "insertTableData(): table=$table, data=", $data;
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 
