@@ -84,9 +84,10 @@ directly.
 Status: available,
 Effort: 3h
 
-=head3 Default Values in New Records
+=head3 Copy Values in New Records
 
-The New Record form is populated with default values from the database.
+The next New Record is populated with values from the previous record
+as defined by meta fields.
 
 Status: available,
 Effort: 2h
