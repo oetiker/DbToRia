@@ -67,7 +67,6 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     break;
 
                 case "TextArea":
-                    desc.tooltip = qx.locale.Manager.tr('Use Ctrl-Enter for line breaks.');
                     control = new dbtoria.ui.form.TextArea();
                     break;
 

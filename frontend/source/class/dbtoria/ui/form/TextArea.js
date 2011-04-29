@@ -19,6 +19,8 @@ qx.Class.define("dbtoria.ui.form.TextArea", {
      */
     construct : function() {
         this.base(arguments);
+        // default tooltip
+        this.setToolTip(new qx.ui.tooltip.ToolTip(qx.locale.Manager.tr('Use Ctrl-Enter for line breaks.')));
     },
 
     members : {
