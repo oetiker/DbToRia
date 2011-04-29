@@ -94,7 +94,7 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     var l = {};
                     l[desc.idCol] = 'id';
                     l[desc.valueCol] = 'value';
-                    var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,
+                    var remoteModel = new dbtoria.data.RemoteTableModel(desc.tableId,
                                                                       [desc.idCol,desc.valueCol], l);
                     control = new dbtoria.ui.form.ComboTable(remoteModel);
                     desc.initial = {
