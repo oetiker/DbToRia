@@ -258,6 +258,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
              this.__form.clear();
              this.setCaption("New "+this.__tableName);
              this.setLoading(true);
+             // FIX ME: copy from previous record functionality
              this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__getDefaultsHandler, this), 'getDefaultsDeref',
                                        this.__tableId);
          },
