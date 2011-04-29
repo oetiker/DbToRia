@@ -35,7 +35,7 @@ qx.Class.define("dbtoria.window.TableSelection", {
 
     construct : function() {
         this.base(arguments);
-        var rpc = dbtoria.communication.Rpc.getInstance();
+        var rpc = dbtoria.io.remote.Rpc.getInstance();
         var that = this;
         var tableMenu = new qx.ui.menu.Menu();
         var viewMenu  = new qx.ui.menu.Menu();
