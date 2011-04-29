@@ -35,19 +35,17 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
     construct : function() {
         this.base(arguments);
         dbtoria.window.Desktop.getInstance().add(this);
-  
+
         var taskbar = dbtoria.window.Taskbar.getInstance();
-        var taskbarButton = new qx.ui.toolbar.Button(
-              this.getCaption(), "icon/16/mimetypes/text-plain.png"
-        ).set({
-            visibility: 'excluded'
-        });
+        var taskbarButton = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
+        taskbarButton.exclude();
         taskbar.add(taskbarButton);
         this.addListener("minimize", function(e) {
-            taskbar.setVisibility('visible');
+            taskbarButton.setLabel(this.getCaption());
+            taskbarButton.show();
             taskbarButton.addListener("execute", function(e) {
                 this.open();
-                taskbar.setVisibility('excluded');
+                  taskbarButton.exclude();
             }, this );
         },
         this);
@@ -57,7 +55,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
         loading: {
             init : false,
             check: 'Boolean',
-            apply: '_applyLoading'            
+            apply: '_applyLoading'
         }
     },
     members : {
@@ -88,7 +86,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
                         alignY: 'middle',
                         center: true
                     });
-                    this.getChildControl('pane');
+                    this.getChildControl('pane'); // make sure pane is created first!
                     this.getChildControl('stack').add(control);
                     break;
             }
@@ -97,7 +95,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
         _applyLoading: function(newValue,oldValue){
             if (newValue == oldValue){
                 return;
-            }            
+            }
             this.getChildControl('loader').setVisibility(newValue ? 'visible' : 'hidden' );
             this.debug('Loader ' + this.getChildControl('loader').getVisibility());
         }

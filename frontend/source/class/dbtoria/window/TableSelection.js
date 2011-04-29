@@ -6,12 +6,14 @@
 
    Copyright:
     2009 David Angleitner, Switzerland
+    2011 Oetiker+Partner AG, Olten, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
    Authors:
     * David Angleitner
+    * Fritz Zaucker
 
 ************************************************************************ */
 
@@ -28,27 +30,22 @@
  * generated and a click on them opens the detailled TableView.
  */
 qx.Class.define("dbtoria.window.TableSelection", {
-   type : 'static',
+    extend : qx.ui.menu.Menu,
+    type : "singleton",
 
-//    extend : qx.ui.menu.Menu,
-//    construct : function() {
-
-   statics : {
-
-   menuButtons: function() {
-//       this.base(arguments);
+    construct : function() {
+        this.base(arguments);
         var rpc = dbtoria.communication.Rpc.getInstance();
         var that = this;
         var tableMenu = new qx.ui.menu.Menu();
-        var viewMenu = new qx.ui.menu.Menu();
+        var viewMenu  = new qx.ui.menu.Menu();
         var pearlMenu = new qx.ui.menu.Menu();
-//        var tableButton = new qx.ui.menu.Button(this.tr('Tables'),null,null,tableMenu);
-//        var viewButton = new qx.ui.menu.Button(this.tr('Views'),null,null,viewMenu);
-        var tableButton = new qx.ui.toolbar.MenuButton('Tables',"icon/16/places/folder.png",tableMenu);
-        var viewButton = new qx.ui.toolbar.MenuButton('Views',"icon/16/places/folder.png",viewMenu);
-        var pearlButton = new qx.ui.toolbar.MenuButton('Pearls',"icon/16/places/folder.png",pearlMenu);
-//        this.add(new qx.ui.menu.Button(this.tr('Tables'),null,null,tableMenu));
-//        this.add(new qx.ui.menu.Button(this.tr('Views'),null,null,viewMenu));
+        var tableButton = new qx.ui.menu.Button(this.tr('Tables'), null, null, tableMenu).set({enabled: false});
+        var viewButton  = new qx.ui.menu.Button(this.tr('Views'),  null, null, viewMenu).set({enabled: false});
+        var pearlButton = new qx.ui.menu.Button(this.tr('Pearls'), null, null, pearlMenu).set({enabled: false});
+        this.add(tableButton);
+        this.add(viewButton);
+        this.add(pearlButton);
         rpc.callAsyncSmart(function(ret) {
             // generate a button for each table
             var tables = [];
@@ -65,9 +62,15 @@ qx.Class.define("dbtoria.window.TableSelection", {
                     var menuButton = new qx.ui.menu.Button(item.name);
                     if (item.type == 'TABLE'){
                         tableMenu.add(menuButton);
+                        tableButton.setEnabled(true);
                     }
-                    else {
+                    else if (item.type == 'VIEW') {
                         viewMenu.add(menuButton);
+                        viewButton.setEnabled(true);
+                    }
+                    else if (item.type == 'PEARL') {
+                        pearlMenu.add(menuButton);
+                        pearlButton.setEnabled(true);
                     }
                     menuButton.addListener("execute", function(e) {
                         new dbtoria.window.TableWindow(tableId, item.name);
@@ -76,11 +79,6 @@ qx.Class.define("dbtoria.window.TableSelection", {
             );
         },
         'getTables');
-       return {
-           tables: tableButton,
-           views:  viewButton,
-           pearls: pearlButton
-       };
    }
-   }
+
 });

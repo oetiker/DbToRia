@@ -1,5 +1,5 @@
+#!/usr/sepp/bin/perl-5.12.3-to
 #!/usr/bin/env perl
-#!/usr/sepp/bin/perl-5.12.1-to
 use strict;
 use warnings;
 use FindBin;
