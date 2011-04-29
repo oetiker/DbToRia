@@ -107,19 +107,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __target          : null,
         __postAction      : null,
 
-        __viewMode: function(enabled) {
-            this.__tbEdit.setEnabled(!enabled);
-            this.__tbDelete.setEnabled(!enabled);
-            this.__tbNew.setEnabled(!enabled);
-            this.__tbDup.setEnabled(!enabled);
-            if (enabled) {
-                this.setCaption(this.tr('View: %1', this.__tableName));
-            }
-            else {
-                this.setCaption(this.tr('Table: %1', this.__tableName));
-            }
-        },
-
         __createButton: function(icon, tooltip, target) {
             var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
             btn.addListener('execute', function() {
