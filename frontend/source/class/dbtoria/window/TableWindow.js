@@ -205,7 +205,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
                     columnLabels[columns[i].id] = columns[i].name;
                 }
                 var model = new dbtoria.db.RemoteTableModel(tableId,columnIds,columnLabels);
-                that.__table = new dbtoria.window.Table(model);
+                that.__table = new dbtoria.ui.table.Table(model);
                 that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
                 that.__table.addListener("cellDblclick", that.__editRecord, that);
                 for (i=0; i<nCols; i++){
