@@ -13,6 +13,7 @@
 
    Authors:
     * David Angleitner
+    * Tobias Oetiker
     * Fritz Zaucker
 
 ************************************************************************ */
@@ -29,6 +30,7 @@
  *
  * - Minimization of window to taskbar
  * - Adding window to bookmark bar (not yet implemented)
+ * - Loading indicator
  */
 qx.Class.define("dbtoria.window.DesktopWindow", {
     extend : qx.ui.window.Window,
@@ -51,6 +53,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
         this);
 
     },
+
     properties: {
         loading: {
             init : false,
@@ -58,6 +61,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
             apply: '_applyLoading'
         }
     },
+
     members : {
         _createChildControlImpl : function(id, hash){
             var control;
@@ -92,6 +96,7 @@ qx.Class.define("dbtoria.window.DesktopWindow", {
             }
             return control || this.base(arguments, id, hash);
         },
+
         _applyLoading: function(newValue,oldValue){
             if (newValue == oldValue){
                 return;
