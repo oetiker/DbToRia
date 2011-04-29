@@ -26,6 +26,12 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          * { type:    "TextArea",
          *   TODOC
          * },
+         * { type:    "IntField",
+         *   TODOC
+         * },
+         * { type:    "FloatField",
+         *   TODOC
+         * },
          * { type:    "TextField",
          *   label:   "Label",
          *   filter:  "regexp",
@@ -50,36 +56,35 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
             var control = null;
             var setter  = null;
 
-//            qx.dev.Debug.debugObject(desc);
+            qx.dev.Debug.debugObject(desc);
             switch(desc.type) {
                 case "TextField":
                     control = new dbtoria.ui.form.TextField();
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
+                    break;
+
+                case "FloatField":
+                    control = new dbtoria.ui.form.FloatField();
+                    break;
+
+                case "IntField":
+                    control = new dbtoria.ui.form.IntField();
                     break;
 
                 case "TextArea":
+                    desc.tooltip = qx.locale.Manager.tr('Use Ctrl-Enter for line breaks.');
                     control = new dbtoria.ui.form.TextArea();
-                    if (qx.lang.Type.isNumber(desc.initial)) {
-                        desc.initial = String(desc.initial);
-                    }
                     break;
 
                 case "Date":
                     control = new dbtoria.ui.form.DateField();
-
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         // handle epoch seconds
-                        desc.initial = new Date(desc.initial * 1000);
-                    } else if (desc.initial) {
-                        desc.initial = new Date(desc.initial);
+                        desc.initial *= 1000;
                     }
                     break;
 
                 case "CheckBox":
                     control = new dbtoria.ui.form.CheckBox();
-
                     if (qx.lang.Type.isNumber(desc.initial)) {
                         desc.initial = desc.initial == 1;
                     }
@@ -92,35 +97,17 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     var remoteModel = new dbtoria.db.RemoteTableModel(desc.tableId,
                                                                       [desc.idCol,desc.valueCol], l);
                     control = new dbtoria.ui.form.ComboTable(remoteModel);
-                    control.setModel(String(desc.initial));
-                    control.setValue(String(desc.initialText));
-                    delete desc.initial;
+                    desc.initial = {
+                        id: desc.initial,
+                      text: desc.initialText
+                    };
                     break;
 
                 default:
                     throw new Error("Control '" + desc.type + "' is not yet supported");
                     break;
             }
-            if (desc.readOnly) {
-                control.setEnabled(false);
-            }
-            if (desc.hasOwnProperty('width')) {
-                control.setWidth(desc.width);
-            }
-            if (desc.hasOwnProperty('initial')) {
-                var initial = desc.initial;
-
-                if (control.setModelSelection) {
-                    if (!qx.lang.Type.isArray(initial)) {
-                        initial = [ initial ];
-                    }
-
-                    control.setModelSelection(initial);
-                }
-                else {
-                    control.setValue(initial);
-                }
-            }
+            this._setControlProperties(control,desc);
 
             if (control.getModel) {
                 control.addListener('changeModel',function(e){
@@ -146,10 +133,28 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 },this);
             }
 
+            return control;
+        },
+
+        /**
+         * Set control properties
+         *
+         * @param desc {var} TODOC
+         * @return {void}
+         */
+        _setControlProperties: function(control,desc) {
+            if (desc.tooltip) {
+                control.setToolTip(new qx.ui.tooltip.ToolTip(desc.tooltip));
+            }
+            if (desc.readOnly) {
+                control.setEnabled(false);
+            }
             if (desc.required) {
                 control.setRequired(true);
             }
-            return control;
+            if (desc.hasOwnProperty('width')) {
+                control.setWidth(desc.width);
+            }
         },
 
         /**

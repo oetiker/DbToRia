@@ -14,17 +14,12 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
 
     /**
      * @param tableModel {} table model to use.
-     * @param tooltip {String} optional tooltip text.
      *
      * Create a customized comboTable.
      *
      */
-    construct : function(tableModel, tooltip) {
+    construct : function(tableModel) {
         this.base(arguments, tableModel);
-        if (tooltip) {
-            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
-        }
-//        this.set({allowGrowX : false});
     },
 
     members : {

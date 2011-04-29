@@ -11,30 +11,17 @@
 
 qx.Class.define("dbtoria.ui.form.TextField", {
     extend : qx.ui.form.TextField,
+    include : [ dbtoria.ui.form.MControlSetter ],
 
     /**
-     * @param tooltip {String} optional tooltip text.
-     *
      * Create a customized TextField.
      *
      */
-    construct : function(tooltip) {
+    construct : function() {
         this.base(arguments);
-        if (tooltip) {
-            this.setToolTip(new qx.ui.tooltip.ToolTip(tooltip));
-        }
-//        this.set({});
     },
 
     members : {
-        setter: function(value) {
-            if (value == null) {
-                this.setValue(value);
-            }
-            else {
-                this.setValue(String(value));
-            }
-        }
     }
 
 });

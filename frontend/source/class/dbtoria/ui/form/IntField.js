@@ -9,27 +9,20 @@
 /* ************************************************************************
 ************************************************************************ */
 
-qx.Class.define("dbtoria.ui.form.DateField", {
-    extend : qx.ui.form.DateField,
+qx.Class.define("dbtoria.ui.form.IntField", {
+    extend : qx.ui.form.TextField,
+    include : [ dbtoria.ui.form.MControlSetter ],
 
     /**
-     * Create a customized DateField.
+     * Create a customized TextField.
      *
      */
     construct : function() {
         this.base(arguments);
-        this.set({allowGrowX : false});
+//        this.set({});
     },
 
     members : {
-        setter: function(value) {
-            if (value == null) {
-                this.setValue(value);
-            }
-            else {
-                this.setValue(new Date(value));
-            }
-        }
     }
 
 });

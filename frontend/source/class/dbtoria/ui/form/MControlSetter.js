@@ -9,25 +9,24 @@
 /* ************************************************************************
 ************************************************************************ */
 
-qx.Class.define("dbtoria.ui.form.DateField", {
-    extend : qx.ui.form.DateField,
+qx.Mixin.define("dbtoria.ui.form.MControlSetter", {
 
-    /**
-     * Create a customized DateField.
-     *
-     */
     construct : function() {
-        this.base(arguments);
-        this.set({allowGrowX : false});
     },
 
     members : {
+    /**
+     * @param value {var}.
+     *
+     * Provide a default setter.
+     *
+     */
         setter: function(value) {
             if (value == null) {
                 this.setValue(value);
             }
             else {
-                this.setValue(new Date(value));
+                this.setValue(String(value));
             }
         }
     }
