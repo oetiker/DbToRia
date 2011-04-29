@@ -13,7 +13,7 @@
 /**
  * Create a table according to the instructions provided.
  */
-qx.Class.define("dbtoria.window.Table", {
+qx.Class.define("dbtoria.ui.table.Table", {
     extend : qx.ui.table.Table,
     include : [ qx.ui.table.MTableContextMenu ],
 
