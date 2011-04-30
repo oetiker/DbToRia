@@ -75,6 +75,9 @@ qx.Class.define("dbtoria.window.TableWindow", {
             this.__recordEdit.addListener('done',       this.__done, this);
         }
 
+        this.addListener('close', function() {
+            this.__recordEdit.cancel();
+        }, this);
         this.open();
     },
 
