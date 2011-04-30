@@ -377,9 +377,11 @@ sub getEditView {
 
     for my $col (@{$structure->{columns}}){
         my $c = {
-           name => $col->{id},
+           name  => $col->{id},
            label => $col->{name},
         };
+        $c->{required} = $col->{required};
+        $c->{check} = $col->{check};
         if ($col->{references}){
             $c->{type}     = 'ComboTable';
             $c->{tableId}  = $col->{references}{table},

@@ -37,28 +37,32 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             var control = controlMap[desc.name] =
                 dbtoria.ui.form.ControlBuilder.createControl(desc, qx.lang.Function.bind(this.__formDataCallback, this));
 
-            this.add(control, trlab, null, desc.name);
-            if (desc.hasOwnProperty('required')) {
+            if (desc.hasOwnProperty('required') && desc.required) {
                 control.set({
                     required: true,
                     requiredInvalidMessage: this.tr('This field is required')
                 });
             }
+            this.add(control, trlab, null, desc.name);
             validationMgr.add(control,control.validator());
             if (desc.hasOwnProperty('check')) {
-                (function(){ /* give use local context - function factory */
-                    var rx = new RegExp(desc.check.rx);
-                    var name = desc.name;
-                    var msg = this['tr'](desc.check.msg);
-                    validationMgr.add(control,function(value,control){
-                        var valid = rx.test(formData[name] || '');
-                        if (!valid){
-                            control.setInvalidMessage(msg);
-                            control.setValid(valid);
-                        }
-                        return valid;
-                    });
-                })();
+                if (desc.check) {
+                    control.setToolTip(new qx.ui.tooltip.ToolTip(this.tr('Condition: %1',desc.check)));
+                    // FIX ME: build rx in backend
+                    // (function(){ /* give use local context - function factory */
+                    //     var rx = new RegExp(desc.check.rx);
+                    //     var name = desc.name;
+                    //     var msg = qx.locale.Manager.tr(desc.check.msg);
+                    //     validationMgr.add(control,function(value,control){
+                    //         var valid = rx.test(formData[name] || '');
+                    //         if (!valid){
+                    //             control.setInvalidMessage(msg);
+                    //             control.setValid(valid);
+                    //         }
+                    //         return valid;
+                    //     });
+                    // })();
+                }
             }
         }
     },
