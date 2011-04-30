@@ -225,7 +225,7 @@ Returns hash of columns with default values.
 sub getDefaults {
     my $self     = shift;
     my $tableId  = shift;
-print STDERR "getDefaults($tableId)\n";
+#print STDERR "getDefaults($tableId)\n";
     my $dbh        = $self->getDbh();
     my $columns    = $self->getTableStructure($tableId)->{columns};
     my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
@@ -240,7 +240,7 @@ print STDERR "getDefaults($tableId)\n";
         $sth->execute();
         my $row = $sth->fetchrow_arrayref;
         $defaults{$id} = $self->dbToFe($row->[0], $typeMap->{$id});
-        print STDERR "default($id)=", $defaults{$id}, "\n";
+#        print STDERR "default($id)=", $defaults{$id}, "\n";
     }
 #    for my $engine (@{$self->metaEngines}){
 #        $engine->massageRecord($tableId, $recordId, \%newRow);

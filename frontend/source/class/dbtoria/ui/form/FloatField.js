@@ -14,25 +14,31 @@ qx.Class.define("dbtoria.ui.form.FloatField", {
     include : [ dbtoria.ui.form.MControlSetter ],
 
     /**
-     * Create a customized TextField.
-     *
+     * Create a customized TextField for floating point numbers.
+     * Converts times in hh:mm format to decimal.
      */
     construct : function() {
         this.base(arguments);
-//        this.set({});
     },
 
     members : {
         validator: function() {
             return function(value,control){
-                        var msg = qx.locale.Manager.tr('This field must be a number.');
-                        var valid = !isNaN(Number(value));
-                        if (!valid){
-                            control.setInvalidMessage(msg);
-                            control.setValid(valid);
-                        }
-                        return valid;
-                   };
+                var regex = /(\d*):(\d+)/;
+                var res;
+                if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
+                  this.debug('res='+res);
+                    value = Number(res[1]) + Number(res[2])/60;
+                }
+                this.debug('value='+value);
+                var msg = qx.locale.Manager.tr('This field must be a number.');
+                var valid = !isNaN(Number(value));
+                if (!valid){
+                    control.setInvalidMessage(msg);
+                    control.setValid(valid);
+                    }
+                return valid;
+            };
         }
     }
 
