@@ -34,7 +34,7 @@ qx.Class.define("dbtoria.ui.form.CheckBox", {
         validator: function() {
             return function(value,control){
                         var msg = qx.locale.Manager.tr('This field must be a boolean.');
-                        var valid = qx.lang.Type.isBoolean(value);
+                        var valid = qx.lang.Type.isBoolean(value) || value == null;
                         if (!valid){
                             control.setInvalidMessage(msg);
                             control.setValid(valid);

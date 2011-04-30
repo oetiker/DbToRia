@@ -42,6 +42,7 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
         validator: function() {
             return function(value,control){
                 if (!control.getRequired()) {
+                    control.setValid(true);
                     return true;
                 }
                 var msg = qx.locale.Manager.tr('This field must not be undefined.');
