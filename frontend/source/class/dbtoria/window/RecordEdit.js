@@ -41,6 +41,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.set({
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
+            showClose            : false,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
             contentPaddingTop    : 20,
@@ -107,7 +108,11 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __target          : null,
         __postAction      : null,
 
-        __createButton: function(icon, tooltip, target) {
+          close: function() {
+              this.base(arguments);
+          },
+
+          __createButton: function(icon, tooltip, target) {
             var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
             btn.addListener('execute', function() {
                 this.__target = target;
@@ -145,7 +150,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             var btnOk  = new dbtoria.ui.form.Button(this.tr("OK"), "icon/16/actions/dialog-ok.png",
                                                     this.tr('Save form content to backend and close window'));
             btnOk.addListener("execute", function(e) {
-                this.close(); // calls __saveRecord implicitely
+                this.__saveRecord('close');
             }, this);
 
             var btnRow     = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
@@ -206,6 +211,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             }
             else {
                 this.debug('Form validation failed');
+                this.fireEvent('undo');
                 var msg = dbtoria.dialog.MsgBox.getInstance();
                 msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
             }
