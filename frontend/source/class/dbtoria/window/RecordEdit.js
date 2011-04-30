@@ -137,15 +137,19 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         },
 
         __createNavigation: function(viewMode) {
-            var btnFirst = this.__createButton("icon/16/actions/go-first.png",    this.tr("Jump to first record"),  'first');
-            var btnBack  = this.__createButton("icon/16/actions/go-previous.png", this.tr("Go to previous record"), 'back');
-            var btnNext  = this.__createButton("icon/16/actions/go-next.png",     this.tr("Go to next record"),     'next');
-            var btnLast  = this.__createButton("icon/16/actions/go-last.png",     this.tr("Jump to last record"),   'last');
-            var btnNew   = this.__createButton("icon/16/actions/help-about.png",  this.tr("Open new record"),       'new');
+            var btnFirst = this.__createButton("icon/16/actions/go-first.png",
+                                               this.tr("Jump to first record"),  'first');
+            var btnBack  = this.__createButton("icon/16/actions/go-previous.png",
+                                               this.tr("Go to previous record"), 'back');
+            var btnNext  = this.__createButton("icon/16/actions/go-next.png",
+                                               this.tr("Go to next record"),     'next');
+            var btnLast  = this.__createButton("icon/16/actions/go-last.png",
+                                               this.tr("Jump to last record"),   'last');
+            var btnNew   = this.__createButton("icon/16/actions/help-about.png",
+                                               this.tr("Open new record"),       'new');
 
             var btnCnl = new dbtoria.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png",
                                                     this.tr('Abort editing without saving'));
-
             btnCnl.addListener("execute", function(e) {
                 this.cancel();
             }, this);
@@ -162,7 +166,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 this.__saveRecord('close');
             }, this);
 
-            var btnRow     = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+            var btnRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
             btnRow.add(btnFirst);
             btnRow.add(btnBack);
             btnRow.add(btnNext);
@@ -190,14 +194,13 @@ qx.Class.define("dbtoria.window.RecordEdit", {
                 return;
             }
             this.__saveRecord(recordId);
-//             this.__recordId = recordId;
         },
 
         __saveRecord : function(recordId) {
             if (recordId != 'close' && recordId != 'apply') {
                 this.__newRecord = recordId;
             }
-            if (!this.formDataChanged()) {
+            if (!this.__form.getFormDataChanged()) {
                 this.debug("Form data didn't change, not saving.");
                 this.__setNewRecord();
                 this.fireEvent('done');
@@ -243,7 +246,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __setNewRecord: function() {
             this.setLoading(true);
             var recordId = this.__newRecord;
-//             this.debug('setRecord(): record='+recordId);
+//             this.debug('__setNewRecord(): record='+recordId);
             this.__recordId = recordId;
             if (recordId == null) {
                 this.__setDefaults();
@@ -252,15 +255,6 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             if (this.isVisible()) {
                 this.__setFormData();
             }
-        },
-
-        /* TODOC
-         *
-         * @param record {var} TODOC
-         * @return {void}
-         */
-        formDataChanged : function() {
-            return this.__form.getFormDataChanged();
         },
 
         /**
