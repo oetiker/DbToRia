@@ -32,7 +32,7 @@ qx.Class.define("dbtoria.ui.form.FloatField", {
                 }
                 this.debug('value='+value);
                 var msg = qx.locale.Manager.tr('This field must be a number.');
-                var valid = !isNaN(Number(value));
+                var valid = !isNaN(Number(value)) || value == null;
                 if (!valid){
                     control.setInvalidMessage(msg);
                     control.setValid(valid);

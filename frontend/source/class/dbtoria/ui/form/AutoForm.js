@@ -51,6 +51,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             // ControlBuilder.createControl
             // method.
             validationMgr.add(control,control.validator());
+
             if (desc.hasOwnProperty('check')) {
                 if (desc.check) {
                     control.setToolTip(new qx.ui.tooltip.ToolTip(this.tr('Condition: %1',desc.check)));
