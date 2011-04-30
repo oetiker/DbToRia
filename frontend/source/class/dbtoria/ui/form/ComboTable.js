@@ -41,14 +41,17 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
 
         validator: function() {
             return function(value,control){
-                        var msg = qx.locale.Manager.tr('This field must not be undefined.');
-                        var valid = (value != qx.locale.Manager.tr('Select'));
-                        if (!valid){
-                            control.setInvalidMessage(msg);
-                            control.setValid(valid);
-                        }
-                        return valid;
-                   };
+                if (!control.getRequired()) {
+                    return true;
+                }
+                var msg = qx.locale.Manager.tr('This field must not be undefined.');
+                var valid = (value != qx.locale.Manager.tr('Select'));
+                if (!valid){
+                    control.setInvalidMessage(msg);
+                    control.setValid(valid);
+                }
+                return valid;
+            };
         }
 
     }

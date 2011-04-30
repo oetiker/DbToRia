@@ -34,7 +34,7 @@ qx.Class.define("dbtoria.ui.form.DateField", {
         validator: function() {
             return function(value,control){
                         var msg = qx.locale.Manager.tr('This field must be a date.');
-                        var valid = qx.lang.Type.isDate(value);
+                        var valid = qx.lang.Type.isDate(value) || value == null;
                         if (!valid){
                             control.setInvalidMessage(msg);
                             control.setValid(valid);

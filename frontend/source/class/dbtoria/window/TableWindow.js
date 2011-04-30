@@ -74,6 +74,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             this.__recordEdit.addListener('undo',       this.__undo, this);
             this.__recordEdit.addListener('done',       this.__done, this);
         }
+
         this.open();
     },
 
@@ -123,7 +124,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
             else {
                 row    = sm.getSelectedRanges()[0].minIndex;
             }
-
+            var oldRow = row;
             // switch record
             var maxRow = tm.getRowCount();
             this.debug('__navigation(): target='+target+', row='+row+', maxRow='+maxRow);
@@ -146,6 +147,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
                 break;
             case 'new':
                 this.__newRecord();
+                sm.resetSelection();
                 return;
                 break;
             case 'close':
@@ -154,6 +156,9 @@ qx.Class.define("dbtoria.window.TableWindow", {
             }
 
             // switch
+            if (row==oldRow) { // make sure there is a changeSelection event
+                sm.resetSelection();
+            }
             sm.setSelectionInterval(row, row);
             this.__table.scrollCellVisible(0, row);
 //            this.__editRecord(row);
