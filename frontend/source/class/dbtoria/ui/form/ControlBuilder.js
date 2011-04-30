@@ -129,7 +129,8 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
         _addListItems : function(control, data) {
             var vtr = this._vtr;
 
-            for (var i=0; i<data.length; i++) {
+            var len = data.length;
+            for (var i=0; i<len; i++) {
                 var item = data[i];
 
                 if (qx.lang.Type.isObject(item)) {
@@ -153,8 +154,8 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          */
         _addCheckItems : function(control, data) {
             var vtr = this._vtr;
-
-            for (var i=0; i<data.length; i++) {
+            var len = data.length;
+            for (var i=0; i<len; i++) {
                 var item = data[i];
 
                 if (qx.lang.Type.isObject(item)) {

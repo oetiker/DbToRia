@@ -13,7 +13,6 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
     extend : qx.ui.form.Form,
     include : [ qx.locale.MTranslation ],
 
-
     /**
      * @param formDesc {formDescription[]} Form description array.
      *
@@ -26,12 +25,12 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
      */
     construct : function(formDesc) {
         this.base(arguments);
-        var fl = formDesc.length;
-        var formData = this.__formData = {};
+        var fl            = formDesc.length;
+        var controlMap    = this.__controlMap = {};
+        var formData      = this.__formData   = {};
         var validationMgr = this.getValidationManager();
-        var controlMap = this.__controlMap = {};
         for (var i=0; i<fl; i++) {
-            var desc = formDesc[i];
+            var desc  = formDesc[i];
             var trlab = desc.label.translate ? desc.label : this['tr'](desc.label);
 
             var control = controlMap[desc.name] =
@@ -44,11 +43,20 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
                 });
             }
             this.add(control, trlab, null, desc.name);
+
+            // The validator defined in the control (can't do it in control as its
+            // validation manager is only know after its added to the form).
+            //
+            // Alternatively, the validationMgr could be passed to the
+            // ControlBuilder.createControl
+            // method.
             validationMgr.add(control,control.validator());
             if (desc.hasOwnProperty('check')) {
                 if (desc.check) {
                     control.setToolTip(new qx.ui.tooltip.ToolTip(this.tr('Condition: %1',desc.check)));
                     // FIX ME: build rx in backend
+                    //         This might be tricky in case a more complex condition involving
+                    //         various columns is used in the backend.
                     // (function(){ /* give use local context - function factory */
                     //     var rx = new RegExp(desc.check.rx);
                     //     var name = desc.name;
@@ -71,7 +79,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         formDataChanged : {
             init     : false,
             check    : "Boolean",
-            apply    : '_applyFormDataChanged',
+            apply    : '_applyFormDataChanged', // for debugging
             nullable : false
         }
     },
@@ -80,6 +88,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         __formData : null,
         __controlMap: null,
 
+        // only for debugging ...
         _applyFormDataChanged: function(newValue, oldValue) {
             this.debug('formDataChanged='+newValue);
         },
