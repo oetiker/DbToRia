@@ -35,8 +35,12 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         this.__tableId   = tableId;
         this.__tableName = tableName;
 
-        var maxHeight = qx.bom.Document.getHeight() - 20;
-        var maxWidth =  qx.bom.Document.getWidth() - 20;
+        var maxHeight = qx.bom.Document.getHeight() - 100;
+//        var maxWidth =  qx.bom.Document.getWidth() - 20;
+        this.addListener("appear",  function(e) {
+            var maxHeight = qx.bom.Document.getHeight() - 100;
+            this.setHeight(maxHeight);
+        }, this);
 
         this.set({
             icon                 : 'icon/16/apps/utilities-text-editor.png',
@@ -47,13 +51,18 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             contentPaddingTop    : 20,
             contentPaddingBottom : 10,
             layout               : new qx.ui.layout.VBox(10),
-            width                : 600,
-             maxHeight           : maxHeight,
+            minWidth             : 400,
+//             maxHeight           : maxHeight,
+            height           : maxHeight,
+            allowGrowX : true,
             allowGrowY : true
-//            height               : 500
         });
 
         var scrollContainer = new qx.ui.container.Scroll();
+        scrollContainer.set({
+            allowGrowX: true,
+            allowGrowY: true
+        });
         this.__scrollContainer = scrollContainer;
         this.add(scrollContainer, { flex: 1 });
 
@@ -315,7 +324,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             var form         = new dbtoria.ui.form.AutoForm(rules);
             this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
-            this.__scrollContainer.add(formControl);
+            this.__scrollContainer.add(formControl, {flex:1});
             this.__form = form;
         }
     }
