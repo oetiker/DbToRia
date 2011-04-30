@@ -14,19 +14,18 @@ qx.Class.define("dbtoria.ui.form.IntField", {
     include : [ dbtoria.ui.form.MControlSetter ],
 
     /**
-     * Create a customized TextField.
+     * Create a customized TextField for integer values.
      *
      */
     construct : function() {
         this.base(arguments);
-//        this.set({});
     },
 
     members : {
         validator: function() {
             return function(value,control){
                         var msg = qx.locale.Manager.tr('This field must be an integer.');
-                        var valid = !isNaN(Number(value));
+                        var valid = (!isNaN(Number(value)) && value == Math.round(value));
                         if (!valid){
                             control.setInvalidMessage(msg);
                             control.setValid(valid);
