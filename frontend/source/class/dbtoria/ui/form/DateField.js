@@ -11,6 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.DateField", {
     extend : qx.ui.form.DateField,
+    include : [ dbtoria.ui.form.MControlProperties ],
 
     /**
      * Create a customized DateField.

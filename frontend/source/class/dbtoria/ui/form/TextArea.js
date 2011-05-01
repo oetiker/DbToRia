@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.TextArea", {
     extend : qx.ui.form.TextArea,
-    include : [ dbtoria.ui.form.MControlSetter ],
+    include : [ dbtoria.ui.form.MControlSetter, dbtoria.ui.form.MControlProperties ],
 
     /**
      * Create a customized TextArea.

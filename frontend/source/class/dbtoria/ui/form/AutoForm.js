@@ -114,9 +114,18 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             }
         },
 
+        clearPartial: function() {
+            for (var k in this.__controlMap) {
+                var control = this.__controlMap[k];
+                if (!control.getCopyForward()) {
+                    control.setter(null);
+                }
+            }
+        },
+
         setFormData: function(dataMap) {
             for (var k in dataMap) {
-//                this.debug('Setting key='+k+', value='+dataMap[k]);
+                this.debug('Setting key='+k+', value='+dataMap[k]);
                 this.__controlMap[k].setter(dataMap[k]);
             }
         }

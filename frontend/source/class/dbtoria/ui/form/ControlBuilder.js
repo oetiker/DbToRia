@@ -52,7 +52,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
         createControl : function(desc, formDataCallback) {
             var control = null;
 
-//            qx.dev.Debug.debugObject(desc);
+//            if (desc.copy) {
+//                qx.dev.Debug.debugObject(desc);
+//            }
             switch(desc.type) {
                 case "TextField":
                     control = new dbtoria.ui.form.TextField();
@@ -80,6 +82,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     break;
             }
 
+            if (desc.copyForward) {
+                control.setCopyForward(true);
+            }
             if (desc.tooltip) {
                 control.setToolTip(new qx.ui.tooltip.ToolTip(desc.tooltip));
             }

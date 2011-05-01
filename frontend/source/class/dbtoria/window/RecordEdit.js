@@ -264,10 +264,10 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          */
          __setDefaults : function() {
 //             this.debug('Called __setDefaults()');
-             this.__form.clear();
+             // only clear fields that don't have copyForward attribute
+             this.__form.clearPartial();
              this.setCaption("New "+this.__tableName);
              this.setLoading(true);
-             // FIX ME: copy from previous record functionality
              this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__getDefaultsHandler, this), 'getDefaultsDeref',
                                        this.__tableId);
          },
@@ -279,6 +279,8 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
         __getDefaultsHandler : function(data) {
+            this.debug('__getDefaultsHandler(): data=');
+            qx.dev.Debug.debugObject(data);
             this.__form.setFormData(data);
             this.__form.setFormDataChanged(true);
             this.setLoading(false);
