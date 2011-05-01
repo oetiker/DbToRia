@@ -24,12 +24,19 @@ qx.Class.define("dbtoria.ui.form.DateField", {
 
     members : {
         setter: function(value) {
+            if (this.getValue() != null) {
+                return;
+            }
             if (value == null) {
                 this.setValue(value);
             }
             else {
                 this.setValue(new Date(value));
             }
+        },
+
+        clear: function() {
+            this.setValue(null)  ;
         },
 
         validator: function() {

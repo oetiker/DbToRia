@@ -19,12 +19,19 @@ qx.Mixin.define("dbtoria.ui.form.MControlSetter", {
      *
      */
         setter: function(value) {
+            if (this.getValue() != null) {
+                return;
+            }
             if (value == null) {
                 this.setValue(value);
             }
             else {
                 this.setValue(String(value));
             }
+        },
+
+        clear: function() {
+            this.setValue(null);
         }
     }
 
