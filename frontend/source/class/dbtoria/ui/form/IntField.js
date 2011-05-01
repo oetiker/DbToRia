@@ -29,7 +29,7 @@ qx.Class.define("dbtoria.ui.form.IntField", {
                     return true;
                 }
                 var msg = qx.locale.Manager.tr('This field must be an integer.');
-                var valid = (!isNaN(Number(value)) && value == Math.round(value));
+                var valid = (value != null) && (!isNaN(Number(value)) && value == Math.round(value));
                 if (!valid){
                     control.setInvalidMessage(msg);
                     control.setValid(valid);
