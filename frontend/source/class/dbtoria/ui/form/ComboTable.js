@@ -41,7 +41,7 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
 
         validator: function() {
             return function(value,control){
-                if (!control.getRequired()) {
+                if (value == qx.locale.Manager.tr('Select') && !control.getRequired()) {
                     control.setValid(true);
                     return true;
                 }

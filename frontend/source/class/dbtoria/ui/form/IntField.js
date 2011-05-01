@@ -24,14 +24,18 @@ qx.Class.define("dbtoria.ui.form.IntField", {
     members : {
         validator: function() {
             return function(value,control){
-                        var msg = qx.locale.Manager.tr('This field must be an integer.');
-                        var valid = (!isNaN(Number(value)) && value == Math.round(value)) || value == null;
-                        if (!valid){
-                            control.setInvalidMessage(msg);
-                            control.setValid(valid);
-                        }
-                        return valid;
-                   };
+                if (value == null && !control.getRequired()) {
+                    control.setValid(true);
+                    return true;
+                }
+                var msg = qx.locale.Manager.tr('This field must be an integer.');
+                var valid = (!isNaN(Number(value)) && value == Math.round(value));
+                if (!valid){
+                    control.setInvalidMessage(msg);
+                    control.setValid(valid);
+                }
+                return valid;
+            };
         }
     }
 
