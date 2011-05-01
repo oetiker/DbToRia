@@ -157,6 +157,13 @@ sub massageEditView {
                 $row->{readOnly} = $Mojo::JSON::TRUE;
             }
         }
+        for my $table (keys %{$self->{metaFields}}) {
+            next unless exists $self->{metaFields}{$table}{$field}{copy};
+            my $copy   = $self->{metaFields}{$table}{$field}{copy};
+            if ($copy) {
+                $row->{copyForward} = $Mojo::JSON::TRUE;
+            }
+        }
     }
 
 }

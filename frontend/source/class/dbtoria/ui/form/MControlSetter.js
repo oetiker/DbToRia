@@ -11,9 +11,6 @@
 
 qx.Mixin.define("dbtoria.ui.form.MControlSetter", {
 
-    construct : function() {
-    },
-
     members : {
     /**
      * @param value {var}.

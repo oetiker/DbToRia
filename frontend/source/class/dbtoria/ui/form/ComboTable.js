@@ -11,6 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.ComboTable", {
     extend : combotable.ComboTable,
+    include : [ dbtoria.ui.form.MControlProperties ],
 
     /**
      * @param tableModel {} table model to use.
@@ -23,7 +24,7 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
         l[desc.idCol] = 'id';
         l[desc.valueCol] = 'value';
         var tableModel = new dbtoria.data.RemoteTableModel(desc.tableId,
-                                                            [desc.idCol,desc.valueCol], l);
+                                                           [desc.idCol,desc.valueCol], l);
         this.base(arguments, tableModel);
     },
 
@@ -38,6 +39,10 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
                 this.setValue(value.text);
             }
         },
+
+        // getter: function() {
+        //     return {id: this.getModel(), text: this.getValue()};
+        // },
 
         validator: function() {
             return function(value,control){

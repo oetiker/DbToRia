@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.IntField", {
     extend : qx.ui.form.TextField,
-    include : [ dbtoria.ui.form.MControlSetter ],
+    include : [ dbtoria.ui.form.MControlSetter, dbtoria.ui.form.MControlProperties ],
 
     /**
      * Create a customized TextField for integer values.

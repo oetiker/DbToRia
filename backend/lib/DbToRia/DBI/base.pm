@@ -293,15 +293,17 @@ sub getDefaultsDeref {
     my $tableId  = shift;
 
     my $rec  = $self->getDefaults($tableId);
-
+    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
     for my $field (@$view){
         if ($field->{type} eq 'ComboTable'){
             my $key      = $field->{name};
+            next unless exists $rec->{$key}; # only fields already there
             $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
         }
     }
+    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     return $rec;
 }
 

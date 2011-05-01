@@ -11,6 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.CheckBox", {
     extend : qx.ui.form.CheckBox,
+    include : [ dbtoria.ui.form.MControlProperties ],
 
     /**
      * Create a customized CheckBox.

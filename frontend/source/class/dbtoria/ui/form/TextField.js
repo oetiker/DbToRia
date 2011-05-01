@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.TextField", {
     extend : qx.ui.form.TextField,
-    include : [ dbtoria.ui.form.MControlSetter ],
+    include : [ dbtoria.ui.form.MControlProperties, dbtoria.ui.form.MControlSetter ],
 
     /**
      * Create a customized TextField.
