@@ -123,6 +123,13 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             }
         },
 
+        setDefaults: function(dataMap) {
+            for (var k in dataMap) {
+                this.debug('Setting key='+k+', value='+dataMap[k]);
+                this.__controlMap[k].defaults(dataMap[k]);
+            }
+        },
+
         setFormData: function(dataMap) {
             for (var k in dataMap) {
                 this.debug('Setting key='+k+', value='+dataMap[k]);

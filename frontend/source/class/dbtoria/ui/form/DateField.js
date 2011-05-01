@@ -23,10 +23,14 @@ qx.Class.define("dbtoria.ui.form.DateField", {
     },
 
     members : {
-        setter: function(value) {
+        defaults: function(value) {
             if (this.getValue() != null) {
                 return;
             }
+            this.setter(value);
+        },
+
+        setter: function(value) {
             if (value == null) {
                 this.setValue(value);
             }

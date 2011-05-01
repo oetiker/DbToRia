@@ -276,7 +276,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
         __newRecord : function(e) {
             this.__currentId = null;
-            this.__recordEdit.setRecord(null);
+            this.__recordEdit.setRecord('new');
             this.__recordEdit.open();
         },
 

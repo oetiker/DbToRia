@@ -117,9 +117,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
         __target          : null,
         __postAction      : null,
 
-          close: function() {
-              this.base(arguments);
-          },
+          // close: function() {
+          //     this.base(arguments);
+          // },
 
           __createButton: function(icon, tooltip, target) {
             var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
@@ -189,6 +189,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
         setRecord : function(recordId) {
+            if (recordId == 'new') {
+                recordId = null;
+            }
             this.debug("setRecord(): recordId="+recordId);
             if (recordId == this.__recordId) { // nothing changed
                 return;
@@ -210,7 +213,7 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             if (this.__form.validate()) {
                 this.debug('Form validation ok');
                 var data = this.__form.getFormData();
-                qx.dev.Debug.debugObject(data);
+//                qx.dev.Debug.debugObject(data);
                 this.setLoading(true);
                 if (this.__recordId == null) {
                     this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
@@ -248,11 +251,13 @@ qx.Class.define("dbtoria.window.RecordEdit", {
             var recordId = this.__newRecord;
 //             this.debug('__setNewRecord(): record='+recordId);
             this.__recordId = recordId;
-            if (recordId == null) {
-                this.__setDefaults();
+            if (!this.isVisible()) {
                 return;
             }
-            if (this.isVisible()) {
+            if (recordId == null) {
+                this.__setDefaults();
+            }
+            else {
                 this.__setFormData();
             }
         },
@@ -279,9 +284,9 @@ qx.Class.define("dbtoria.window.RecordEdit", {
          * @return {void}
          */
         __getDefaultsHandler : function(data) {
-            this.debug('__getDefaultsHandler(): data=');
-            qx.dev.Debug.debugObject(data);
-            this.__form.setFormData(data);
+//            this.debug('__getDefaultsHandler(): data=');
+//            qx.dev.Debug.debugObject(data);
+            this.__form.setDefaults(data);
             this.__form.setFormDataChanged(true);
             this.setLoading(false);
         },

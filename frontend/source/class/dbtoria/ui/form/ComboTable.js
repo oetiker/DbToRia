@@ -29,10 +29,14 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
     },
 
     members : {
-        setter: function(value) {
+        defaults: function(value) {
             if (this.getModel() != null) {
                 return;
             }
+            this.setter(value);
+        },
+
+        setter: function(value) {
             if (value == null || value.id == undefined || value.id == null) {
                 this.setModel(null);
                 this.setValue(qx.locale.Manager.tr('Select'));
