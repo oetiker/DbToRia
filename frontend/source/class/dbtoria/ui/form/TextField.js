@@ -29,7 +29,7 @@ qx.Class.define("dbtoria.ui.form.TextField", {
                     return true;
                 }
                 var msg = qx.locale.Manager.tr('This field must be a string.');
-                var valid = qx.lang.Type.isString(value);
+                var valid = (value != null) && qx.lang.Type.isString(value);
                 if (!valid){
                     control.setInvalidMessage(msg);
                     control.setValid(valid);
