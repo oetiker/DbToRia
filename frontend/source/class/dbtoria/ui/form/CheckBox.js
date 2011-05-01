@@ -24,12 +24,19 @@ qx.Class.define("dbtoria.ui.form.CheckBox", {
 
     members : {
         setter: function(value) {
+            if (this.getValue() != null) {
+                return;
+            }
             if (value == null) {
                 this.setValue(false);
             }
             else {
                 this.setValue(value);
             }
+        },
+
+        clear: function() {
+            this.setValue(false);
         },
 
         validator: function() {

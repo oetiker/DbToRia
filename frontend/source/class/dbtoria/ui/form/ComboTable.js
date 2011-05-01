@@ -30,6 +30,9 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
 
     members : {
         setter: function(value) {
+            if (this.getModel() != null) {
+                return;
+            }
             if (value == null || value.id == undefined || value.id == null) {
                 this.setModel(null);
                 this.setValue(qx.locale.Manager.tr('Select'));
@@ -40,9 +43,10 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
             }
         },
 
-        // getter: function() {
-        //     return {id: this.getModel(), text: this.getValue()};
-        // },
+        clear: function() {
+            this.setModel(null);
+            this.setValue(qx.locale.Manager.tr('Select'));
+        },
 
         validator: function() {
             return function(value,control){

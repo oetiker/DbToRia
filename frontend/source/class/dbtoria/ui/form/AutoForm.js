@@ -110,7 +110,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
 
         clear: function() {
             for (var k in this.__controlMap) {
-                this.__controlMap[k].setter(null);
+                this.__controlMap[k].clear();
             }
         },
 
@@ -118,7 +118,7 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             for (var k in this.__controlMap) {
                 var control = this.__controlMap[k];
                 if (!control.getCopyForward()) {
-                    control.setter(null);
+                    control.clear();
                 }
             }
         },
