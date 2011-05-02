@@ -46,7 +46,7 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
 //        partAction.add(new qx.ui.toolbar.Separator());
 
 
-        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
+        this.__rpc = dbtoria.data.Rpc.getInstance();
 
         this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__getTablesHandler, this),
                                   'getToolbarTables');

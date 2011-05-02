@@ -61,7 +61,7 @@ qx.Class.define( 'dbtoria.data.Config',
                 return;
             }
             this.__loading = true;
-            var rpc = dbtoria.io.remote.Rpc.getInstance();
+            var rpc = dbtoria.data.Rpc.getInstance();
             rpc.callAsync( qx.lang.Function.bind(this.__refreshHandler, this),
                            'getConfig');
         },
