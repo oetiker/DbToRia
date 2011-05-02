@@ -46,8 +46,9 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
         __rpc: null,
         __tableId: null,
         __columnIdList: null,
+
         /**
-         * Provid our implementation to make remote table work
+         * Provide our implementation to make remote table work
          */
         _loadRowCount : function() {
             var that = this;

@@ -98,13 +98,16 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __refresh : function(e) {
 //            this.__done();
-            var row = e.getData();
-            this.debug('__refresh() called, row='+row);
+            var record = e.getData();
+            this.debug('__refresh() called, record='+record);
             this.__table.getTableModel().reloadData();
-            if (row != null) {
-                var sm  = this.__table.getSelectionModel();
-                sm.resetSelection();
-                sm.setSelectionInterval(row, row);
+            if (record != null) {
+                window.alert('Finding row from recordId not yet implemented.');
+//                this.__table.selectRow(record);
+                // var row = this.__table.getRow(record);
+                // var sm  = this.__table.getSelectionModel();
+                // sm.resetSelection();
+                // sm.setSelectionInterval(row, row);
             }
         },
 
