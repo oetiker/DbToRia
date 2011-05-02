@@ -28,7 +28,7 @@
  * msg.error('Title','Message');
  * </pre>
  */
-qx.Class.define("dbtoria.dialog.MsgBox", {
+qx.Class.define("dbtoria.ui.dialog.MsgBox", {
     extend : qx.ui.window.Window,
     type : "singleton",
 
@@ -110,7 +110,7 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
          *
          * @param titel {String} window title
          * @param text {String} contents
-         * @return {void} 
+         * @return {void}
          */
         __open : function(titel, text) {
             this.setCaption(String(titel));
@@ -144,7 +144,7 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
          *
          * @param titel {String} title
          * @param text {String} body
-         * @return {void} 
+         * @return {void}
          */
         error : function(titel, text) {
             this.__body.setIcon("icon/32/status/dialog-error.png");
@@ -161,7 +161,7 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
          * Show server error message
          *
          * @param exc {Map} callAsync exception
-         * @return {void} 
+         * @return {void}
          */
         exc : function(exc) {
             this.__body.setIcon("icon/32/status/dialog-error.png");
@@ -184,7 +184,7 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
          *
          * @param titel {String} title
          * @param text {String} body
-         * @return {void} 
+         * @return {void}
          */
         info : function(titel, text) {
             this.__body.setIcon("icon/32/status/dialog-information.png");
@@ -203,7 +203,7 @@ qx.Class.define("dbtoria.dialog.MsgBox", {
          * @param titel {String} title
          * @param text {String} body
          * @param exec_action {var} TODOC
-         * @return {void} 
+         * @return {void}
          */
         warn : function(titel, text, exec_action) {
             this.__body.setIcon("icon/32/status/dialog-warning.png");

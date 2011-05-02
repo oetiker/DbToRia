@@ -17,7 +17,7 @@
 /**
  * Login Popup that performs authentication.
  */
-qx.Class.define("dbtoria.dialog.Login", {
+qx.Class.define("dbtoria.ui.dialog.Login", {
     extend : qx.ui.window.Window,
     type : 'singleton',
 
@@ -145,7 +145,7 @@ qx.Class.define("dbtoria.dialog.Login", {
          */
         __loginHandler : function(ret, exc) {
             if (exc) {
-                dbtoria.dialog.MsgBox.getInstance().exc(exc);
+                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
                 this.setEnabled(true);
             }
             else {
