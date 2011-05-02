@@ -115,7 +115,7 @@ ${E}head1 SYNOPSIS
  dsn = 
  mojo_secret = MyCookieSecret
  log_file = /tmp/dbtoria.log
- log_toppic_filter = .+
+ log_level = debug
 
 ${E}head1 DESCRIPTION
 
@@ -141,12 +141,13 @@ sub _make_parser {
         _mandatory => [qw(General)],
         General => {
             _doc => 'Global configuration settings for DbToRia',
-            _vars => [ qw(dsn mojo_secret log_file log_toppic_filer schema encoding) ],
-            _mandatory => [ qw(dsn mojo_secret log_file) ],
+            _vars => [ qw(dsn mojo_secret log_file log_level schema encoding) ],
+            _mandatory => [ qw(dsn mojo_secret) ],
             dsn => { _doc => 'DBI connect string', _example=>'dbi:Pg:dbname=testdb' },
             mojo_secret => { _doc => 'secret for signing mojo cookies' },
             schema => { _doc => 'which schema should we prowl for data?' },
             log_file => { _doc => 'write a log file to this location'},
+            log_level => { _doc => 'mojo log level'},
         },
         MetaEngines => {
             _doc => 'Modules for adding meta information to the database',
