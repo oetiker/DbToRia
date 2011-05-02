@@ -22,27 +22,25 @@ qx.Class.define("dbtoria.ui.form.FloatField", {
     },
 
     members : {
-        validator: function() {
-            return function(value,control){
-                if (value == null && !control.getRequired()) {
-                    control.setValid(true);
-                    return true;
-                }
-                var regex = /(\d*):(\d+)/;
-                var res;
-                if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
-                  this.debug('res='+res);
-                    value = Number(res[1]) + Number(res[2])/60;
-                }
-                this.debug('value='+value);
-                var msg = qx.locale.Manager.tr('This field must be a number.');
-                var valid = (value != null) && !isNaN(Number(value));
-                if (!valid){
-                    control.setInvalidMessage(msg);
-                    control.setValid(valid);
-                    }
-                return valid;
-            };
+        validator: function(value,control) {
+            if (value == null && !control.getRequired()) {
+                control.setValid(true);
+                return true;
+            }
+            var regex = /(\d*):(\d+)/;
+            var res;
+            if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
+                this.debug('res='+res);
+                value = Number(res[1]) + Number(res[2])/60;
+            }
+            this.debug('value='+value);
+            var msg = qx.locale.Manager.tr('This field must be a number.');
+            var valid = (value != null) && !isNaN(Number(value));
+            if (!valid){
+                control.setInvalidMessage(msg);
+                control.setValid(valid);
+            }
+            return valid;
         }
     }
 

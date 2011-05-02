@@ -22,20 +22,18 @@ qx.Class.define("dbtoria.ui.form.IntField", {
     },
 
     members : {
-        validator: function() {
-            return function(value,control){
-                if (value == null && !control.getRequired()) {
-                    control.setValid(true);
-                    return true;
-                }
-                var msg = qx.locale.Manager.tr('This field must be an integer.');
-                var valid = (value != null) && (!isNaN(Number(value)) && value == Math.round(value));
-                if (!valid){
-                    control.setInvalidMessage(msg);
-                    control.setValid(valid);
-                }
-                return valid;
-            };
+        validator: function(value,control) {
+            if (value == null && !control.getRequired()) {
+                control.setValid(true);
+                return true;
+            }
+            var msg = qx.locale.Manager.tr('This field must be an integer.');
+            var valid = (value != null) && (!isNaN(Number(value)) && value == Math.round(value));
+            if (!valid){
+                control.setInvalidMessage(msg);
+                control.setValid(valid);
+            }
+            return valid;
         }
     }
 

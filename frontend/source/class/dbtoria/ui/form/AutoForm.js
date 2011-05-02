@@ -50,7 +50,9 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             // Alternatively, the validationMgr could be passed to the
             // ControlBuilder.createControl
             // method.
-            validationMgr.add(control,control.validator());
+            if (qx.lang.Type.isFunction(control.validator)) {
+                validationMgr.add(control, control.validator);
+            }
 
             if (desc.hasOwnProperty('check')) {
                 if (desc.check) {
