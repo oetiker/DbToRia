@@ -29,7 +29,7 @@
  * The database is asked for all available tables. A list of buttons is
  * generated and a click on them opens the detailled TableView.
  */
-qx.Class.define("dbtoria.window.TableSelection", {
+qx.Class.define("dbtoria.module.database.TableSelection", {
     extend : qx.ui.menu.Menu,
     type : "singleton",
 
@@ -74,7 +74,7 @@ qx.Class.define("dbtoria.window.TableSelection", {
                     }
                     menuButton.addListener("execute", function(e) {
                         var viewMode = (item.type != 'TABLE');
-                        new dbtoria.window.TableWindow(tableId, item.name, viewMode);
+                        new dbtoria.module.database.TableWindow(tableId, item.name, viewMode);
                     }, this);
                 }
             );

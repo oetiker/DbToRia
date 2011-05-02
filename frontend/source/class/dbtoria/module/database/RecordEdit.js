@@ -3,6 +3,8 @@
    Copyrigtht: OETIKER+PARTNER AG
    License:    GPL
    Authors:    Tobias Oetiker
+               Fritz Zaucker
+
    Utf8Check:  äöü
 
    $Id: AdminEditor.js 333 2010-10-05 20:07:53Z oetiker $
@@ -27,8 +29,8 @@
 /**
  * Popup window for editing a database record.
  */
-qx.Class.define("dbtoria.window.RecordEdit", {
-    extend : dbtoria.window.DesktopWindow,
+qx.Class.define("dbtoria.module.database.RecordEdit", {
+    extend : dbtoria.module.desktop.DesktopWindow,
 
     construct : function(tableId, tableName, viewMode) {
         this.base(arguments);

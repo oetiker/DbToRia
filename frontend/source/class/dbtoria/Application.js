@@ -55,7 +55,7 @@ qx.Class.define("dbtoria.Application", {
             var config = dbtoria.data.Config.getInstance();
             config.addListener('configUpdate',
                                function() {
-                                   root.add(new dbtoria.window.Main(),
+                                   root.add(new dbtoria.module.Main(),
                                             { edge : 0 });
                                }, this);
             config.refresh();

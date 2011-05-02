@@ -6,12 +6,14 @@
 
    Copyright:
     2009 David Angleitner, Switzerland
+    2011 Oetiker+Partner AG, Olten, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
    Authors:
     * David Angleitner
+    * Fritz Zaucker
 
 ************************************************************************ */
 
@@ -29,17 +31,8 @@
  * The main window consists of a menu bar, a desktop where the windows are
  * located and a taskbar where minimized windows are held.
  */
-qx.Class.define("dbtoria.window.Main", {
+qx.Class.define("dbtoria.module.Main", {
     extend : qx.ui.container.Composite,
-
-
-
-
-    /*
-        *****************************************************************************
-    	CONSTRUCTOR
-        *****************************************************************************
-        */
 
     construct : function() {
         var containerLayout = new qx.ui.layout.VBox();
@@ -51,19 +44,19 @@ qx.Class.define("dbtoria.window.Main", {
         var desktopContainer = new qx.ui.container.Scroll();
 
         // the desktop holds all other windows
-        var desktop = dbtoria.window.Desktop.getInstance();
+        var desktop = dbtoria.module.desktop.Desktop.getInstance();
 
         desktopContainer.add(desktop, {
             width  : '100%',
             height : '100%'
         });
 
-        var toolbar = dbtoria.window.Toolbar.getInstance();
+        var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
         this.add(toolbar);
 
         this.add(desktopContainer, { flex : 1 });
 
-        var taskbar = dbtoria.window.Taskbar.getInstance();
+        var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
         this.add(taskbar);
 
     }
