@@ -228,12 +228,13 @@ sub getDefaults {
     my $tableId  = shift;
     # print STDERR "getDefaults($tableId)\n";
     my $dbh        = $self->getDbh();
-    my $columns    = $self->getTableStructure($tableId)->{columns};
-    my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
+    my $structure  = $self->getTableStructure($tableId);
+    my $columns    = $structure->{columns};
+    my $typeMap    = $structure->{typeMap};
 
     my %defaults;
     for my $col (@$columns) {
-        my $id = $col->{id};
+        my $id      = $col->{id};
         my $default = $col->{default};
         next if not defined $default;
         next if $default =~ m/nextval/; # don't trigger serial sequence

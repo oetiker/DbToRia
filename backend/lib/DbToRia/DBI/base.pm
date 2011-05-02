@@ -573,6 +573,7 @@ sub feToDb {
     if ($ourtype eq 'boolean'){
         $value = $value ? 1 : 0;
     }
+    # time support
     if ($ourtype eq 'float') {
         if ($value =~ m/^(\d*):(\d+)$/) {
             $value = $1 + $2/60;
