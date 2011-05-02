@@ -126,15 +126,17 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
         },
 
         setDefaults: function(dataMap) {
+            this.debug('Called setDefaults()');
             for (var k in dataMap) {
-                this.debug('Setting key='+k+', value='+dataMap[k]);
+//                this.debug('  setDefaults(): key='+k+', value='+dataMap[k]);
                 this.__controlMap[k].defaults(dataMap[k]);
             }
         },
 
         setFormData: function(dataMap) {
+            this.debug('Called setFormData()');
             for (var k in dataMap) {
-                this.debug('Setting key='+k+', value='+dataMap[k]);
+//                this.debug('  setFormData key='+k+', value='+dataMap[k]);
                 this.__controlMap[k].setter(dataMap[k]);
             }
         }

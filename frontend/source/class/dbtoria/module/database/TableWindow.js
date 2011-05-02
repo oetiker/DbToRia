@@ -71,8 +71,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, viewMode);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);
-            this.__recordEdit.addListener('undo',       this.__undo, this);
-            this.__recordEdit.addListener('done',       this.__done, this);
+//            this.__recordEdit.addListener('undo',       this.__undo, this);
         }
 
         this.addListener('close', function() {
@@ -85,7 +84,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __table:      null,
         __tbEdit:     null,
         __tbDelete:   null,
-        __tbDup:      null,
+        __tbClone:    null,
         __tbNew:      null,
         __currentId:  null,
         __tableName:  null,
@@ -98,22 +97,29 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __newRow:     null,
 
         __refresh : function(e) {
-            this.__done();
+//            this.__done();
+            var row = e.getData();
+            this.debug('__refresh() called, row='+row);
             this.__table.getTableModel().reloadData();
+            if (row != null) {
+                var sm  = this.__table.getSelectionModel();
+                sm.resetSelection();
+                sm.setSelectionInterval(row, row);
+            }
         },
 
-        __undo : function(e) {
-            this.debug('__undo(): lastId='+this.__lastId+', lastRow='+this.__lastRow);
-            var row = this.__lastRow;
-            var sm     = this.__table.getSelectionModel();
-            sm.setSelectionInterval(row, row);
-        },
+        // __undo : function(e) {
+        //     this.debug('__undo(): lastId='+this.__lastId+', lastRow='+this.__lastRow);
+        //     var row = this.__lastRow;
+        //     var sm  = this.__table.getSelectionModel();
+        //     sm.setSelectionInterval(row, row);
+        // },
 
-        __done : function(e) {
-            this.__lastRow = this.__newRow;
-            this.__newRow  = null;
-            this.debug('__done(): lastRow='+this.__lastRow);
-        },
+        // __done : function(e) {
+        //     this.__lastRow = this.__newRow;
+        //     this.__newRow  = null;
+        //     this.debug('__done(): lastRow='+this.__lastRow);
+        // },
 
         __navigation : function(e) {
             var target = e.getData();
@@ -150,10 +156,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 break;
             case 'new':
                 this.__newRecord();
-                sm.resetSelection();
-                return;
-                break;
-            case 'close':
                 return;
                 break;
             }
@@ -164,7 +166,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             }
             sm.setSelectionInterval(row, row);
             this.__table.scrollCellVisible(0, row);
-//            this.__editRecord(row);
+            if (this.__recordEdit.isVisible()) {
+                this.__editRecord(row);
+            }
 
         },
 
@@ -178,7 +182,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var toolbar = new qx.ui.toolbar.ToolBar();
             var newButton = this.__tbNew = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
             var editButton = this.__tbEdit = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png").set({enabled: false});
-            var dupButton = this.__tbDup = new qx.ui.toolbar.Button(this.tr("Copy"), "icon/16/actions/edit-copy.png").set({enabled: false});
+            var cloneButton = this.__tbClone = new qx.ui.toolbar.Button(this.tr("Clone"), "icon/16/actions/edit-copy.png").set({enabled: false});
             var deleteButton = this.__tbDelete = new qx.ui.toolbar.Button(this.tr("Delete"), "icon/16/actions/edit-delete.png").set({enabled: false});
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
@@ -192,7 +196,8 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 editButton.addListener('execute', this.__editRecord, this);
                 toolbar.add(editButton);
 
-                toolbar.add(dupButton);
+                cloneButton.addListener('execute', this.__cloneRecord, this);
+                toolbar.add(cloneButton);
 
                 deleteButton.addListener('execute', this.__deleteRecord, this);
                 toolbar.add(deleteButton);
@@ -239,13 +244,13 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __contextMenuHandler: function(col, row, table, dataModel, contextMenu) {
             var editEntry   = new qx.ui.menu.Button(this.tr("Edit"));
             editEntry.addListener("execute", this.__editRecord, this);
-            var deleteEntry = new qx.ui.menu.Button(this.tr("Delete")).set({enabled: false});
+            var deleteEntry = new qx.ui.menu.Button(this.tr("Delete"));
             deleteEntry.addListener("execute", this.__deleteRecord, this);
-            var dupEntry = new qx.ui.menu.Button(this.tr("Copy")).set({enabled: false});
-            dupEntry.addListener("execute", this.__dupRecord, this);
+            var cloneEntry = new qx.ui.menu.Button(this.tr("Clone"));
+            cloneEntry.addListener("execute", this.__cloneRecord, this);
             contextMenu.add(editEntry);
             contextMenu.add(deleteEntry);
-            contextMenu.add(dupEntry);
+            contextMenu.add(cloneEntry);
 
             return true;
         },
@@ -253,8 +258,8 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __deleteRecord : function(e) {
             this.debug('__deleteRecord(): id='+this.__currentId);
-          this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__deleteRecordHandler, this),
-                                    'deleteTableData', this.__tableId, this.__currentId);
+            this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__deleteRecordHandler, this),
+                                      'deleteTableData', this.__tableId, this.__currentId);
         },
 
         __deleteRecordHandler : function(ret) {
@@ -265,22 +270,73 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             tm.removeRow(row);
         },
 
-        __dupRecord : function(e) {
-            var dupId = this.__currentId;
-            this.__currentId = null;
-            this.__recordEdit.duplicateRecord(dupId);
-            this.__recordEdit.open();
+        __cloneRecordHandler: function(e) {
+            var ret = e.getData();
+            this.debug('__cloneRecordHandler(): ret='+ret);
+            switch (ret) {
+            case 'failed':
+            case 'invalid':
+                this.__undo();
+                break;
+            case 'succeeded':
+                this.__refresh();
+            case null:
+                this.__recordEdit.cloneRecord(this.__currentId);
+                break;
+            }
+        },
+
+        __cloneRecord : function(e) {
+            this.__recordEdit.addListenerOnce('saveRecord', this.__cloneRecordHandler, this);
+            this.__recordEdit.saveRecord();
+        },
+
+        __editRecordHandler: function(e) {
+            var ret = e.getData();
+            this.debug('__editRecordHandler(): ret='+ret);
+            this.debug('__editRecordHandler(): this.__currentId='+this.__currentId);
+            switch (ret) {
+            case 'failed':
+            case 'invalid':
+                this.__undo();
+                break;
+            case 'succeeded':
+                this.__refresh();
+            case null:
+                this.__recordEdit.editRecord(this.__currentId);
+                break;
+            }
         },
 
         __editRecord : function(e) {
-            this.__recordEdit.setRecord(this.__currentId);
-            this.__recordEdit.open();
+            this.debug('__editRecord called');
+            this.__recordEdit.addListenerOnce('saveRecord',
+                                              qx.lang.Function.bind(this.__editRecordHandler, this),
+                                              this);
+            this.__recordEdit.saveRecord();
+        },
+
+        __newRecordHandler: function(e) {
+            var ret = e.getData();
+            this.debug('__newRecordHandler(): ret='+ret);
+            switch (ret) {
+            case 'failed':
+            case 'invalid':
+                this.__undo();
+                break;
+            case 'succeeded':
+                this.__refresh();
+            case null:
+                var sm = this.__table.getSelectionModel();
+                sm.resetSelection();
+                this.__recordEdit.newRecord();
+                break;
+            }
         },
 
         __newRecord : function(e) {
-            this.__currentId = null;
-            this.__recordEdit.setRecord('new');
-            this.__recordEdit.open();
+            this.__recordEdit.addListenerOnce('saveRecord', this.__newRecordHandler, this);
+            this.__recordEdit.saveRecord();
         },
 
         __filterTable : function(e) {
@@ -316,15 +372,20 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             });
             if (row) {
                 this.__currentId = row.ROWINFO[0];
+                this.__tbClone.setEnabled(row.ROWINFO[1]);
                 this.__tbEdit.setEnabled(row.ROWINFO[1]);
                 this.__tbDelete.setEnabled(row.ROWINFO[2]);
             }
             else {
-                this.__tbEdit.setEnabled(false);
+                this.__tbClone.setEnabled(false);
                 this.__tbDelete.setEnabled(false);
+                this.__tbEdit.setEnabled(false);
                 this.__currentId = null;
             }
-            this.__recordEdit.setRecord(this.__currentId);
+            this.debug('__switchRecord(): this.__currentId='+this.__currentId);
+            if (this.__recordEdit.isVisible() && this.__currentId != null) {
+                this.__editRecord(this.__currentId);
+            }
         }
     }
 });
