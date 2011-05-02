@@ -15,7 +15,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("dbtoria.module.desktop.Toolbar", {
+qx.Class.define("dbtoria.module.desktop.Toolbar2", {
     extend : qx.ui.toolbar.ToolBar,
     type : "singleton",
 
@@ -27,9 +27,15 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         this.__partTables = partTables;
         var partLast   = new qx.ui.toolbar.Part();
 
+        var overflow = new qx.ui.toolbar.MenuButton("More...");
+        var overflowMenu = this.__overflowMenu = new qx.ui.menu.Menu();
+        overflow.setMenu(overflowMenu);
+
         this.add(partAction);
         this.add(new qx.ui.toolbar.Separator());
         this.add(partTables);
+        this.add(overflow);
+        this.setOverflowIndicator(overflow);
         this.addSpacer();
         this.add(new qx.ui.toolbar.Separator());
         this.add(partLast);
@@ -37,18 +43,19 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu);
         menuBtn.set({allowGrowX: false, allowGrowY: false, show: 'icon'});
         partAction.add(menuBtn);
-//        partAction.add(new qx.ui.toolbar.Separator());
-
 
         this.__rpc = dbtoria.data.Rpc.getInstance();
-
         this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__getTablesHandler, this),
                                   'getToolbarTables');
 
-        var logoutBtn = new qx.ui.toolbar.Button(this.tr("Logout"), "icon/16/actions/application-exit.png").set({show: 'icon'});
+        var logoutBtn = new qx.ui.toolbar.Button(this.tr("Logout"),
+                                                 "icon/16/actions/application-exit.png");
         this.__logoutBtn = logoutBtn;
-        logoutBtn.setAllowGrowX(false);
-        logoutBtn.setAllowGrowY(false);
+        logoutBtn.set({
+//            show: 'icon',
+            allowGrowX: false,
+            allowGrowY: false
+        });
         partLast.add(logoutBtn);
 
         // call logout on the backend to destroy session
@@ -62,8 +69,19 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
     },
 
     members : {
-        __rpc     : null,
-        __partTables: null,
+        __rpc:          null,
+        __partTables:   null,
+        __overflowMenu: null,
+
+        __showItem: function(item) {
+            item.setVisibility('visible');
+            item.getUserData('menuBtn').setVisibility("excluded");
+        },
+
+        __hideItem: function(item) {
+            item.setVisibility('excluded');
+            item.getUserData('menuBtn').setVisibility("visible");
+        },
 
         __getTablesHandler:  function(ret) {
             var btn, table, i, len=ret.length;
@@ -72,18 +90,35 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
                 tables.push(ret[i]);
             }
             var that = this;
+
+            // handler for showing and hiding toolbar items
+            this.addListener("showItem", function(e) {
+                this.__showItem(e.getData());
+            }, this);
+
+            this.addListener("hideItem", function(e) {
+                this.__hideItem(e.getData());
+            }, this);
+            this.setOverflowHandling(true);
+
+            var prio = 0;
             tables.map(
                 function(table) {
-                    var item = table;
-                    var btn = new qx.ui.toolbar.Button(item.name);
-                    btn.set({ allowGrowX: false, allowGrowY: false});
-                    btn.addListener("execute", function(e) {
-                        new dbtoria.module.database.TableWindow(item.tableId, item.name);
-                    }, this);
-//                    qx.log.Logger.debug(that, item.name);
+                    var handler = function() {
+                        new dbtoria.module.database.TableWindow(table.tableId, table.name);
+                    };
+                    var btn = new qx.ui.toolbar.Button(table.name);
+                    btn.addListener("execute", handler, this);
+                    var btnO = new qx.ui.menu.Button(table.name);
+                    btnO.addListener("execute", handler, this);
+                    btnO.setVisibility("excluded");
+                    that.setRemovePriority(btn, prio++);
+                    btn.setUserData('menuBtn', btnO);
                     that.__partTables.add(btn);
+                    that.__overflowMenu.add(btnO);
                 }
             );
+
         }
 
     }

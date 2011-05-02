@@ -38,7 +38,6 @@ qx.Class.define("dbtoria.module.Main", {
         var containerLayout = new qx.ui.layout.VBox();
         containerLayout.setSeparator("separator-vertical");
         this.base(arguments, containerLayout);
-
         // the desktop area is the largest part of dbtoria, make sure it is
         // scrollable
         var desktopContainer = new qx.ui.container.Scroll();
@@ -50,8 +49,11 @@ qx.Class.define("dbtoria.module.Main", {
             width  : '100%',
             height : '100%'
         });
-
+        var maxWidth = qx.bom.Document.getWidth();
+        this.debug('maxWidth='+maxWidth);
         var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
+//        toolbar.setMaxWidth(maxWidth);
+        toolbar.setAllowGrowX(false);
         this.add(toolbar);
 
         this.add(desktopContainer, { flex : 1 });
