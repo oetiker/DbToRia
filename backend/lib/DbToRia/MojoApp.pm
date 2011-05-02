@@ -18,9 +18,14 @@ has 'cfg' => sub {
 
 sub startup {
     my $self = shift;
-
-    $self->secret($self->cfg->{General}{mojo_secret});
-    $self->log->path($self->cfg->{General}{log_file});
+    my $gcfg = $self->cfg->{General};
+    $self->secret($gcfg->{mojo_secret});
+    if ($self->app->mode ne 'development' and $gcfg->{log_file}){
+        $self->log->path($gcfg->{log_file});
+    }
+    if ($gcfg->{log_level}){
+        $self->log->level($gcfg->{log_level});
+    }
     $self->app->hook(before_dispatch => sub {
         my $self = shift;
         $self->stash->{'mojo.session'} ||= {};
