@@ -43,20 +43,18 @@ qx.Class.define("dbtoria.ui.form.DateField", {
             this.setValue(null)  ;
         },
 
-        validator: function() {
-            return function(value,control){
-                if (value == null && !control.getRequired()) {
-                    control.setValid(true);
-                    return true;
-                }
-                var msg = qx.locale.Manager.tr('This field must be a date.');
-                var valid = qx.lang.Type.isDate(value);
-                if (!valid){
-                    control.setInvalidMessage(msg);
-                    control.setValid(valid);
-                }
-                return valid;
-            };
+        validator: function(value,control) {
+            if (value == null && !control.getRequired()) {
+                control.setValid(true);
+                return true;
+            }
+            var msg = qx.locale.Manager.tr('This field must be a date.');
+            var valid = qx.lang.Type.isDate(value);
+            if (!valid){
+                control.setInvalidMessage(msg);
+                control.setValid(valid);
+            }
+            return valid;
         }
 
     }

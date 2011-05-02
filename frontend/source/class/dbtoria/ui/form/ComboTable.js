@@ -52,20 +52,18 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
             this.setValue(qx.locale.Manager.tr('Select'));
         },
 
-        validator: function() {
-            return function(value,control){
-                if (value == qx.locale.Manager.tr('Select') && !control.getRequired()) {
-                    control.setValid(true);
-                    return true;
-                }
-                var msg = qx.locale.Manager.tr('This field must not be undefined.');
-                var valid = (value != qx.locale.Manager.tr('Select'));
-                if (!valid){
-                    control.setInvalidMessage(msg);
-                    control.setValid(valid);
-                }
-                return valid;
-            };
+        validator: function(value,control){
+            if (value == qx.locale.Manager.tr('Select') && !control.getRequired()) {
+                control.setValid(true);
+                return true;
+            }
+            var msg = qx.locale.Manager.tr('This field must not be undefined.');
+            var valid = (value != qx.locale.Manager.tr('Select'));
+            if (!valid){
+                control.setInvalidMessage(msg);
+                control.setValid(valid);
+            }
+            return valid;
         }
 
     }
