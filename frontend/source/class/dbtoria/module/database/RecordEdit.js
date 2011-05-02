@@ -29,7 +29,7 @@
  * Popup window for editing a database record.
  */
 qx.Class.define("dbtoria.module.database.RecordEdit", {
-    extend : dbtoria.module.desktop.DesktopWindow,
+    extend : dbtoria.module.desktop.Window,
 
     construct : function(tableId, tableName, viewMode) {
         this.base(arguments);
