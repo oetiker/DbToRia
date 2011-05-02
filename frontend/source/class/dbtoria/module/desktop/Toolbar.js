@@ -15,7 +15,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("dbtoria.window.Toolbar", {
+qx.Class.define("dbtoria.module.desktop.Toolbar", {
     extend : qx.ui.toolbar.ToolBar,
     type : "singleton",
 
@@ -39,7 +39,7 @@ qx.Class.define("dbtoria.window.Toolbar", {
         this.addSpacer();
         this.add(new qx.ui.toolbar.Separator());
         this.add(partLast);
-        var menu    = dbtoria.window.TableSelection.getInstance();
+        var menu    = dbtoria.module.database.TableSelection.getInstance();
         var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu);
         menuBtn.set({allowGrowX: false, allowGrowY: false, show: 'icon'});
         partAction.add(menuBtn);
@@ -84,7 +84,7 @@ qx.Class.define("dbtoria.window.Toolbar", {
                     var btn = new qx.ui.toolbar.Button(item.name);
                     btn.set({ allowGrowX: false, allowGrowY: false});
                     btn.addListener("execute", function(e) {
-                        new dbtoria.window.TableWindow(item.tableId, item.name);
+                        new dbtoria.module.database.TableWindow(item.tableId, item.name);
                     }, this);
 //                    qx.log.Logger.debug(that, item.name);
                     that.__partTables.add(btn);

@@ -47,8 +47,8 @@
  * form for data editing. This window also allows for searching, creation and
  * deletion of entries.
  */
-qx.Class.define("dbtoria.window.TableWindow", {
-    extend : dbtoria.window.DesktopWindow,
+qx.Class.define("dbtoria.module.database.TableWindow", {
+    extend : dbtoria.module.desktop.DesktopWindow,
         construct : function(tableId, tableName, viewMode) {
         this.__tableName = tableName;
         this.__tableId   = tableId;
@@ -68,7 +68,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
         }
         else {
             this.setCaption(this.tr('Table: %1', this.__tableName));
-            this.__recordEdit = new dbtoria.window.RecordEdit(tableId, tableName, viewMode);
+            this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, viewMode);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);
             this.__recordEdit.addListener('undo',       this.__undo, this);
@@ -266,7 +266,10 @@ qx.Class.define("dbtoria.window.TableWindow", {
         },
 
         __dupRecord : function(e) {
-            window.alert('Not yet implemented');
+            var dupId = this.__currentId;
+            this.__currentId = null;
+            this.__recordEdit.duplicateRecord(dupId);
+            this.__recordEdit.open();
         },
 
         __editRecord : function(e) {
@@ -282,7 +285,7 @@ qx.Class.define("dbtoria.window.TableWindow", {
 
         __filterTable : function(e) {
             var that = this;
-            new dbtoria.window.TableFilter(this.tr("Filter: %1", this.__tableName),
+            new dbtoria.module.database.TableFilter(this.tr("Filter: %1", this.__tableName),
                                            this.__columns,
                                            function(filter) {
 //                                               this.debug('__filterTable(): calling setFilter()');

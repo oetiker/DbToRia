@@ -39,7 +39,7 @@
  * selectabilty but its difficult to find a user friendly way to display these
  * options.
  */
-qx.Class.define("dbtoria.window.TableFilter", {
+qx.Class.define("dbtoria.module.database.TableFilter", {
     extend : qx.ui.window.Window,
 
     /*
@@ -47,7 +47,7 @@ qx.Class.define("dbtoria.window.TableFilter", {
     	CONSTRUCTOR
         *****************************************************************************
 
-        * @param tableWindow {dbtoria.window.Table} The table window the filter is applied to
+        * @param tableWindow {dbtoria.module.database.Table} The table window the filter is applied to
         * @param title {String} Title for window.
         */
 

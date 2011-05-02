@@ -32,13 +32,13 @@
  * - Adding window to bookmark bar (not yet implemented)
  * - Loading indicator
  */
-qx.Class.define("dbtoria.window.DesktopWindow", {
+qx.Class.define("dbtoria.module.desktop.DesktopWindow", {
     extend : qx.ui.window.Window,
     construct : function() {
         this.base(arguments);
-        dbtoria.window.Desktop.getInstance().add(this);
+        dbtoria.module.desktop.Desktop.getInstance().add(this);
 
-        var taskbar = dbtoria.window.Taskbar.getInstance();
+        var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
         var taskbarButton = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
         taskbarButton.exclude();
         taskbar.add(taskbarButton);
