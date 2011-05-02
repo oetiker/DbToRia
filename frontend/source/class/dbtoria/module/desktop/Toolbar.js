@@ -15,7 +15,7 @@
 
 ************************************************************************ */
 
-qx.Class.define("dbtoria.module.desktop.Toolbar2", {
+qx.Class.define("dbtoria.module.desktop.Toolbar", {
     extend : qx.ui.toolbar.ToolBar,
     type : "singleton",
 
