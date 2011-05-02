@@ -61,7 +61,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             loading        : true
         });
 
-        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
+        this.__rpc = dbtoria.data.Rpc.getInstance();
         this.__buildUi(tableId, viewMode);
         if (viewMode) {
             this.setCaption(this.tr('View: %1', this.__tableName));

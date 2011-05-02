@@ -103,7 +103,7 @@ qx.Class.define("dbtoria.dialog.Login", {
             }
         });
 
-        var rpc = dbtoria.io.remote.Rpc.getInstance();
+        var rpc = dbtoria.data.Rpc.getInstance();
 
         login.addListener("execute", function(e) {
             this.setEnabled(false);

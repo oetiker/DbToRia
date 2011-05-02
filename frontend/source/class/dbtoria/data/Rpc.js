@@ -10,8 +10,8 @@
  * initialize us an Rpc object which accesses a local cgi server when called from
  * the source version of the application
  */
-qx.Class.define('dbtoria.io.remote.Rpc', {
-    extend : qx.io.remote.Rpc,
+qx.Class.define('dbtoria.data.Rpc', {
+    extend : qx.data.Rpc,
     type : "singleton",
 
     construct : function() {

@@ -25,7 +25,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
         if (columnLabelMap){
             this.setColumnNamesById(columnLabelMap);
         }
-        this.__rpc = dbtoria.io.remote.Rpc.getInstance();
+        this.__rpc = dbtoria.data.Rpc.getInstance();
     },
 
     properties : {
