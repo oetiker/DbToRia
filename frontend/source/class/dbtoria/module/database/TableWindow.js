@@ -48,7 +48,7 @@
  * deletion of entries.
  */
 qx.Class.define("dbtoria.module.database.TableWindow", {
-    extend : dbtoria.module.desktop.DesktopWindow,
+    extend : dbtoria.module.desktop.Window,
         construct : function(tableId, tableName, viewMode) {
         this.__tableName = tableName;
         this.__tableId   = tableId;

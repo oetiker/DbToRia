@@ -32,7 +32,7 @@
  * - Adding window to bookmark bar (not yet implemented)
  * - Loading indicator
  */
-qx.Class.define("dbtoria.module.desktop.DesktopWindow", {
+qx.Class.define("dbtoria.module.desktop.Window", {
     extend : qx.ui.window.Window,
     construct : function() {
         this.base(arguments);
