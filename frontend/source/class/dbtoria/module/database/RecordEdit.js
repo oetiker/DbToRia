@@ -24,7 +24,6 @@
 
 // FIX ME:
 //   - documentation
-//   - SVN ID
 
 /**
  * Popup window for editing a database record.
