@@ -42,7 +42,7 @@ qx.Class.define('dbtoria.data.Rpc', {
 
             var superHandler = function(ret, exc, id) {
                 if (exc) {
-                    dbtoria.dialog.MsgBox.getInstance().exc(exc);
+                    dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
                 } else {
                     origHandler(ret);
                 }
@@ -66,7 +66,7 @@ qx.Class.define('dbtoria.data.Rpc', {
 
             var superHandler = function(ret, exc, id) {
                 if (exc && exc.code == 6) {
-                    var login = dbtoria.dialog.Login.getInstance();
+                    var login = dbtoria.ui.dialog.Login.getInstance();
                     login.addListenerOnce('login', function(e) {
                         origArguments.callee.base.apply(origThis, origArguments);
                     });

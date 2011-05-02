@@ -229,14 +229,14 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             else {
                 this.debug('Form validation failed');
                 this.fireEvent('undo');
-                var msg = dbtoria.dialog.MsgBox.getInstance();
+                var msg = dbtoria.ui.dialog.MsgBox.getInstance();
                 msg.error(this.tr("Form Invalid"), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
             }
         },
 
         __saveRecordHandler : function(data, exc, id) {
             if (exc) {
-                dbtoria.dialog.MsgBox.getInstance().exc(exc);
+                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
                 this.debug('__saveRecordHandler() failed');
                 this.fireEvent('undo');
             }

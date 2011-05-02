@@ -80,7 +80,7 @@ qx.Class.define( 'dbtoria.data.Config',
             }
             else {
                 this.__loaded = false;
-                dbtoria.dialog.Error.getInstance().showError('Config.__refreshHandler(): error loading config');
+                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
             }
             this.__loading = false;
         }
