@@ -254,8 +254,9 @@ sub getRecordDeref {
     my $self     = shift;
     my $tableId  = shift;
     my $recordId = shift;
+    my $action   = shift;
 
-    my $rec  = $self->getRecord($tableId, $recordId);
+    my $rec  = $self->getRecord($tableId, $recordId, $action);
 
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
@@ -265,6 +266,7 @@ sub getRecordDeref {
             $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
         }
     }
+#    use Data::Dumper; print STDERR Dumper "rec=", $rec;
     return $rec;
 }
 

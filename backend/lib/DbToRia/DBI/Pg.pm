@@ -196,6 +196,7 @@ sub getRecord {
     my $self     = shift;
     my $tableId  = shift;
     my $recordId = shift;
+    my $action   = shift;
 
     my $dbh        = $self->getDbh();
     my $recordIdQ  = $dbh->quote($recordId);
@@ -206,6 +207,7 @@ sub getRecord {
     my $row        = $sth->fetchrow_hashref;
     my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
 
+    delete $row->{primaryKey} if $action eq 'clone';
     my %newRow;
     for my $key (keys %$row) {
         $newRow{$key} = $self->dbToFe($row->{$key}, $typeMap->{$key});
