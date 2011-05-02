@@ -20,7 +20,7 @@
 ************************************************************************ */
 
 /**
- * A status window singelton. There is only one instance, several calls to
+ * A status window singleton. There is only one instance, several calls to
  * open will just change the windows content on the fly.
  *
  * <pre code='javascript'>

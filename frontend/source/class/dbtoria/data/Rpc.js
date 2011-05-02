@@ -7,18 +7,18 @@
 ************************************************************************ */
 
 /**
- * initialize us an Rpc object which accesses a local cgi server when called from
+ * Initialize an Rpc object which accesses a local cgi server when called from
  * the source version of the application
  */
 qx.Class.define('dbtoria.data.Rpc', {
-    extend : qx.data.Rpc,
+    extend : qx.io.remote.Rpc,
     type : "singleton",
 
     construct : function() {
         this.base(arguments);
 
         this.set({
-            // 3 seconds max
+            // 10 seconds max
             timeout     : 10000,
             url         : 'jsonrpc/',
             serviceName : 'DbToRia'

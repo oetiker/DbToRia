@@ -19,12 +19,6 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
     extend : qx.ui.toolbar.ToolBar,
     type : "singleton",
 
-    /*
-        *****************************************************************************
-    	CONSTRUCTOR
-        *****************************************************************************
-        */
-
     construct : function() {
         this.base(arguments);
         this.set({ spacing: 5 });

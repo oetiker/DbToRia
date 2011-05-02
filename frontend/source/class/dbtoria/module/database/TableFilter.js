@@ -42,15 +42,6 @@
 qx.Class.define("dbtoria.module.database.TableFilter", {
     extend : qx.ui.window.Window,
 
-    /*
-        *****************************************************************************
-    	CONSTRUCTOR
-        *****************************************************************************
-
-        * @param tableWindow {dbtoria.module.database.Table} The table window the filter is applied to
-        * @param title {String} Title for window.
-        */
-
     construct : function(title, columns, filterCallback) {
         // call super class
         this.base(arguments, title);
