@@ -23,17 +23,12 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
             toolTip: new qx.ui.tooltip.ToolTip(qx.locale.Manager.tr('Use either decimal or hh:mm::ss format.'))
         });
     },
-
-    members : {
-        validator: function(value,control) {
-            if (value == null && !control.getRequired()) {
-                control.setValid(true);
-                return true;
-            }
-            var regex = /(\d*?):(\d+)/;
+    statics : {
+        __time2float: function(value) {
             var res;
+            var regex = /(\d*?):(\d+)/;
             if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
-                this.debug('res='+res);
+//                this.debug('res='+res);
                 var h = res[1];
                 var m = res[2];
                 var s=0;
@@ -43,7 +38,18 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
                 }
                 value = h+m/60+s/3600;
             }
-            this.debug('value='+value);
+            return value;
+        }
+    },
+
+    members : {
+        validator: function(value,control) {
+            if (value == null && !control.getRequired()) {
+                control.setValid(true);
+                return true;
+            }
+            value = dbtoria.ui.form.FloatTimeField.__time2float(value);
+//            this.debug('value='+value);
             var msg = qx.locale.Manager.tr('This field must be a number.');
             var valid = (value != null) && !isNaN(Number(value));
             if (!valid){
@@ -51,7 +57,16 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
                 control.setValid(valid);
             }
             return valid;
-        }
+        },
+
+        setFormDataCallback: function(name, callback) {
+            this.addListener('changeValue', function(e) {
+                var value = dbtoria.ui.form.FloatTimeField.__time2float(e.getData());
+                callback(name, value);
+            }, this);
+        },
+
+
     }
 
 });
