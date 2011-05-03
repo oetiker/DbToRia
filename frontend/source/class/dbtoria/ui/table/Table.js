@@ -23,6 +23,9 @@ qx.Class.define("dbtoria.ui.table.Table", {
             tableColumnModel : function(obj) {
                 return new qx.ui.table.columnmodel.Resize(obj);
             }
+//            tablePaneScroller : function(obj) {
+//                return new dbtoria.ui.table.pane.Scroller(obj);
+//            }
         };
         this.base(arguments, tm, tableOpts);
         this.set({
