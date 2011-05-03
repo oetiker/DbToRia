@@ -21,7 +21,8 @@ Map a native database column type to a DbToRia field type:
  integer
  float
  boolean
- datatime
+ datetime
+ date
 
 =cut
 
