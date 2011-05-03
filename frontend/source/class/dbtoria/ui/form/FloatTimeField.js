@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.FloatTimeField", {
     extend : qx.ui.form.TextField,
-    include : [ dbtoria.ui.form.MControlSetter, dbtoria.ui.form.MControlProperties ],
+    include : [ dbtoria.ui.form.MControlProperties ],
 
     /**
      * Create a customized TextField for time entries.
@@ -26,17 +26,22 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
     statics : {
         __time2float: function(value) {
             var res;
-            var regex = /(\d*?):(\d+)/;
+            var regex = /^(\d*?):(?:(\d+)|(\d+):(\d+))$/;
+            qx.log.Logger.debug('input='+value);
             if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
-//                this.debug('res='+res);
-                var h = res[1];
-                var m = res[2];
-                var s=0;
-                if ((res = regex.exec(m))) {
-                    m = res[1];
-                    s = res[2];
+                qx.log.Logger.debug('res='+res);
+                var s, m, h = res[1];
+                if (res[3] != undefined) {
+                    m = Number(res[3]);
+                    s = Number(res[4]);
                 }
-                value = h+m/60+s/3600;
+                else {
+                  s = 0;
+                  m = Number(res[2]);
+                }
+                qx.log.Logger.debug('h='+h+', m='+m+', s='+s);
+                value = (h*3600+m*60+s)/3600;
+                qx.log.Logger.debug('output='+value);
             }
             return value;
         }
@@ -66,6 +71,38 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
             }, this);
         },
 
+        defaults: function(value) {
+            if (this.getValue() != null) {
+                return;
+            }
+            this.setter(value);
+        },
+
+        setter: function(value) {
+            if (value == null) {
+                this.setValue(value);
+            }
+            else {
+                var h = String(Math.floor(value));
+                value *= 3600;
+                var s = value % 3600;
+                var m = String(Math.floor(s/60));
+                s = String(s % 60);
+                this.debug('m='+m+', m.length='+m.length);
+                this.debug('m='+m+', m.length='+m.length);
+                if (m.length<2) {
+                    m = '0'+m;
+                }
+                if (s.length<2) {
+                    s = '0'+s;
+                }
+                this.setValue(h+':'+m+':'+s);
+            }
+        },
+
+        clear: function() {
+            this.setValue(null);
+        }
 
     }
 
