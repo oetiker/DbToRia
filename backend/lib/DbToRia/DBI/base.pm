@@ -343,6 +343,18 @@ sub getDefaultsDeref {
 
 =head1 BASE METHODS
 
+=head2 clearTableCaches
+
+Clear table caches.
+
+=cut
+
+sub clearTableCaches {
+    my $self = shift;
+    delete $self->{tableList};
+    delete $self->{tablePrivileges};
+}
+
 =head2 getTables
 
 return tables and views filtered for menu display.
