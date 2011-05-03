@@ -284,9 +284,9 @@ SQL
         while ($row = $sth->fetchrow_hashref) {
             $priv{$row->{privilege_type}} = 1;
         }
-        $self->{tablePrivileges}{$table}{$username} = \%priv;
+        $self->{tablePrivileges}{$tableId}{$username} = \%priv;
     }
-    return $self->{tablePrivileges}{$table}{$username};
+    return $self->{tablePrivileges}{$tableId}{$username};
 }
 
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
