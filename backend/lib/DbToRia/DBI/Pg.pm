@@ -263,6 +263,35 @@ sub getDefaults {
 }
 
 
+=head2 getTablePrivileged(table)
+
+Returns permission information about the table directly from he
+database.
+
+=cut
+
+sub getTablePrivileges {
+    my $self = shift;
+    my $tableId = shift;
+    my $username = $self->username;
+    if (not exists $self->{tablePrivileges}{$tableId}{$username}){
+        my $dbh = $self->getDbh();
+        my $sth = $dbh->prepare(<<'SQL');
+SELECT privilege_type 
+  FROM information_schema.table_privileges 
+ WHERE table_name = ? AND grantee IN ( SELECT role_name FROM information_schema.enabled_roles )
+SQL
+        $sth->execute($tableId);
+        my $row;
+        my %priv;
+        while ($row = $sth->fetchrow_hashref) {
+            $priv{$row->{privilege_type}} = 1;
+        }
+        $self->{tablePrivileges}{$table}{$username} = \%priv;
+    }
+    return $self->{tablePrivileges}{$table}{$username};
+}
+
 =head2 getTableDataChunk(table,firstRow,lastRow,columns,optMap)
 
 Returns the selected columns from the table. Using firstRow and

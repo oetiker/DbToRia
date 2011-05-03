@@ -240,26 +240,8 @@ database.
 sub getTablePrivileges {
     my $self = shift;
     my $table = shift;
-
-    return $self->{tablePrivileges}{$table} if exists $self->{tablePrivileges}{$table};
-
-    my $dbh = $self->getDbh();
-	my %tablePrivileges;
-
-     my $sth = $dbh->prepare("SELECT privilege_type FROM information_schema.table_privileges WHERE table_name = '$table'");
-    $sth->execute();
-    my $row;
-    while ($row = $sth->fetchrow_arrayref) {
-        $tablePrivileges{$row->[0]} = 1;
-    }
-#    for my $engine (@{$self->metaEngines}){
-#        $engine->massageTableStructure($table,$self->{tableStructure}{$table});
-#    }
-    $self->{tablePrivileges}{$table} = \%tablePrivileges;
-    return $self->{tablePrivileges}{$table};
+    die "Override in Driver";
 }
-
-
 
 =head2 getRecord (table,recordId)
 
