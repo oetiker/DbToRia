@@ -116,6 +116,7 @@ sub login {
     $session->param('username',$username);
     $session->param('password',$password);
     my $connect = $self->connect_db;
+    $self->DBI->clearTableCaches();
     return $connect;
 }
 
