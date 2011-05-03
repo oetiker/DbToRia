@@ -254,9 +254,8 @@ sub getRecordDeref {
     my $self     = shift;
     my $tableId  = shift;
     my $recordId = shift;
-    my $action   = shift;
 
-    my $rec  = $self->getRecord($tableId, $recordId, $action);
+    my $rec  = $self->getRecord($tableId, $recordId);
 
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
@@ -384,6 +383,10 @@ sub getEditView {
            name  => $col->{id},
            label => $col->{name},
         };
+        # can never edit a primary key
+        $c->{readOnly} = $Mojo::JSON::TRUE if $col->{primary};
+        # tell the FE we have a primary key
+        $c->{primaryKey} = $col->{primary} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
         $c->{required} = $col->{required};
         $c->{check} = $col->{check};
         if ($col->{references}){

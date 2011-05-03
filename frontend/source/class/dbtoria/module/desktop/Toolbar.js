@@ -21,27 +21,32 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
 
     construct : function() {
         this.base(arguments);
-        this.set({ spacing: 5 });
+
+
         var partAction = new qx.ui.toolbar.Part();
         var partTables = new qx.ui.toolbar.Part();
         this.__partTables = partTables;
         var partLast   = new qx.ui.toolbar.Part();
 
-        var overflow = new qx.ui.toolbar.MenuButton("More...");
-        var overflowMenu = this.__overflowMenu = new qx.ui.menu.Menu();
-        overflow.setMenu(overflowMenu);
-
         this.add(partAction);
         this.add(new qx.ui.toolbar.Separator());
         this.add(partTables);
-        this.add(overflow);
-        this.setOverflowIndicator(overflow);
         this.addSpacer();
+        var overflow = new qx.ui.toolbar.MenuButton("More ...");
+        this.add(overflow);
+        this.set({
+            spacing: 5,
+            overflowIndicator: overflow,
+            overflowHandling: true
+        });
+
+        var overflowMenu = this.__overflowMenu = new qx.ui.menu.Menu();
+        overflow.setMenu(overflowMenu);
         this.add(new qx.ui.toolbar.Separator());
         this.add(partLast);
         var menu    = dbtoria.module.database.TableSelection.getInstance();
         var menuBtn = new qx.ui.toolbar.MenuButton(this.tr("Menu"),"icon/16/places/folder.png", menu);
-        menuBtn.set({allowGrowX: false, allowGrowY: false, show: 'icon'});
+        menuBtn.set({ show: 'icon'});
         partAction.add(menuBtn);
 
         this.__rpc = dbtoria.data.Rpc.getInstance();
@@ -52,9 +57,7 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
                                                  "icon/16/actions/application-exit.png");
         this.__logoutBtn = logoutBtn;
         logoutBtn.set({
-//            show: 'icon',
-            allowGrowX: false,
-            allowGrowY: false
+            show: 'icon'
         });
         partLast.add(logoutBtn);
 
@@ -65,7 +68,6 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
             }, 'logout');
         },
         this);
-
     },
 
     members : {
@@ -74,23 +76,17 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         __overflowMenu: null,
 
         __showItem: function(item) {
-            item.setVisibility('visible');
-            item.getUserData('menuBtn').setVisibility("excluded");
+            item.show();
+            item.getUserData('menuBtn').exclude();
         },
 
         __hideItem: function(item) {
-            item.setVisibility('excluded');
-            item.getUserData('menuBtn').setVisibility("visible");
+            item.exclude();
+            item.getUserData('menuBtn').show();
         },
 
-        __getTablesHandler:  function(ret) {
-            var btn, table, i, len=ret.length;
-            var tables = [];
-            for (i=0; i<len; i++) {
-                tables.push(ret[i]);
-            }
+        __getTablesHandler:  function(tables) {
             var that = this;
-
             // handler for showing and hiding toolbar items
             this.addListener("showItem", function(e) {
                 this.__showItem(e.getData());
@@ -99,15 +95,16 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
             this.addListener("hideItem", function(e) {
                 this.__hideItem(e.getData());
             }, this);
-            this.setOverflowHandling(true);
 
             var prio = 0;
+            var lastButton;
             tables.map(
                 function(table) {
                     var handler = function() {
                         new dbtoria.module.database.TableWindow(table.tableId, table.name);
                     };
                     var btn = new qx.ui.toolbar.Button(table.name);
+                    lastButton = btn;
                     btn.addListener("execute", handler, this);
                     var btnO = new qx.ui.menu.Button(table.name);
                     btnO.addListener("execute", handler, this);
@@ -118,8 +115,17 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
                     that.__overflowMenu.add(btnO);
                 }
             );
-
+            // force the overflow to be recalculate when all the buttons are there
+            // naive me would expect this not to be neccessary
+            lastButton.addListenerOnce('appear',function(){
+                var pane = this.getLayoutParent();
+                this.fireDataEvent('resize', pane.getBounds());
+            },this);
+            // nor this
+            this.getOverflowIndicator().addListener('appear',function(){
+                var pane = this.getLayoutParent();
+                this.fireDataEvent('resize', pane.getBounds());
+            },this);
         }
-
     }
 });
