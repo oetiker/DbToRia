@@ -55,7 +55,8 @@ Returns a list of tables and views available from the system.
 
 sub getAllTables {
     my $self = shift;
-    return $self->{tableList} if $self->{tableList};
+    my $username = $self->username;
+    return $self->{tableList}{$username} if $self->{tableList}{$username};
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
 	my %tables;
@@ -72,9 +73,9 @@ sub getAllTables {
             readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
     	};
     }
-    $self->{tableList} = \%tables;
+    $self->{tableList}{$username} = \%tables;
     # use Data::Dumper; print STDERR Dumper "tables=", \%tables;
-    return $self->{tableList};
+    return $self->{tableList}{$username};
 }
 
 =head2 getFilterOpsArray()
@@ -135,9 +136,6 @@ the internal datatypes to DbToRia compatible datatypes.
 sub getTableStructure {
     my $self  = shift;
     my $table = shift;
-
-#    $self->getTablePrivileges($table);
-#    use Data::Dumper; print STDERR Dumper "tablePrivileges($table)=", $self->{tablePrivileges}{$table};
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
