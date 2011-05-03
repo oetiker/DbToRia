@@ -257,8 +257,10 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var sm  = this.__table.getSelectionModel();
             var tm  = this.__table.getTableModel();
             var row = sm.getSelectedRanges()[0].minIndex;
-            this.debug('__deleteRecordHandler(): row='+row);
+//            this.debug('__deleteRecordHandler(): row='+row);
             tm.removeRow(row);
+            var rowInfo = tm.getRowData(row);
+            this.__currentId = rowInfo['ROWINFO'][0];
         },
 
         __cloneRecordHandler: function(e) {
