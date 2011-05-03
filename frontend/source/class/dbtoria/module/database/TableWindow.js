@@ -71,7 +71,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, viewMode);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);
-//            this.__recordEdit.addListener('undo',       this.__undo, this);
         }
 
         this.addListener('close', function() {
@@ -97,12 +96,11 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __newRow:     null,
 
         __refresh : function(e) {
-//            this.__done();
             var record = e.getData();
             this.debug('__refresh() called, record='+record);
             this.__table.getTableModel().reloadData();
             if (record != null) {
-                window.alert('Finding row from recordId not yet implemented.');
+//                FIX ME: Finding row from recordId
 //                this.__table.selectRow(record);
                 // var row = this.__table.getRow(record);
                 // var sm  = this.__table.getSelectionModel();
@@ -110,19 +108,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 // sm.setSelectionInterval(row, row);
             }
         },
-
-        // __undo : function(e) {
-        //     this.debug('__undo(): lastId='+this.__lastId+', lastRow='+this.__lastRow);
-        //     var row = this.__lastRow;
-        //     var sm  = this.__table.getSelectionModel();
-        //     sm.setSelectionInterval(row, row);
-        // },
-
-        // __done : function(e) {
-        //     this.__lastRow = this.__newRow;
-        //     this.__newRow  = null;
-        //     this.debug('__done(): lastRow='+this.__lastRow);
-        // },
 
         __navigation : function(e) {
             var target = e.getData();

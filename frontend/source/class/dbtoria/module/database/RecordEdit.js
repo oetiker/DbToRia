@@ -37,7 +37,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         this.__tableName = tableName;
 
         var maxHeight = qx.bom.Document.getHeight() - 100;
-//        var maxWidth =  qx.bom.Document.getWidth() - 20;
         this.addListener("appear",  function(e) {
             var maxHeight = qx.bom.Document.getHeight() - 100;
             this.setHeight(maxHeight);
@@ -92,7 +91,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
     events: {
         "saveRecord" : "qx.event.type.Data",
         "navigation"  : "qx.event.type.Data",
-//        "undo"        : "qx.event.type.Event",
         "refresh"     : "qx.event.type.Data"
     }, // events
 
@@ -116,7 +114,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         //     switch (ret) {
         //     case 'failed':
         //     case 'invalid':
-        //         this.__undo();
         //         break;
         //     case 'succeeded':
         //         this.fireEvent('refresh');
@@ -137,7 +134,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             switch (ret) {
             case 'failed':
             case 'invalid':
-//                this.fireEvent('undo');
                 break;
             case 'succeeded':
               this.fireDataEvent('refresh', this.__recordId);
@@ -158,7 +154,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             switch (ret) {
             case 'failed':
             case 'invalid':
-//                this.fireEvent('undo');
                 break;
             case 'succeeded':
                 this.fireDataEvent('refresh', this.__recordId);
