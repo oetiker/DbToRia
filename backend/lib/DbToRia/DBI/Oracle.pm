@@ -38,6 +38,7 @@ sub getFilterOpsArray {
                 {op   => 'NOT BETWEEN',          type => 'dualValue',
                  help => 'value outside range (not yet implemented)'},
 
+                # FIX ME: really in Oracle???
                 {op   => 'RLIKE',                type => 'simpleValue',
                  help => 'Regexp matching; equivalent to REGEXP operator'},
                 {op   => 'NOT RLIKE',            type => 'simpleValue',
