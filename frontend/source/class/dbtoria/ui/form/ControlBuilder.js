@@ -32,6 +32,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
          * { type:    "FloatField",
          *   TODOC
          * },
+         * { type:    "TimeField",
+         *   TODOC
+         * },
          * { type:    "TextField",
          *   label:   "Label",
          *   filter:  "regexp",
@@ -64,6 +67,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                     break;
                 case "IntField":
                     control = new dbtoria.ui.form.IntField();
+                    break;
+                case "FloatTimeField":
+                    control = new dbtoria.ui.form.FloatTimeField();
                     break;
                 case "TextArea":
                     control = new dbtoria.ui.form.TextArea();

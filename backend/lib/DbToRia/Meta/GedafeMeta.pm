@@ -153,6 +153,9 @@ sub massageEditView {
             if ($widget eq 'area') {
                 $row->{type} = 'TextArea';
             }
+            elsif ($widget eq 'floattime') {
+                $row->{type} = 'FloatTimeField';
+            }
             elsif ($widget eq 'readonly') {
                 $row->{readOnly} = $Mojo::JSON::TRUE;
             }
