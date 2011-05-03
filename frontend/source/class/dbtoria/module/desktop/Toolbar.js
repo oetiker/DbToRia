@@ -59,6 +59,13 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         logoutBtn.set({
             show: 'icon'
         });
+        var username = new qx.ui.basic.Label();
+        username.set({
+            alignY: 'middle',
+            padding: 5
+        });
+        this.__username = username;
+        partLast.add(username);
         partLast.add(logoutBtn);
 
         // call logout on the backend to destroy session
@@ -74,6 +81,11 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         __rpc:          null,
         __partTables:   null,
         __overflowMenu: null,
+        __username:     null,
+
+        setUsername: function(username) {
+            this.__username.setValue(username);
+        },
 
         __showItem: function(item) {
             item.show();

@@ -63,6 +63,7 @@ qx.Class.define("dbtoria.ui.dialog.Login", {
         });
 
         var username = new qx.ui.form.TextField();
+        this.__username = username;
 
         this.add(username, {
             row    : 1,
@@ -136,6 +137,13 @@ qx.Class.define("dbtoria.ui.dialog.Login", {
     events : { 'login' : 'qx.event.type.Event' },
 
     members : {
+
+        __username: null,
+
+        getUsername: function() {
+            return this.__username.getValue();
+        },
+
         /**
          * Handler for the login events
          *

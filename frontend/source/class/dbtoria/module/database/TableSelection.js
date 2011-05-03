@@ -78,7 +78,7 @@ qx.Class.define("dbtoria.module.database.TableSelection", {
                     }
                     menuButton.addListener("execute", function(e) {
                         var viewMode = (item.type != 'TABLE');
-                        new dbtoria.module.database.TableWindow(tableId, item.name, viewMode);
+                        new dbtoria.module.database.TableWindow(tableId, item.name, viewMode, item.readOnly);
                     }, this);
                 }
             );
