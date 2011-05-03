@@ -144,7 +144,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         },
 
         ok: function() {
-          this.addListenerOnce('saveRecord', qx.lang.Function.bind(this.__okHandler, this), this);
+            this.addListenerOnce('saveRecord', qx.lang.Function.bind(this.__okHandler, this), this);
             this.saveRecord();
         },
 
@@ -347,13 +347,25 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
          */
         __setFormData : function(recordId, action) {
             this.debug('Called __setFormData(): record='+recordId+', action='+action);
-            this.__recordId = recordId;
             this.setLoading(true);
-            this.__rpc.callAsync(qx.lang.Function.bind(this.__setFormDataHandler, this),
-                                 'getRecordDeref', this.__tableId, recordId, action);
-            if (action == 'clone') {
-                this.__recordId = null;
-            }
+            var that = this;
+            var setFormDataHandler = function(data, exc, id) {
+                if (exc) {
+                    dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
+                }
+                else {
+                    if (action == 'clone'){
+                        that.__recordId = null;                    
+                    }
+                    else {
+                        that.__recordId = recordId;
+                    }
+                    that.__form.setFormData(data);
+                    that.__form.setFormDataChanged(false);
+                }
+                that.setLoading(false);
+            };
+            this.__rpc.callAsync(setFormDataHandler, 'getRecordDeref', this.__tableId, recordId);
          },
 
         /**
@@ -362,20 +374,6 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
          * @param rules {var} TODOC
          * @return {void}
          */
-        __setFormDataHandler : function(data, exc, id) {
-            if (exc) {
-                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
-                this.__recordId = null;
-            }
-            else {
-                this.debug('Called __setFormDataHandler(), data=');
-//                qx.dev.Debug.debugObject(data);
-                this.__form.setFormData(data);
-                this.__form.setFormDataChanged(false);
-            }
-            this.setLoading(false);
-        },
-
         /**
          * TODOC
          *
