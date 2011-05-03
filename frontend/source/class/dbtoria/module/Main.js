@@ -53,13 +53,8 @@ qx.Class.define("dbtoria.module.Main", {
         this.debug('maxWidth='+maxWidth);
         var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
 //        toolbar.setMaxWidth(maxWidth);
-//        toolbar.setAllowGrowX(false);
-        var toolbarContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox());
-        toolbarContainer.setAllowGrowX(false);
-        toolbarContainer.setAllowShrinkX(false);
-        toolbarContainer.add(toolbar, { flex : 1 });
-//        this.add(toolbar);
-        this.add(toolbarContainer);
+        toolbar.setAllowGrowX(false);
+        this.add(toolbar);
 
         this.add(desktopContainer, { flex : 1 });
 
