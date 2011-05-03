@@ -27,9 +27,9 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
         __time2float: function(value) {
             var res;
             var regex = /^(\d*?):(?:(\d+)|(\d+):(\d+))$/;
-            qx.log.Logger.debug('input='+value);
+//            qx.log.Logger.debug('input='+value);
             if (qx.lang.Type.isString(value) && (res = regex.exec(value)) ) {
-                qx.log.Logger.debug('res='+res);
+//                qx.log.Logger.debug('res='+res);
                 var s, m, h = res[1];
                 if (res[3] != undefined) {
                     m = Number(res[3]);
@@ -39,9 +39,9 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
                   s = 0;
                   m = Number(res[2]);
                 }
-                qx.log.Logger.debug('h='+h+', m='+m+', s='+s);
+//                qx.log.Logger.debug('h='+h+', m='+m+', s='+s);
                 value = (h*3600+m*60+s)/3600;
-                qx.log.Logger.debug('output='+value);
+//                qx.log.Logger.debug('output='+value);
             }
             return value;
         }
@@ -54,7 +54,6 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
                 return true;
             }
             value = dbtoria.ui.form.FloatTimeField.__time2float(value);
-//            this.debug('value='+value);
             var msg = qx.locale.Manager.tr('This field must be a number.');
             var valid = (value != null) && !isNaN(Number(value));
             if (!valid){
@@ -88,8 +87,8 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
                 var s = value % 3600;
                 var m = String(Math.floor(s/60));
                 s = String(s % 60);
-                this.debug('m='+m+', m.length='+m.length);
-                this.debug('m='+m+', m.length='+m.length);
+//                this.debug('m='+m+', m.length='+m.length);
+//                this.debug('m='+m+', m.length='+m.length);
                 if (m.length<2) {
                     m = '0'+m;
                 }
