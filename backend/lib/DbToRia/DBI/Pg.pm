@@ -403,7 +403,7 @@ sub insertTableData {
     my @keys;
     my @values;
 
-    for my $key (keys %$data) {        
+    for my $key (keys %$data) {
         push @keys, $dbh->quote_identifier($key);
         push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
