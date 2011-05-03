@@ -104,7 +104,10 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 control.setWidth(desc.width);
             }
 
-            if (control.getModel) {
+            if (control.setFormDataCallback) {
+                control.setFormDataCallback(desc.name, formDataCallback);
+            }
+            else if (control.getModel) {
                 control.addListener('changeModel',function(e){
                     formDataCallback(desc.name, e.getData());
                 },this);
