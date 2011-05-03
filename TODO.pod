@@ -47,14 +47,6 @@ While the basic functionality is already available, the feature set is
 still incomplete in order to replace Gedafe with DbToRia in an
 existing Gedafe application.
 
-=head3 Permission handling
-
-Get read/write permissions for user/tables from backend and adapt
-frontend accordingly (read-only "edit" mode for tables).
-
-Status: available,
-Effort: ?
-
 =head3 Direct Access URL
 
 The filter and the selected sort order of a view or table is
