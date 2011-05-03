@@ -165,7 +165,7 @@ sub getTableStructure {
             size       => $col->{COLUMN_SIZE},
             default    => $col->{COLUMN_DEF},
             check      => $col->{pg_constraint}, # FIX ME: build regex for form validation
-            required   => ( $col->{NULLABLE} == 0 and not $col->{COLUMN_DEF} =~ m/nextval/ ),
+            required   => ( $col->{NULLABLE} == 0 and ($col->{COLUMN_DEF} || '') !~ m/nextval/ ),
             references => $foreignKeys{$id},
             primary    => $primaryKeys{$id},
             pos        => $col->{ORDINAL_POSITION},
