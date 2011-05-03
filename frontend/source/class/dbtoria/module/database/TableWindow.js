@@ -91,25 +91,40 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __columns:    null,
         __recordEdit: null,
         __rpc:        null,
-        __lastRow:    null,
-        __lastId:     null,
-        __newRow:     null,
+        __dataChangedHandler:    null,
 
         __refresh : function(e) {
-            this.__table.getTableModel().reloadData();
-            // FIX ME: Finding row from recordId
-            // var record;
-            // if(e != undefined) {
-            //     record = e.getData();
-            // }
-            // this.debug('__refresh() called, record='+record);
-            // if (record != null) {
-            //     this.__table.selectRow(record);
-            //     var row = this.__table.getRow(record);
-            //     var sm  = this.__table.getSelectionModel();
-            //     sm.resetSelection();
-            //     sm.setSelectionInterval(row, row);
-            // }
+            var tm = this.__table.getTableModel();
+            if (this.__dataChangedHandler) {
+                tm.removeListener('dataChanged', this.__dataChangedHandler, this);
+                this.__dataChangedHandler = null;
+            }
+
+            // check if we still have a correct selection
+            // FIX ME: it would be nicer to actually figure out which row to select.
+            var sm        = this.__table.getSelectionModel();
+            var selection = sm.getSelectedRanges()[0];
+            if (selection == undefined || selection == null) {
+                return;
+            }
+            var row = selection.minIndex;
+            var that=this;
+            this.__dataChangedHandler = function(e) {
+                var id, rowData = tm.getRowData(row);
+                if (rowData) { // we found the row
+                    tm.removeListener('dataChanged', this.__dataChangedHandler, this);
+                    this.__dataChangedHandler = null;
+                    that.setLoading(false);
+                    id = rowData['ROWINFO'][0];
+                    if (id != this.__currentId) {
+                        sm.resetSelection();
+                    }
+                }
+            };
+
+            tm.addListener('dataChanged', this.__dataChangedHandler, this);
+            this.setLoading(true);
+            tm.reloadData();
         },
 
         __navigation : function(e) {
@@ -122,7 +137,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 row = 0; // FIX ME: is this sensible?
             }
             else {
-                row    = sm.getSelectedRanges()[0].minIndex;
+                row    = selection.minIndex;
             }
             var oldRow = row;
             // switch record
@@ -257,7 +272,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var sm  = this.__table.getSelectionModel();
             var tm  = this.__table.getTableModel();
             var row = sm.getSelectedRanges()[0].minIndex;
-//            this.debug('__deleteRecordHandler(): row='+row);
             tm.removeRow(row);
             var rowInfo = tm.getRowData(row);
             this.__currentId = rowInfo['ROWINFO'][0];
@@ -265,11 +279,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __cloneRecordHandler: function(e) {
             var ret = e.getData();
-            this.debug('__cloneRecordHandler(): ret='+ret);
             switch (ret) {
             case 'failed':
             case 'invalid':
-                this.__undo();
                 break;
             case 'succeeded':
                 this.__refresh();
@@ -286,12 +298,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __editRecordHandler: function(e) {
             var ret = e.getData();
-            this.debug('__editRecordHandler(): ret='+ret);
-            this.debug('__editRecordHandler(): this.__currentId='+this.__currentId);
             switch (ret) {
             case 'failed':
             case 'invalid':
-                this.__undo();
                 break;
             case 'succeeded':
                 this.__refresh();
@@ -315,7 +324,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             switch (ret) {
             case 'failed':
             case 'invalid':
-                this.__undo();
                 break;
             case 'succeeded':
                 this.__refresh();
@@ -335,14 +343,11 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __filterTable : function(e) {
             var that = this;
             new dbtoria.module.database.TableFilter(this.tr("Filter: %1", this.__tableName),
-                                           this.__columns,
-                                           function(filter) {
-//                                               this.debug('__filterTable(): calling setFilter()');
-                                               that.__table.getTableModel().setFilter(filter);
-                                               // qx.dev.Debug.debugObject(filter);
-                                               // window.alert('Filter callback not yet implemented, filter='+filter);
-                                           }
-                                          );
+                                                    this.__columns,
+                                                    function(filter) {
+                                                        that.__table.getTableModel().setFilter(filter);
+                                                    }
+                                                   );
         },
 
         __switchRecord : function(e) {
@@ -356,9 +361,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             if (currentSelection != null && currentSelection != undefined) {
                 currentRow = currentSelection.minIndex;
             }
-
-//            this.__lastId  = this.__currentId;
-            this.__newRow = currentRow;
 
             selMod.iterateSelection(function(ind) {
                 row = model.getRowData(ind);
@@ -375,10 +377,10 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 this.__tbEdit.setEnabled(false);
                 this.__currentId = null;
             }
-            this.debug('__switchRecord(): this.__currentId='+this.__currentId);
             if (this.__recordEdit.isVisible() && this.__currentId != null) {
                 this.__editRecord(this.__currentId);
             }
         }
+
     }
 });
