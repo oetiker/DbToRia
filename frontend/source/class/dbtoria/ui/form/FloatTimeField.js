@@ -19,6 +19,9 @@ qx.Class.define("dbtoria.ui.form.FloatTimeField", {
      */
     construct : function() {
         this.base(arguments);
+        this.set({
+            toolTip: new qx.ui.tooltip.ToolTip(qx.locale.Manager.tr('Use either decimal or hh:mm::ss format.'))
+        });
     },
 
     members : {
