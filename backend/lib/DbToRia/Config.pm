@@ -26,7 +26,7 @@ use Config::Grammar;
 use Mojo::Base -base;
 
 has 'file';
-    
+
 
 =head1 METHODS
 
@@ -89,7 +89,7 @@ ${E}head1 HISTORY
  2011-02-19 to 1.0 first version
 
 FOOTER
-    my $header = $self->_make_pod_header();    
+    my $header = $self->_make_pod_header();
     return $header.$parser->makepod().$footer;
 }
 
