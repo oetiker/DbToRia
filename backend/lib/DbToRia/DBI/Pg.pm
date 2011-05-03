@@ -197,7 +197,6 @@ sub getRecord {
     my $self     = shift;
     my $tableId  = shift;
     my $recordId = shift;
-    my $action   = shift;
 
     my $dbh        = $self->getDbh();
     my $recordIdQ  = $dbh->quote($recordId);
@@ -208,7 +207,6 @@ sub getRecord {
     my $row        = $sth->fetchrow_hashref;
     my $typeMap    = $self->getTableStructure($tableId)->{typeMap};
 
-    delete $row->{primaryKey} if $action eq 'clone';
     my %newRow;
     for my $key (keys %$row) {
         $newRow{$key} = $self->dbToFe($row->{$key}, $typeMap->{$key});
@@ -361,6 +359,10 @@ sub updateTableData {
 
     my @set;
     for my $key (keys %$data) {
+        if ($key eq $primaryKey){
+            warn "someone is trying to write back the primary ($primaryKey) key in $table. Skipping.\n";
+            next;
+        }
         push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
     $update .= 'SET '.join(', ',@set) if @set;
@@ -401,7 +403,7 @@ sub insertTableData {
     my @keys;
     my @values;
 
-    for my $key (keys %$data) {
+    for my $key (keys %$data) {        
         push @keys, $dbh->quote_identifier($key);
         push @values, $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
     }
