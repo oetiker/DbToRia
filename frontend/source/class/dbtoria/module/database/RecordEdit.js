@@ -85,7 +85,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             if (e.getKeyIdentifier() == 'Escape') {
                 this.cancel();
             }
-        });
+        },this);
 
     },
 
@@ -192,9 +192,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
 
             var btnCnl = new dbtoria.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png",
                                                     this.tr('Abort editing without saving'));
-            btnCnl.addListener("execute", function(e) {
-                this.cancel();
-            }, this);
+            btnCnl.addListener("execute", this.cancel, this);
 
             var btnApp = new dbtoria.ui.form.Button(this.tr("Apply"), "icon/16/actions/dialog-apply.png",
                                                     this.tr('Save form content to backend'));
