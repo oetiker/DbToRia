@@ -49,7 +49,7 @@
  */
 qx.Class.define("dbtoria.module.database.TableWindow", {
     extend : dbtoria.module.desktop.Window,
-        construct : function(tableId, tableName, viewMode) {
+        construct : function(tableId, tableName, viewMode, readOnly) {
         this.__tableName = tableName;
         this.__tableId   = tableId;
         this.base(arguments);
@@ -62,13 +62,13 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         });
 
         this.__rpc = dbtoria.data.Rpc.getInstance();
-        this.__buildUi(tableId, viewMode);
+        this.__buildUi(tableId, viewMode, readOnly);
         if (viewMode) {
             this.setCaption(this.tr('View: %1', this.__tableName));
         }
         else {
             this.setCaption(this.tr('Table: %1', this.__tableName));
-            this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, viewMode);
+            this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);
         }
@@ -184,7 +184,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
          *
          * @return {void}
          */
-      __buildUi : function(tableId, viewMode) {
+      __buildUi : function(tableId, viewMode, readOnly) {
             var toolbar = new qx.ui.toolbar.ToolBar();
             var newButton = this.__tbNew = new qx.ui.toolbar.Button(this.tr("New"), "icon/16/actions/contact-new.png");
             var editButton = this.__tbEdit = new qx.ui.toolbar.Button(this.tr("Edit"), "icon/16/apps/utilities-text-editor.png").set({enabled: false});
@@ -195,13 +195,17 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var printButton = new qx.ui.toolbar.Button(this.tr("Print"), "icon/16/actions/document-print.png").set({enabled: false});
             var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
 
-            if (!viewMode) {
+            if (readOnly) {
+                editButton.setLabel(this.tr("Show"));
+            }
+            if (!viewMode && !readOnly) {
                 newButton.addListener('execute', this.__newRecord, this);
                 toolbar.add(newButton);
+            }
+            editButton.addListener('execute', this.__editRecord, this);
+            toolbar.add(editButton);
 
-                editButton.addListener('execute', this.__editRecord, this);
-                toolbar.add(editButton);
-
+            if (!viewMode && !readOnly) {
                 cloneButton.addListener('execute', this.__cloneRecord, this);
                 toolbar.add(cloneButton);
 

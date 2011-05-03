@@ -110,6 +110,12 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
             return this.__formData;
         },
 
+        setReadOnly: function(readOnly) {
+            for (var k in this.__controlMap) {
+                this.__controlMap[k].setEnabled(!readOnly);
+            }
+        },
+
         clear: function() {
             for (var k in this.__controlMap) {
                 this.__controlMap[k].clear();

@@ -229,6 +229,38 @@ sub getTableStructure {
     die "Override in Driver";
 }
 
+
+=head2 getTablePrivileged(table)
+
+Returns permission information about the table directly from he
+database.
+
+=cut
+
+sub getTablePrivileges {
+    my $self = shift;
+    my $table = shift;
+
+    return $self->{tablePrivileges}{$table} if exists $self->{tablePrivileges}{$table};
+
+    my $dbh = $self->getDbh();
+	my %tablePrivileges;
+
+     my $sth = $dbh->prepare("SELECT privilege_type FROM information_schema.table_privileges WHERE table_name = '$table'");
+    $sth->execute();
+    my $row;
+    while ($row = $sth->fetchrow_arrayref) {
+        $tablePrivileges{$row->[0]} = 1;
+    }
+#    for my $engine (@{$self->metaEngines}){
+#        $engine->massageTableStructure($table,$self->{tableStructure}{$table});
+#    }
+    $self->{tablePrivileges}{$table} = \%tablePrivileges;
+    return $self->{tablePrivileges}{$table};
+}
+
+
+
 =head2 getRecord (table,recordId)
 
 Returns hash of data for the record matching the indicated key. Data
@@ -554,11 +586,11 @@ the frontend according to the database type.
 =cut
 
 sub dbToFe {
-    my $self = shift;
+    my $self  = shift;
     my $value = shift;
-    my $type = shift;
+    my $type  = shift;
     my $ourtype = $self->mapType($type);
-    if ($ourtype eq 'boolean'){
+    if ($ourtype eq 'boolean' and defined $value){
         $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
     }
     return $value;
