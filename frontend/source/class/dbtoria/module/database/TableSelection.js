@@ -59,7 +59,11 @@ qx.Class.define("dbtoria.module.database.TableSelection", {
             }).map(
                 function(tableId) {
                     var item = ret[tableId];
-                    var menuButton = new qx.ui.menu.Button(item.name);
+                    item.label = item.name;
+                    if (item.readOnly) {
+                        item.label += '*';
+                    }
+                    var menuButton = new qx.ui.menu.Button(item.label);
                     if (item.type == 'TABLE'){
                         tableMenu.add(menuButton);
                         tableButton.setEnabled(true);

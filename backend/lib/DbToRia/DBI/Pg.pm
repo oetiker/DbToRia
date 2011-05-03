@@ -61,12 +61,20 @@ sub getAllTables {
 	my %tables;
 	while ( my $table = $sth->fetchrow_hashref ) {
         next unless $table->{TABLE_TYPE} eq 'TABLE' or $table->{TABLE_TYPE} eq 'VIEW';
-	    $tables{$table->{TABLE_NAME}} = {
-            type => $table->{TABLE_TYPE},
-            name => $table->{REMARKS} || $table->{TABLE_NAME}
+        my $tableName = $table->{TABLE_NAME};
+        my $tablePrivileges = $self->getTablePrivileges($tableName);
+        my $readOnly = !( ($tablePrivileges->{UPDATE} || 0) &&
+                          ($tablePrivileges->{INSERT} || 0) &&
+                          ($tablePrivileges->{DELETE} || 0));
+	    $tables{$tableName} = {
+            type     => $table->{TABLE_TYPE},
+            name     => $table->{REMARKS} || $tableName,
+            readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
+#            readOnly => ! $readWrite,
     	};
     }
     $self->{tableList} = \%tables;
+    use Data::Dumper; print STDERR Dumper "tables=", \%tables;
     return $self->{tableList};
 }
 
@@ -126,8 +134,11 @@ the internal datatypes to DbToRia compatible datatypes.
 =cut
 
 sub getTableStructure {
-    my $self = shift;
+    my $self  = shift;
     my $table = shift;
+
+#    $self->getTablePrivileges($table);
+#    use Data::Dumper; print STDERR Dumper "tablePrivileges($table)=", $self->{tablePrivileges}{$table};
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
@@ -303,7 +314,7 @@ sub getTableDataChunk {
     $query .= ' '.$self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
-    warn $query,"\n";
+#    warn $query,"\n";
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;

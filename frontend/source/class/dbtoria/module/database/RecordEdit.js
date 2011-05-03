@@ -31,10 +31,11 @@
 qx.Class.define("dbtoria.module.database.RecordEdit", {
     extend : dbtoria.module.desktop.Window,
 
-    construct : function(tableId, tableName, viewMode) {
+    construct : function(tableId, tableName, readOnly) {
         this.base(arguments);
         this.__tableId   = tableId;
         this.__tableName = tableName;
+        this.__readOnly  = readOnly;
 
         var maxHeight = qx.bom.Document.getHeight() - 100;
         this.addListener("appear",  function(e) {
@@ -71,7 +72,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         this.moveTo(300, 40);
 
 
-        this.add(this.__createNavigation(viewMode));
+        this.add(this.__createNavigation(readOnly));
 
         // this.addListener("close", function(e) {
         //     this.__close();
@@ -102,6 +103,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         __tableName       : null,
         __recordId        : null,
         __rpc             : null,
+        __readOnly        : null,
 
         cancel: function() {
             this.__form.setFormDataChanged(false); // abort, don't save afterwards
@@ -176,7 +178,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             return btn;
         },
 
-        __createNavigation: function(viewMode) {
+        __createNavigation: function(readOnly) {
             var btnFirst = this.__createButton("icon/16/actions/go-first.png",
                                                this.tr("Jump to first record"),  'first');
             var btnBack  = this.__createButton("icon/16/actions/go-previous.png",
@@ -207,13 +209,15 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
             btnRow.add(btnBack);
             btnRow.add(btnNext);
             btnRow.add(btnLast);
-            if (!viewMode) {
+            if (!readOnly) {
                 btnRow.add(btnNew);
             }
             btnRow.add(new qx.ui.core.Spacer(1,1), {flex:1});
-            btnRow.add(btnOk);
-            if (!viewMode) {
-                btnRow.add(btnCnl);
+            if (!readOnly) {
+                btnRow.add(btnOk);
+            }
+            btnRow.add(btnCnl);
+            if (!readOnly) {
                 btnRow.add(btnApp);
             }
             return btnRow;
@@ -355,7 +359,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
                 }
                 else {
                     if (action == 'clone'){
-                        that.__recordId = null;                    
+                        that.__recordId = null;
                     }
                     else {
                         that.__recordId = recordId;
@@ -374,14 +378,9 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
          * @param rules {var} TODOC
          * @return {void}
          */
-        /**
-         * TODOC
-         *
-         * @param rules {var} TODOC
-         * @return {void}
-         */
         _fillForm : function(rules) {
             var form         = new dbtoria.ui.form.AutoForm(rules);
+            form.setReadOnly(this.__readOnly);
             this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
             this.__scrollContainer.add(formControl, {flex:1});

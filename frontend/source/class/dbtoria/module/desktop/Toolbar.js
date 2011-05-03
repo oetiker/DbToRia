@@ -101,12 +101,16 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
             tables.map(
                 function(table) {
                     var handler = function() {
-                        new dbtoria.module.database.TableWindow(table.tableId, table.name);
+                        new dbtoria.module.database.TableWindow(table.tableId, table.name, null, table.readOnly);
                     };
-                    var btn = new qx.ui.toolbar.Button(table.name);
+                    table.label = table.name;
+                    if (table.readOnly) {
+                        table.label += '*';
+                    }
+                    var btn = new qx.ui.toolbar.Button(table.label);
                     lastButton = btn;
                     btn.addListener("execute", handler, this);
-                    var btnO = new qx.ui.menu.Button(table.name);
+                    var btnO = new qx.ui.menu.Button(table.label);
                     btnO.addListener("execute", handler, this);
                     btnO.setVisibility("excluded");
                     that.setRemovePriority(btn, prio++);
