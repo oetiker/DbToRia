@@ -67,12 +67,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             this.setCaption(this.tr('View: %1', this.__tableName));
         }
         else {
-            if (readOnly) {
-                this.setCaption(this.tr('Table: %1 (readOnly)', this.__tableName));
-            }
-            else {
-                this.setCaption(this.tr('Table: %1', this.__tableName));
-            }
+            this.setCaption(this.tr('Table: %1', this.__tableName));
             this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);

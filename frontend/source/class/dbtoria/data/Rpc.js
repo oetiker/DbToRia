@@ -68,6 +68,7 @@ qx.Class.define('dbtoria.data.Rpc', {
                 if (exc && exc.code == 6) {
                     var login = dbtoria.ui.dialog.Login.getInstance();
                     login.addListenerOnce('login', function(e) {
+                        dbtoria.module.desktop.Toolbar.getInstance().setUsername(login.getUsername());
                         origArguments.callee.base.apply(origThis, origArguments);
                     });
                     login.open();
