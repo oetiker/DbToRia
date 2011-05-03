@@ -70,11 +70,10 @@ sub getAllTables {
             type     => $table->{TABLE_TYPE},
             name     => $table->{REMARKS} || $tableName,
             readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
-#            readOnly => ! $readWrite,
     	};
     }
     $self->{tableList} = \%tables;
-    use Data::Dumper; print STDERR Dumper "tables=", \%tables;
+    # use Data::Dumper; print STDERR Dumper "tables=", \%tables;
     return $self->{tableList};
 }
 
