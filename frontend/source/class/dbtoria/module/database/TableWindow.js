@@ -96,17 +96,20 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __newRow:     null,
 
         __refresh : function(e) {
-            var record = e.getData();
-            this.debug('__refresh() called, record='+record);
             this.__table.getTableModel().reloadData();
-            if (record != null) {
-//                FIX ME: Finding row from recordId
-//                this.__table.selectRow(record);
-                // var row = this.__table.getRow(record);
-                // var sm  = this.__table.getSelectionModel();
-                // sm.resetSelection();
-                // sm.setSelectionInterval(row, row);
-            }
+            // FIX ME: Finding row from recordId
+            // var record;
+            // if(e != undefined) {
+            //     record = e.getData();
+            // }
+            // this.debug('__refresh() called, record='+record);
+            // if (record != null) {
+            //     this.__table.selectRow(record);
+            //     var row = this.__table.getRow(record);
+            //     var sm  = this.__table.getSelectionModel();
+            //     sm.resetSelection();
+            //     sm.setSelectionInterval(row, row);
+            // }
         },
 
         __navigation : function(e) {
