@@ -232,15 +232,19 @@ sub getTableStructure {
 
 =head2 getTablePrivileged(table)
 
-Returns permission information about the table directly from he
-database.
+Returns permission information about the table for the current user.
 
 =cut
 
 sub getTablePrivileges {
     my $self = shift;
     my $table = shift;
-    die "Override in Driver";
+    return {
+        UPDATE => 1,
+        INSERT => 1,
+        DELETE => 1,
+        SELECT => 1
+    };
 }
 
 =head2 getRecord (table,recordId)
