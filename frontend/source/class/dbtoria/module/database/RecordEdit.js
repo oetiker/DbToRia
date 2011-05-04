@@ -46,7 +46,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         this.set({
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             showMinimize         : true,
-            showClose            : false,
+            showClose            : true,
             contentPaddingLeft   : 20,
             contentPaddingRight  : 20,
             contentPaddingTop    : 20,
@@ -75,7 +75,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         this.add(this.__createNavigation(readOnly));
 
         // this.addListener("close", function(e) {
-        //     this.__close();
+        //      this.close();
         // }, this);
 
         this.addListener('keyup', function(e) {
@@ -125,9 +125,18 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         //     }
         // },
 
-        // __close: function() {
-        //     this.addListenerOnce('saveRecord', this.__closeHandler, this);
-        //     this.saveRecord();
+        // close: function() {
+        //     if (false) {
+        //         this.base.close(arguments);
+        //     }
+        //     var that=this;
+        //     var handler = function(arguments) {
+        //         that.base(arguments);
+        //     };
+        //     var mbox = dbtoria.ui.dialog.MsgBox.getInstance();
+        //     mbox.warn(this.tr('Unsaved data.'),
+        //               this.tr('Do you really want to close the edit form and loose your changes?'),
+        //               handler);
         // },
 
         __okHandler: function(e) {
