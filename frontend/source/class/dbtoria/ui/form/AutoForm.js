@@ -112,7 +112,16 @@ qx.Class.define("dbtoria.ui.form.AutoForm", {
 
         setReadOnly: function(readOnly) {
             for (var k in this.__controlMap) {
-                this.__controlMap[k].setEnabled(!readOnly);
+                this.debug('Calling setReadOnly(true) for '+k);
+                this.__controlMap[k].setReadOnly(readOnly);
+                // if (this.__controlMap[k].hasOwnProperty('readOnly')) {
+                //     this.debug('Calling setReadOnly(true).');
+                //     this.__controlMap[k].setReadOnly(readOnly);
+                // }
+                // else {
+                //     this.debug('Calling setEnabled(false).');
+                //     this.__controlMap[k].setEnabled(!readOnly);
+                // }
             }
         },
 

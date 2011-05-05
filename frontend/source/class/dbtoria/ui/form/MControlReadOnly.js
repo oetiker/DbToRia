@@ -9,32 +9,21 @@
 /* ************************************************************************
 ************************************************************************ */
 
-qx.Mixin.define("dbtoria.ui.form.MControlProperties", {
+qx.Mixin.define("dbtoria.ui.form.MControlReadOnly", {
 
     properties : {
-        copyForward : {
+        readOnly : {
             init     : false,
             check    : "Boolean",
-//            apply    : '_applyCopyForward', // for debugging
+            apply    : '_applyReadOnly',
             nullable : false
         }
-        // ,
-        // readOnly : {
-        //     init     : false,
-        //     check    : "Boolean",
-        //     apply    : '_applyReadOnly',
-        //     nullable : false
-        // }
-
     },
 
     members : {
-
-      // _applyReadOnly : function() {
-      //     this.setEnabled(false);
-
-      // }
-
+      _applyReadOnly : function() {
+          this.setEnabled(false);
+      }
     }
 
 });

@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.CheckBox", {
     extend : qx.ui.form.CheckBox,
-    include : [ dbtoria.ui.form.MControlProperties ],
+    include : [ dbtoria.ui.form.MControlProperties, dbtoria.ui.form.MControlReadOnly ],
 
     /**
      * Create a customized CheckBox.
@@ -23,6 +23,7 @@ qx.Class.define("dbtoria.ui.form.CheckBox", {
     },
 
     members : {
+
         defaults: function(value) {
             if (this.getValue() != null) {
                 return;
