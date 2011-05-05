@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.DateField", {
     extend : qx.ui.form.DateField,
-    include : [ dbtoria.ui.form.MControlProperties ],
+    include : [ dbtoria.ui.form.MControlProperties, dbtoria.ui.form.MControlReadOnly ],
 
     /**
      * Create a customized DateField.
@@ -23,6 +23,7 @@ qx.Class.define("dbtoria.ui.form.DateField", {
     },
 
     members : {
+
         defaults: function(value) {
             if (this.getValue() != null) {
                 return;
@@ -56,6 +57,23 @@ qx.Class.define("dbtoria.ui.form.DateField", {
             }
             return valid;
         }
+
+        // getValue: function() {
+        //     var date = this.base(arguments);
+        //     if (date == null) {
+        //         return date;
+        //     }
+        //     var y = date.getFullYear();
+        //     var m = date.getMonth();
+        //     if (m<10) {
+        //         m ='0'+m;
+        //     }
+        //     var d = date.getDate();
+        //     if (d<10) {
+        //         d ='0'+d;
+        //     }
+        //     return y+'-'+m+'-'+d;
+        // }
 
 //         /**
 //          * TODOC
@@ -100,17 +118,6 @@ qx.Class.define("dbtoria.ui.form.DateField", {
 //             }
 //         }
 
-        // getValue: function() {
-        //     var date = this.base(arguments);
-        // //     if (date == null) {
-        // //         return date;
-        // //     }
-        //     var epoch = null;
-        //     if (date && date.getTime) {
-        //          epoch = date.getTime() / 1000.0;
-        //     }
-        //     return epoch;
-        // }
 
 
     }

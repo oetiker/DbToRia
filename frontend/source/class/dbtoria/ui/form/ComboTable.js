@@ -11,7 +11,7 @@
 
 qx.Class.define("dbtoria.ui.form.ComboTable", {
     extend : combotable.ComboTable,
-    include : [ dbtoria.ui.form.MControlProperties ],
+    include : [ dbtoria.ui.form.MControlProperties, dbtoria.ui.form.MControlReadOnly ],
 
     /**
      * @param tableModel {} table model to use.
@@ -29,6 +29,7 @@ qx.Class.define("dbtoria.ui.form.ComboTable", {
     },
 
     members : {
+
         defaults: function(value) {
             if (this.getModel() != null) {
                 return;
