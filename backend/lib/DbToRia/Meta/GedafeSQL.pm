@@ -38,12 +38,15 @@ sub massageTables {
             delete $tables->{$table};
             next;
         }
+        next unless exists $tables->{$table}{remark};
+        $tables->{$table}{name} = $tables->{$table}{remark};
     }
 }
 
 =head2 massageToolbarTables(tablelist)
 
-Updates the table toolbar list created by L<DbToRia::DBI::base::getToolbarTables>.
+Updates the table toolbar list created by
+L<DbToRia::DBI::base::getToolbarTables>.
 
 =cut
 
@@ -61,8 +64,6 @@ sub massageToolbarTables {
     my @sortedTables = sort { $a->{name} cmp $b->{name} }  @newTables;
     $tables = \@sortedTables;
     return $tables;
-#    use Data::Dumper;
-#    print STDERR Dumper "toolbarTablesSorted=", $tables;
 }
 
 
@@ -73,20 +74,30 @@ Updates the tableStructure initially created by L<DbToRia::DBI::base::getTableSt
 =cut
 
 sub massageTableStructure {
-    my $self = shift;
-    my $tableId = shift;
+    my $self      = shift;
+    my $tableId   = shift;
     my $structure = shift;
+    my $colHash   = shift;
+    use Data::Dumper; print STDERR Dumper "colHash2=", $colHash;
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
-        $structure->{columns}[0]{hidden} = 1;
+        $structure->{columns}[0]{hidden}  = 1;
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
-        for (@{$structure->{columns}}){
-            $_->{hidden} = 1 if $_->{name} eq 'meta_sort';
+        for my $col (@{$structure->{columns}}){
+            $col->{hidden} = 1 if $col->{id} eq 'meta_sort';
+            my $id = $col->{id};
+            my $remark = $col->{remark} || '';
+            if ($remark ne '') {
+                $col->{name} = $remark;
+            }
+            elsif (exists $colHash->{$id}) {
+                $col->{name} = $colHash->{$id};
+            }
         }
     }
-} 
+}
 
-=head2 massageListView(tableId,listView) 
+=head2 massageListView(tableId,listView)
 
 Updates the information on how to display the table content in a tabular format
 

@@ -36,6 +36,7 @@ our $map = {
     (map { $_ => 'float' }   ('double precision','numeric','decimal','real','float 8','float4')),
     (map { $_ => 'boolean' } ('boolean')),
     (map { $_ => 'datetime' } ('timestamp without time zone')),
+    (map { $_ => 'time' } ('time without time zone')),
     (map { $_ => 'date' } ('date')),
 };
 
@@ -60,21 +61,45 @@ sub getAllTables {
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
 	my %tables;
+    my %colHash;
 	while ( my $table = $sth->fetchrow_hashref ) {
-        next unless $table->{TABLE_TYPE} eq 'TABLE' or $table->{TABLE_TYPE} eq 'VIEW';
-        my $tableName = $table->{TABLE_NAME};
+        my $tableType = $table->{TABLE_TYPE};
+        next unless $tableType eq 'TABLE' or $tableType eq 'VIEW';
+        my $tableName       = $table->{TABLE_NAME};
         my $tablePrivileges = $self->getTablePrivileges($tableName);
         my $readOnly = !( ($tablePrivileges->{UPDATE} || 0) &&
                           ($tablePrivileges->{INSERT} || 0) &&
                           ($tablePrivileges->{DELETE} || 0));
 	    $tables{$tableName} = {
-            type     => $table->{TABLE_TYPE},
-            name     => $table->{REMARKS} || $tableName,
+            type     => $tableType,
+            name     => $tableName,
+            remark   => $table->{REMARKS},
             readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
     	};
+
+        # build a name cache for Gedafe from table column column
+        # comments (not from views)
+        next unless $tableType eq 'TABLE';
+        my $structure = $self->getTableStructure($tableName);
+        my $columns   = $structure->{columns};
+        for my $col (@$columns) {
+            my $colName = $col->{name};
+            my $remark  = $col->{remark};
+            next unless defined $remark;
+            $colHash{$colName} = $remark;
+        }
     }
+    for my $table (keys %tables) {
+        for my $engine (@{$self->metaEngines}){
+            $engine->massageTableStructure($table,
+                                           $self->{tableStructure}{$table},
+                                           \%colHash
+                                          );
+        }
+    }
+    $self->{colHash} = \%colHash;
     $self->{tableList}{$username} = \%tables;
-    # use Data::Dumper; print STDERR Dumper "tables=", \%tables;
+    use Data::Dumper; print STDERR Dumper "colHash=", \%colHash;
     return $self->{tableList}{$username};
 }
 
@@ -169,7 +194,8 @@ sub getTableStructure {
         push @columns, {
             id         => $id,
             type       => $self->mapType($col->{TYPE_NAME}),
-            name       => $col->{REMARKS} || $id,
+            name       => $id,
+            remark     => $col->{REMARKS},
             size       => $col->{COLUMN_SIZE},
             default    => $col->{COLUMN_DEF},
             check      => $col->{pg_constraint}, # FIX ME: build regex for form validation
@@ -188,9 +214,6 @@ sub getTableStructure {
             primary => \@primaryKey
         }
     };
-    for my $engine (@{$self->metaEngines}){
-        $engine->massageTableStructure($table,$self->{tableStructure}{$table});
-    }
     return $self->{tableStructure}{$table};
 }
 
@@ -385,8 +408,8 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
-#    use Data::Dumper;
-#    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
+    use Data::Dumper;
+    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
