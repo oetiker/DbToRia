@@ -62,11 +62,13 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
         this.__scrollContainer = scrollContainer;
         this.add(scrollContainer, { flex: 1 });
 
-        this.__rpc = dbtoria.data.Rpc.getInstance();
-        this.__rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', tableId);
+        this._rpc = dbtoria.data.Rpc.getInstance();
         this.moveTo(300, 40);
 
-        this.add(this.__createNavigation());
+        var actionRow = new qx.ui.container.Composite(new qx.ui.layout.HBox(5));
+
+        this._createNavigation(actionRow);
+        this._createActions(actionRow);
 
         this.addListener('keyup', function(e) {
             if (e.getKeyIdentifier() == 'Escape') {
@@ -83,14 +85,18 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
     }, // events
 
     members : {
+        _form            : null,
         __formModel       : null,
-        __form            : null,
         __scrollContainer : null,
         __tableId         : null,
         __tableName       : null,
-        __recordId        : null,
-        __rpc             : null,
+        _recordId        : null,
+        _rpc             : null,
         __readOnly        : null,
+
+        _initForm: function() {
+            this._rpc.callAsyncSmart(qx.lang.Function.bind(this._fillForm, this), 'getEditView', this.__tableId);
+        },
 
         __createButton: function(icon, tooltip, target) {
             var btn = new dbtoria.ui.form.Button(null, icon, tooltip);
@@ -101,7 +107,7 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
             return btn;
         },
 
-        __createNavigation: function(readOnly) {
+        _createNavigation: function(readOnly) {
             var btnFirst = this.__createButton("icon/16/actions/go-first.png",
                                                this.tr("Jump to first record"),  'first');
             var btnBack  = this.__createButton("icon/16/actions/go-previous.png",
@@ -131,7 +137,7 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
          */
         setRecord : function(recordId) {
             this.debug("setRecord(): recordId="+recordId);
-            if (recordId == this.__recordId) { // nothing changed
+            if (recordId == this._recordId) { // nothing changed
                 return;
             }
         },
@@ -139,115 +145,9 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
         editRecord : function(recordId) {
             this.debug("editRecord(): recordId="+recordId);
             this.__setFormData(recordId, 'edit');
-            if (this.__readOnly) {
-                this.setCaption("View record: "+this.__tableName);
-            }
-            else {
-                this.setCaption("Edit record: "+this.__tableName);
-            }
             if (!this.isVisible()) {
                 this.open();
             }
-        },
-
-        cloneRecord : function(recordId) {
-            this.debug("cloneRecord(): recordId="+recordId);
-            this.__setFormData(recordId, 'clone');
-            this.setCaption("Clone record: "+this.__tableName);
-            if (!this.isVisible()) {
-                this.open();
-            }
-        },
-
-        newRecord : function() {
-            this.debug('newRecord() called');
-            this.__setDefaults();
-//            this.__setFormData(null, 'new');
-            this.setCaption("New record: "+this.__tableName);
-            if (!this.isVisible()) {
-                this.open();
-            }
-        },
-
-        saveRecord : function() {
-            if (!this.__form.getFormDataChanged()) {
-                this.debug("Form data didn't change, not saving.");
-                this.fireDataEvent('saveRecord', null);
-                return;
-            }
-
-            this.debug('saveRecord(): id='+this.__recordId);
-            if (!this.__form.validate()) {
-                this.debug('Form validation failed');
-                this.fireDataEvent('saveRecord', 'invalid');
-                var msg = dbtoria.ui.dialog.MsgBox.getInstance();
-                msg.error(this.tr('Form invalid'), this.tr('Make sure all your form input is valid. The invalid entries have been marked in red. Move the mouse over the marked entry to get more information about the problem.'));
-                return;
-            }
-
-            this.debug('Form validation ok');
-            var data = this.__form.getFormData();
-            // qx.dev.Debug.debugObject(data);
-            this.setLoading(true);
-            if (this.__recordId == null) {
-                this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                     'insertTableData', this.__tableId, data);
-            }
-            else {
-                this.__rpc.callAsync(qx.lang.Function.bind(this.__saveRecordHandler, this),
-                                     'updateTableData', this.__tableId, this.__recordId, data);
-            }
-        },
-
-
-        __saveRecordHandler : function(data, exc, id) {
-            if (exc) {
-                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
-                this.debug('__saveRecordHandler() failed');
-                this.fireDataEvent('saveRecord', 'failed');
-            }
-            else {
-                if (this.__recordId == null) {
-                    this.__recordId = data;
-                }
-                this.debug('__saveRecordHandler() successful, record='+this.__recordId);
-                this.fireDataEvent('saveRecord', 'succeeded');
-            }
-            this.setLoading(false);
-        },
-
-        /**
-         * TODOC
-         *
-         * @return {void}
-         */
-         __setDefaults : function() {
-             this.debug('Called __setDefaults()');
-             // only clear fields that don't have copyForward attribute
-             this.__recordId = null;
-             this.__form.clearPartial();
-             this.setLoading(true);
-             this.__rpc.callAsync(qx.lang.Function.bind(this.__getDefaultsHandler, this),
-                                  'getDefaultsDeref', this.__tableId);
-         },
-
-        /**
-         * TODOC
-         *
-         * @param rules {var} TODOC
-         * @return {void}
-         */
-      __getDefaultsHandler : function(data, exc, id) {
-            if (exc) {
-                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
-            }
-            else {
-                this.debug('__getDefaultsHandler(): data=');
-//            qx.dev.Debug.debugObject(data);
-                this.__form.setDefaults(data);
-                this.__form.setFormDataChanged(true);
-            }
-            this.setLoading(false);
         },
 
         /**
@@ -265,17 +165,17 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
                 }
                 else {
                     if (action == 'clone'){
-                        that.__recordId = null;
+                        that._recordId = null;
                     }
                     else {
-                        that.__recordId = recordId;
+                        that._recordId = recordId;
                     }
-                    that.__form.setFormData(data);
-                    that.__form.setFormDataChanged(false);
+                    that._form.setFormData(data);
+                    that._form.setFormDataChanged(false);
                 }
                 that.setLoading(false);
             };
-            this.__rpc.callAsync(setFormDataHandler, 'getRecordDeref', this.__tableId, recordId);
+            this._rpc.callAsync(setFormDataHandler, 'getRecordDeref', this.__tableId, recordId);
          },
 
         /**
@@ -293,7 +193,7 @@ qx.Class.define("dbtoria.module.database.AbstractRecord", {
             this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
             this.__scrollContainer.add(formControl, {flex:1});
-            this.__form = form;
+            this._form = form;
         }
     }
 });
