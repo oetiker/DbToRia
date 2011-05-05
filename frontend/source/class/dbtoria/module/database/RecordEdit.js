@@ -245,7 +245,12 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
         editRecord : function(recordId) {
             this.debug("editRecord(): recordId="+recordId);
             this.__setFormData(recordId, 'edit');
-            this.setCaption("Edit record: "+this.__tableName);
+            if (this.__readOnly) {
+                this.setCaption("View record: "+this.__tableName);
+            }
+            else {
+                this.setCaption("Edit record: "+this.__tableName);
+            }
             if (!this.isVisible()) {
                 this.open();
             }
