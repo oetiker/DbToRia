@@ -55,6 +55,9 @@ sub massageTables {
     my $tables = shift;
 }
 
+sub massageTableColumns {
+}
+
 =head2 massageToolbarTables(tablelist)
 
 Updates the table toolbar list created by L<DbToRia::DBI::base::getToolbarTables>.

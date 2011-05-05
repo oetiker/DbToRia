@@ -24,9 +24,10 @@ use DbToRia::Exception qw(error);
 use Mojo::Base 'DbToRia::Meta::base';
 
 
-=head2 massageMenu(tablelist)
+=head2 massageTables(tablelist)
 
 Updates the table list created by L<DbToRia::DBI::base::getTables>.
+Replace table name with table comment if it exists.
 
 =cut
 
@@ -57,7 +58,6 @@ sub massageToolbarTables {
     my @newTables;
     for ($i=0; $i < scalar @$tables; $i++) {
         my $name = $tables->[$i]->{name};
-#        print STDERR "name=$name\n";
         next if $name =~ m/^Z /;
         push @newTables, $tables->[$i];
     }
@@ -77,22 +77,51 @@ sub massageTableStructure {
     my $self      = shift;
     my $tableId   = shift;
     my $structure = shift;
+    my $tableType = shift;
     my $colHash   = shift;
-    use Data::Dumper; print STDERR Dumper "colHash2=", $colHash;
+
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
         $structure->{columns}[0]{hidden}  = 1;
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
-        for my $col (@{$structure->{columns}}){
+        for my $col (@{$structure->{columns}}) {
             $col->{hidden} = 1 if $col->{id} eq 'meta_sort';
-            my $id = $col->{id};
-            my $remark = $col->{remark} || '';
-            if ($remark ne '') {
-                $col->{name} = $remark;
-            }
-            elsif (exists $colHash->{$id}) {
-                $col->{name} = $colHash->{$id};
-            }
+        }
+    }
+
+    # build a name cache for Gedafe from table column column
+    # comments (not from views)
+    return unless $tableType eq 'TABLE';
+    my $columns   = $structure->{columns};
+    for my $col (@$columns) {
+        my $colName = $col->{name};
+        my $remark  = $col->{remark} || '';
+        next unless $remark ne '';
+        $colHash->{$colName} = $remark;
+    }
+}
+
+=head2 massageTableColumns(tableStructure, colHash)
+
+Replace colum names with remarks if they exist. Based on
+tableStructure initially created by
+L<DbToRia::DBI::base::getTableStructure>.
+
+=cut
+
+sub massageTableColumns {
+    my $self      = shift;
+    my $structure = shift;
+    my $colHash   = shift;
+
+    for my $col (@{$structure->{columns}}) {
+        my $id = $col->{id};
+        my $remark = $col->{remark} || '';
+        if ($remark ne '') {
+            $col->{name} = $remark;
+        }
+        elsif ((exists $colHash->{$id}) and ($colHash->{$id} ne '')) {
+            $col->{name} = $colHash->{$id};
         }
     }
 }
