@@ -55,7 +55,7 @@ qx.Class.define("dbtoria.ui.form.DateField", {
                 control.setValid(valid);
             }
             return valid;
-        },
+        }
 
 //         /**
 //          * TODOC
