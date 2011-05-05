@@ -71,15 +71,6 @@ side.
 Status: available,
 Effort: 4h
 
-=head3 Gedafe Friendly Names Cache
-
-In gedafeSQL field names in tables are unique. This allows to identify
-appropriate friendly names for view fields even when none are defined
-directly.
-
-Status: available,
-Effort: 3h
-
 =head3 Pearl Reports Integration
 
 Gedafe Pearl can be used within DbToRia. Pearl reports show up in
