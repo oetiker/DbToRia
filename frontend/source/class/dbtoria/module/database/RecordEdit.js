@@ -296,6 +296,7 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
                 this.fireDataEvent('saveRecord', 'failed');
             }
             else {
+                this.__form.setFormDataChanged(false);
                 if (this.__recordId == null) {
                     this.__recordId = data;
                 }
