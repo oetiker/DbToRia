@@ -392,6 +392,7 @@ sub getEditView {
         varchar => 'TextField',
         integer => 'IntField',
         float   => 'FloatField',
+        time    => 'TimeField',
         date    => 'Date',
         boolean => 'CheckBox',
     };

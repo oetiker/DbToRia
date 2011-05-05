@@ -71,6 +71,9 @@ qx.Class.define("dbtoria.ui.form.ControlBuilder", {
                 case "FloatTimeField":
                     control = new dbtoria.ui.form.FloatTimeField();
                     break;
+                case "TimeField":
+                    control = new dbtoria.ui.form.TimeField();
+                    break;
                 case "TextArea":
                     control = new dbtoria.ui.form.TextArea();
                     break;
