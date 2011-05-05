@@ -23,19 +23,15 @@
  * Popup window for editing a database record.
  */
 qx.Class.define("dbtoria.module.database.ViewRecord", {
-    extend : dbtoria.module.database.AbstractEdit,
+    extend : dbtoria.module.database.AbstractRecord,
 
     construct : function(tableId, tableName) {
         this.base(arguments);
-        this.__tableId   = tableId;
-        this.__tableName = tableName;
 
         this.set({
             icon                 : 'icon/16/apps/utilities-text-editor.png',
             caption              : this.tr('Edit record: %1', tableName)
         });
-
-        this.add(this.__createActions());
 
     },
 
@@ -46,21 +42,13 @@ qx.Class.define("dbtoria.module.database.ViewRecord", {
     }, // events
 
     members : {
-        __formModel       : null,
-        __form            : null,
-        __scrollContainer : null,
-        __tableId         : null,
-        __tableName       : null,
-        __recordId        : null,
-        __rpc             : null,
-        __readOnly        : null,
 
         cancel: function() {
-//            this.__form.setFormDataChanged(false); // abort, don't save afterwards
+//            this._form.setFormDataChanged(false); // abort, don't save afterwards
             this.close();
         },
 
-        __createActions: function() {
+        _createActions: function() {
             var btnCnl = new dbtoria.ui.form.Button(this.tr("Cancel"), "icon/16/actions/dialog-cancel.png",
                                                     this.tr('Abort editing without saving'));
             btnCnl.addListener("execute", this.cancel, this);
