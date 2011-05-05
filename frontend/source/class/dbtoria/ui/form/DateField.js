@@ -44,6 +44,14 @@ qx.Class.define("dbtoria.ui.form.DateField", {
             this.setValue(null);
         },
 
+        setFormDataCallback: function(name, callback) {
+            this.addListener('changeValue', function(e) {
+                var date = e.getData();
+                var value = this.__date2string(date);
+                callback(name, value);
+            }, this);
+        },
+
         validator: function(value,control) {
             if (value == null && !control.getRequired()) {
                 control.setValid(true);
@@ -56,24 +64,23 @@ qx.Class.define("dbtoria.ui.form.DateField", {
                 control.setValid(valid);
             }
             return valid;
-        }
+        },
 
-        // getValue: function() {
-        //     var date = this.base(arguments);
-        //     if (date == null) {
-        //         return date;
-        //     }
-        //     var y = date.getFullYear();
-        //     var m = date.getMonth();
-        //     if (m<10) {
-        //         m ='0'+m;
-        //     }
-        //     var d = date.getDate();
-        //     if (d<10) {
-        //         d ='0'+d;
-        //     }
-        //     return y+'-'+m+'-'+d;
-        // }
+        __date2string: function(date) {
+            if (date == null) {
+                return date;
+            }
+            var y = date.getFullYear();
+            var m = date.getMonth()+1;
+            if (m<10) {
+                m ='0'+m;
+            }
+            var d = date.getDate();
+            if (d<10) {
+                d ='0'+d;
+            }
+            return y+'-'+m+'-'+d;
+        }
 
 //         /**
 //          * TODOC
