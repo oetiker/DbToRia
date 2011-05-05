@@ -387,7 +387,10 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
          */
         _fillForm : function(rules) {
             var form         = new dbtoria.ui.form.AutoForm(rules);
-            form.setReadOnly(this.__readOnly);
+            if (this.__readOnly) {
+                // only for readOnly forms, otherwise readOnly fields would get enabled
+                form.setReadOnly(this.__readOnly);
+            }
             this.__formModel = form.getFormData();
             var formControl  = new dbtoria.ui.form.renderer.Monster(form);
             this.__scrollContainer.add(formControl, {flex:1});
