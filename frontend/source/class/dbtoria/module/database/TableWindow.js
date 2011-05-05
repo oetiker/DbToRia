@@ -65,10 +65,12 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         this.__buildUi(tableId, viewMode, readOnly);
         if (viewMode) {
             this.setCaption(this.tr('View: %1', this.__tableName));
+            this.__recordEdit = new dbtoria.module.database.ViewRecord(tableId, tableName);
         }
         else {
             this.setCaption(this.tr('Table: %1', this.__tableName));
-            this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
+//            this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
+            this.__recordEdit = new dbtoria.module.database.EditRecord(tableId, tableName);
             this.__recordEdit.addListener('navigation', this.__navigation, this);
             this.__recordEdit.addListener('refresh',    this.__refresh, this);
         }
