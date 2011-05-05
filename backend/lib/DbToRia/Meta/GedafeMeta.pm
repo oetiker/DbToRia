@@ -156,6 +156,9 @@ sub massageEditView {
             elsif ($widget eq 'floattime') {
                 $row->{type} = 'FloatTimeField';
             }
+            elsif ($widget eq 'time') {
+                $row->{type} = 'TimeField';
+            }
             elsif ($widget eq 'readonly') {
                 $row->{readOnly} = $Mojo::JSON::TRUE;
             }

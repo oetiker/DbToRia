@@ -61,7 +61,7 @@ sub getAllTables {
     my $dbh	= $self->getDbh();
 	my $sth = $dbh->table_info('',$self->schema,'', 'TABLE,VIEW');
 	my %tables;
-    my %colHash;
+
 	while ( my $table = $sth->fetchrow_hashref ) {
         my $tableType = $table->{TABLE_TYPE};
         next unless $tableType eq 'TABLE' or $tableType eq 'VIEW';
@@ -77,29 +77,21 @@ sub getAllTables {
             readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
     	};
 
-        # build a name cache for Gedafe from table column column
-        # comments (not from views)
-        next unless $tableType eq 'TABLE';
-        my $structure = $self->getTableStructure($tableName);
-        my $columns   = $structure->{columns};
-        for my $col (@$columns) {
-            my $colName = $col->{name};
-            my $remark  = $col->{remark};
-            next unless defined $remark;
-            $colHash{$colName} = $remark;
-        }
     }
+
+    # prepare colHash by going through all table structures
     for my $table (keys %tables) {
+        $self->getTableStructure($table, $tables{$table}{type});
+    }
+
+    # massage all tables' column names
+    for my $table (keys %tables) {
+        my $structure = $self->getTableStructure($table);
         for my $engine (@{$self->metaEngines}){
-            $engine->massageTableStructure($table,
-                                           $self->{tableStructure}{$table},
-                                           \%colHash
-                                          );
+            $engine->massageTableColumns($structure, $self->{colHash});
         }
     }
-    $self->{colHash} = \%colHash;
     $self->{tableList}{$username} = \%tables;
-    use Data::Dumper; print STDERR Dumper "colHash=", \%colHash;
     return $self->{tableList}{$username};
 }
 
@@ -161,6 +153,7 @@ the internal datatypes to DbToRia compatible datatypes.
 sub getTableStructure {
     my $self  = shift;
     my $table = shift;
+    my $tableType = shift;
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
@@ -188,7 +181,6 @@ sub getTableStructure {
 	my @columns;
     my %typeMap;
 	while( my $col = $sth->fetchrow_hashref ) {
-#        use Data::Dumper; print STDERR Dumper "col=", $col;
         my $id = $col->{COLUMN_NAME};
         # return structure
         push @columns, {
@@ -214,6 +206,17 @@ sub getTableStructure {
             primary => \@primaryKey
         }
     };
+
+    # create empty colHash if necessary and fill it through meta engine
+    $self->{colHash} = {} unless exists $self->{colHash};
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageTableStructure($table,
+                                       $self->{tableStructure}{$table},
+                                       $tableType,
+                                       $self->{colHash},
+                                      );
+    }
+
     return $self->{tableStructure}{$table};
 }
 
@@ -233,6 +236,8 @@ sub getRecord {
     my $recordIdQ  = $dbh->quote($recordId);
     my $tableIdQ   = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
+
+    die "Primary key undefined for table $tableId" unless $primaryKey;
     my $sth        = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordIdQ");
     $sth->execute();
     my $row        = $sth->fetchrow_hashref;
@@ -408,8 +413,8 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
-    use Data::Dumper;
-    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
+#    use Data::Dumper;
+#    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
