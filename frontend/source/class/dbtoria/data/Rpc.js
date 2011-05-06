@@ -18,8 +18,8 @@ qx.Class.define('dbtoria.data.Rpc', {
         this.base(arguments);
 
         this.set({
-            // 10 seconds max
-            timeout     : 10000,
+            // 30 seconds max
+            timeout     : 30000,
             url         : 'jsonrpc/',
             serviceName : 'DbToRia'
         });
