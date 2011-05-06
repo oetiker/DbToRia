@@ -85,6 +85,10 @@ sub massageTables {
         next unless exists $tables->{$table}{remark};
         $tables->{$table}{name} = $tables->{$table}{remark};
         delete $tables->{$table}{remark};
+        if (exists $self->{cfg}{tablenamesReplace} ) {
+            my ($match, $replace) = split /,/, $self->{cfg}{tablenamesReplace};
+            $tables->{$table}{name} =~ s/$match/$replace/;
+        }
     }
 }
 
@@ -98,15 +102,21 @@ L<DbToRia::DBI::base::getToolbarTables>.
 sub massageToolbarTables {
     my $self = shift;
     my $tables = shift;
+
+    use Data::Dumper; print STDERR Dumper "cfg=", $self->{cfg};
+    return $tables unless exists $self->{cfg}{toolbarTables};
     my $i;
-    my @newTables;
-    for ($i=0; $i < scalar @$tables; $i++) {
-        my $name = $tables->[$i]->{name};
-        next if $name =~ m/^Z /;
-        push @newTables, $tables->[$i];
+    my $regex = $self->{cfg}{toolbarTables};
+    my @tbTables;
+#    for ($i=0; $i < scalar @$tables; $i++) {
+    for my $table (@$tables) {
+        next unless $table->{name} =~ m/$regex/;
+        push @tbTables, $table;
     }
-    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @newTables;
-    $tables = \@sortedTables;
+    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @tbTables;
+    if (scalar @sortedTables) {
+        $tables = \@sortedTables;
+    }
     return $tables;
 }
 
