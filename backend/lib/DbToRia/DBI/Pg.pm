@@ -79,18 +79,6 @@ sub getAllTables {
 
     }
 
-    # prepare colHash by going through all table structures
-    for my $table (keys %tables) {
-        $self->getTableStructure($table, $tables{$table}{type});
-    }
-
-    # massage all tables' column names
-    for my $table (keys %tables) {
-        my $structure = $self->getTableStructure($table);
-        for my $engine (@{$self->metaEngines}){
-            $engine->massageTableColumns($structure, $self->{colHash});
-        }
-    }
     $self->{tableList}{$username} = \%tables;
     return $self->{tableList}{$username};
 }
@@ -153,7 +141,6 @@ the internal datatypes to DbToRia compatible datatypes.
 sub getTableStructure {
     my $self  = shift;
     my $table = shift;
-    my $tableType = shift;
 
     return $self->{tableStructure}{$table} if exists $self->{tableStructure}{$table};
 
@@ -207,14 +194,8 @@ sub getTableStructure {
         }
     };
 
-    # create empty colHash if necessary and fill it through meta engine
-    $self->{colHash} = {} unless exists $self->{colHash};
     for my $engine (@{$self->metaEngines}){
-        $engine->massageTableStructure($table,
-                                       $self->{tableStructure}{$table},
-                                       $tableType,
-                                       $self->{colHash},
-                                      );
+        $engine->massageTableStructure($table, $self->{tableStructure}{$table});
     }
 
     return $self->{tableStructure}{$table};
