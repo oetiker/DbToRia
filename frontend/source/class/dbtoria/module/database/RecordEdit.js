@@ -111,10 +111,9 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
                 this.base(arguments);
                 return;
             }
-            var that=this;
-            var handler = function(arguments) {
+            var handler = function(arg) {
                 this.__form.setFormDataChanged(false);
-                this.base(arguments);
+                this.base(arg);
             };
             var mbox = dbtoria.ui.dialog.MsgBox.getInstance();
             mbox.warn(this.tr('Unsaved data.'),
