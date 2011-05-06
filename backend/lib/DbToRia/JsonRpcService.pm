@@ -106,7 +106,7 @@ sub allow_rpc_access {
 On successful login, return 1, else return an exception.
 
 =cut
- 
+
 sub login {
     my $self     = shift;
     my $param    = shift;
