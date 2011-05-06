@@ -331,7 +331,7 @@ sub getDefaultsDeref {
 
 =head2 getTables
 
-return tables and views filtered for menu display.
+Return tables and views filtered for menu display.
 
 =cut
 
