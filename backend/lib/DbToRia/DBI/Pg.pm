@@ -37,6 +37,7 @@ our $map = {
     (map { $_ => 'boolean' } ('boolean')),
     (map { $_ => 'datetime' } ('timestamp without time zone')),
     (map { $_ => 'time' } ('time without time zone')),
+    (map { $_ => 'time' } ('timestamp with time zone')),
     (map { $_ => 'date' } ('date')),
 };
 
