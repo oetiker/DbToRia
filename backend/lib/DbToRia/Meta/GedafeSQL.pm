@@ -66,6 +66,21 @@ sub prepare {
     $runtime = time()-$start; print STDERR "prepare finished after $runtime secs\n";
 }
 
+=head2 massageTables(tablelist)
+
+Update the database name created by L<DbToRia::DBI::Pg::getDatabaseName>.
+Replace table name with database comment if it exists.
+
+=cut
+
+sub massageDatabaseName {
+    my $self           = shift;
+    my $databaseName   = shift;
+    my $databaseRemark = shift;
+    $databaseName = $databaseRemark if ($databaseRemark);
+    return $databaseName;
+}
+
 
 =head2 massageTables(tablelist)
 
