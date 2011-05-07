@@ -48,6 +48,24 @@ sub mapType {
     return $map->{$type} || die error(9844,'Unknown Database Type: "'.$type.'"');
 }
 
+=head2 getDatabaseName
+
+Return name of the database connected to.
+
+=cut
+
+sub getDatabaseName {
+    my $self = shift;
+    my $dsn = $self->{dsn};
+    $dsn =~ s/.+database=//;
+    $dsn =~ s/;.*//;
+    my $databaseName = $dsn;
+    for my $engine (@{$self->metaEngines}){
+#        $engine->massageDatabaseName($databaseName);
+    }
+    return $databaseName;
+}
+
 
 =head2 getAllTables()
 

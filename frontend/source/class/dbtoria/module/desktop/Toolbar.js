@@ -75,6 +75,13 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
             }, 'logout');
         },
         this);
+
+        this.__rpc = dbtoria.data.Rpc.getInstance();
+        this.__rpc.callAsyncSmart(
+            qx.lang.Function.bind(function(ret) {
+                this.__username.setValue(ret);
+            }, this), 'getUsername');
+
     },
 
     members : {

@@ -329,6 +329,17 @@ sub getDefaultsDeref {
 
 =head1 BASE METHODS
 
+=head2 getDatabaseName
+
+Return name of the database connected to.
+
+=cut
+
+sub getDatabaseName {
+    my $self = shift;
+    die "Must be overwritten.";
+}
+
 =head2 getTables
 
 Return tables and views filtered for menu display.

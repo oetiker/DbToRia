@@ -58,6 +58,8 @@ our %allow_access = (
     getConfig           => 1,
     login               => 1,
     logout              => 1,
+    getDatabaseName     => 2,
+    getUsername         => 2,
     getTables           => 2,
     getToolbarTables    => 2,
     getListView         => 2,
@@ -123,6 +125,17 @@ sub logout{
     my $self = shift;
     $self->mojo_stash->{'dbtoria.session'}->delete();
     return 1;
+}
+
+sub getUsername {
+    my $self=shift;
+    my $session  = $self->mojo_stash->{'dbtoria.session'};
+    return $session->param('username');
+}
+
+sub getDatabaseName {
+    my $self = shift;
+    return $self->DBI->getDatabaseName(@_);
 }
 
 sub getTables {
