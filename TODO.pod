@@ -56,21 +56,6 @@ re-open the view directly.
 Status: available,
 Effort: 3h
 
-=head3 Configurable Toolbar Content
-
-The top row of the DbToRia frontend should contain a configurable set
-of toolbar buttons for directly accessing tables, view or reports.
-
-=over
-
-=item
-
-The buttons are configurable on a per-application base from the server
-side.
-
-Status: available,
-Effort: 4h
-
 =head3 Pearl Reports Integration
 
 Gedafe Pearl can be used within DbToRia. Pearl reports show up in
@@ -122,6 +107,8 @@ Status: available,
 Effort: ?
 
 =head3 Example applications
+
+=over 
 
 =item Publication database
 
