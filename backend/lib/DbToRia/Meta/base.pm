@@ -46,6 +46,19 @@ sub prepare {
 
 =head2 massageTables(tablelist)
 
+Update the database name created by L<DbToRia::DBI::Pg::getDatabaseName>.
+Replace table name with database comment if it exists.
+
+=cut
+
+sub massageDatabaseName {
+    my $self         = shift;
+    my $databaseName = shift;
+}
+
+
+=head2 massageTables(tablelist)
+
 Updates the table list created by L<DbToRia::DBI::base::getTables>.
 
 =cut

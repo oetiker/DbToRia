@@ -57,11 +57,33 @@ Return name of the database connected to.
 sub getDatabaseName {
     my $self = shift;
     my $dsn = $self->{dsn};
-    $dsn =~ s/.+database=//;
-    $dsn =~ s/;.*//;
+
+    # extract just the database name and remove leading parameter name 
+    # and trailing host and port settings
+    if ( $dsn =~ m/(?:dbname|db|database)=([^;]*)/ ) { # this comment to easy syntax highlighting /
+            $dsn = $1;
+    }
     my $databaseName = $dsn;
+
+    my $dbh        = $self->getDbh();
+    my $query = "SELECT oid FROM pg_database WHERE datname = '$databaseName'";
+    my $sth = $dbh->prepare($query);
+    $sth->execute() or die $sth->errstr;
+    my $data = $sth->fetchrow_arrayref() or die $sth->errstr;
+    my $oid = $data->[0];
+    $sth->finish;
+
+    # read database comment
+    $query = "SELECT shobj_description($oid, 'pg_database')";
+    $sth = $dbh->prepare($query);
+    $sth->execute() or die $sth->errstr;
+    $data = $sth->fetchrow_arrayref();
+    my $databaseRemark = $data->[0];
+    $sth->finish;
+
     for my $engine (@{$self->metaEngines}){
-#        $engine->massageDatabaseName($databaseName);
+        $databaseName = $engine->massageDatabaseName($databaseName,
+                                                     $databaseRemark);
     }
     return $databaseName;
 }
