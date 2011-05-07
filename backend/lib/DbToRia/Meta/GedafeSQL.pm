@@ -3,7 +3,8 @@ package DbToRia::Meta::GedafeSQL;
 
 =head1 NAME
 
-DbToRia::Meta::Gedafe - read nameing information gedafe style out of the database structure
+DbToRia::Meta::Gedafe - read naming information gedafe style out of
+the database structure
 
 =head1 SYNOPSIS
 
@@ -11,8 +12,9 @@ DbToRia::Meta::Gedafe - read nameing information gedafe style out of the databas
 
 =head1 DESCRIPTION
 
-DbToRia can be used as a drop-in replacement for gedafe. The compatibility
-layer for Gedafe SQL nameing conventions is reaslized by this module. See L<http://isg.ee.ethz.ch/tools/gedafe/> for details on
+DbToRia can be used as a drop-in replacement for gedafe. The
+compatibility layer for Gedafe SQL nameing conventions is reaslized by
+this module. See L<http://isg.ee.ethz.ch/tools/gedafe/> for details on
 Gedafe.
 
 =cut
@@ -22,6 +24,47 @@ use warnings;
 use Encode;
 use DbToRia::Exception qw(error);
 use Mojo::Base 'DbToRia::Meta::base';
+use Time::HiRes qw(time);
+
+
+=head2 prepare()
+
+Pull in information needed prior to using this engine. This function
+is called right after the database has been connected.
+
+=cut
+
+sub prepare {
+    my $self = shift;
+
+    my $runtime;
+    my $start = time();
+
+    # build a name cache for Gedafe from table column column
+    # comments (not from views)
+    my $tables = $self->DBI->getAllTables();
+    $runtime = time()-$start; print STDERR "getAllTables() after $runtime secs\n";
+    my %colHash;
+    for my $table (keys %$tables) {
+        next unless $tables->{$table}{type} eq 'TABLE';
+        my $structure = $self->DBI->getTableStructure($table);
+
+        my $columns   = $structure->{columns};
+        for my $col (@$columns) {
+            $colHash{$col->{id}} = $col->{remark} if $col->{remark};
+        }
+    }
+    $self->{colHash} = \%colHash;
+    $runtime = time()-$start; print STDERR "colHash() after $runtime secs\n";
+#    use Data::Dumper; print STDERR Dumper "colHash=", \%colHash;
+
+    # replace column names with remarks or cached table column names
+    for my $table (keys %$tables) {
+        my $structure = $self->DBI->getTableStructure($table);
+        $self->massageTableColumns($structure);
+    }
+    $runtime = time()-$start; print STDERR "prepare finished after $runtime secs\n";
+}
 
 
 =head2 massageTables(tablelist)
@@ -41,6 +84,11 @@ sub massageTables {
         }
         next unless exists $tables->{$table}{remark};
         $tables->{$table}{name} = $tables->{$table}{remark};
+        delete $tables->{$table}{remark};
+        if (exists $self->{cfg}{tablenamesReplace} ) {
+            my ($match, $replace) = split /,/, $self->{cfg}{tablenamesReplace};
+            $tables->{$table}{name} =~ s/$match/$replace/;
+        }
     }
 }
 
@@ -54,22 +102,29 @@ L<DbToRia::DBI::base::getToolbarTables>.
 sub massageToolbarTables {
     my $self = shift;
     my $tables = shift;
+
+    use Data::Dumper; print STDERR Dumper "cfg=", $self->{cfg};
+    return $tables unless exists $self->{cfg}{toolbarTables};
     my $i;
-    my @newTables;
-    for ($i=0; $i < scalar @$tables; $i++) {
-        my $name = $tables->[$i]->{name};
-        next if $name =~ m/^Z /;
-        push @newTables, $tables->[$i];
+    my $regex = $self->{cfg}{toolbarTables};
+    my @tbTables;
+#    for ($i=0; $i < scalar @$tables; $i++) {
+    for my $table (@$tables) {
+        next unless $table->{name} =~ m/$regex/;
+        push @tbTables, $table;
     }
-    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @newTables;
-    $tables = \@sortedTables;
+    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @tbTables;
+    if (scalar @sortedTables) {
+        $tables = \@sortedTables;
+    }
     return $tables;
 }
 
 
 =head2 massageTableStructure(tableId,tableStructure)
 
-Updates the tableStructure initially created by L<DbToRia::DBI::base::getTableStructure>.
+Updates the tableStructure initially created by
+L<DbToRia::DBI::base::getTableStructure>.
 
 =cut
 
@@ -77,8 +132,6 @@ sub massageTableStructure {
     my $self      = shift;
     my $tableId   = shift;
     my $structure = shift;
-    my $tableType = shift;
-    my $colHash   = shift;
 
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
@@ -87,24 +140,14 @@ sub massageTableStructure {
         for my $col (@{$structure->{columns}}) {
             $col->{hidden} = 1 if $col->{id} eq 'meta_sort';
         }
-    }
-
-    # build a name cache for Gedafe from table column column
-    # comments (not from views)
-    return unless $tableType eq 'TABLE';
-    my $columns   = $structure->{columns};
-    for my $col (@$columns) {
-        my $colName = $col->{name};
-        my $remark  = $col->{remark} || '';
-        next unless $remark ne '';
-        $colHash->{$colName} = $remark;
+        return;
     }
 }
 
 =head2 massageTableColumns(tableStructure, colHash)
 
-Replace colum names with remarks if they exist. Based on
-tableStructure initially created by
+Replace colum names with remarks or cached table column names in views
+if they exist. Based on tableStructure initially created by
 L<DbToRia::DBI::base::getTableStructure>.
 
 =cut
@@ -112,15 +155,14 @@ L<DbToRia::DBI::base::getTableStructure>.
 sub massageTableColumns {
     my $self      = shift;
     my $structure = shift;
-    my $colHash   = shift;
 
+    my $colHash   = $self->{colHash};
     for my $col (@{$structure->{columns}}) {
         my $id = $col->{id};
-        my $remark = $col->{remark} || '';
-        if ($remark ne '') {
-            $col->{name} = $remark;
+        if ( $col->{remark} ) {
+            $col->{name} = $col->{remark};
         }
-        elsif ((exists $colHash->{$id}) and ($colHash->{$id} ne '')) {
+        elsif ( $colHash->{$id} ) {
             $col->{name} = $colHash->{$id};
         }
     }
@@ -128,7 +170,8 @@ sub massageTableColumns {
 
 =head2 massageListView(tableId,listView)
 
-Updates the information on how to display the table content in a tabular format
+Updates the information on how to display the table content in a
+tabular format.
 
 =cut
 
@@ -202,17 +245,17 @@ Copyright (c) 2011 by OETIKER+PARTNER AG. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or   
+the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of 
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =head1 AUTHOR
 
