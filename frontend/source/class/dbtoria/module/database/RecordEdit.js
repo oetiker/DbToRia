@@ -121,6 +121,10 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
                       qx.lang.Function.bind(handler, this, arguments));
         },
 
+        isUnsaved: function() {
+            return this.__form.getFormDataChanged();
+        },
+
         __okHandler: function(e) {
             var ret = e.getData();
             this.debug('__okHandler(): ret='+ret+', recordId='+this.__recordId);

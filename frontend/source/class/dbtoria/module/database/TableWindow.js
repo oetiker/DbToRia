@@ -52,6 +52,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
     construct : function(tableId, tableName, viewMode, readOnly) {
         this.__tableName = tableName;
         this.__tableId   = tableId;
+        this.__viewMode  = viewMode;
+        this.__readOnly  = readOnly;
+
         this.base(arguments);
         this.set({
             contentPadding : 0,
@@ -73,9 +76,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
 
-        this.addListener('close', function() {
-            this.__recordEdit.cancel();
-        }, this);
+//        this.addListener('close', function() {
+//            this.__recordEdit.cancel();
+//        }, this);
         this.open();
     },
 
@@ -92,6 +95,20 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __recordEdit: null,
         __rpc:        null,
         __dataChangedHandler:    null,
+        __viewMode: null,
+        __readOnly: null,
+
+        close: function() {
+            if (this.__viewMode || this.__readOnly ||
+                !this.__recordEdit.isVisible()) {
+                this.__recordEdit.close();
+                this.base(arguments);
+                return;
+            }
+            var mbox = dbtoria.ui.dialog.MsgBox.getInstance();
+            mbox.info(this.tr('Unsaved data.'),
+                      this.tr('You must first close the record edit window.'));
+        },
 
         __refresh : function(e) {
             var tm = this.__table.getTableModel();
