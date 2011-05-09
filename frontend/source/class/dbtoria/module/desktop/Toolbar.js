@@ -16,7 +16,7 @@
 ************************************************************************ */
 
 qx.Class.define("dbtoria.module.desktop.Toolbar", {
-    extend : qx.ui.toolbar.ToolBar,
+    extend : dbtoria.module.desktop.AutoToolbar,
     type : "singleton",
 
     construct : function() {
@@ -32,16 +32,7 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         this.add(new qx.ui.toolbar.Separator());
         this.add(partTables);
         this.addSpacer();
-        var overflow = new qx.ui.toolbar.MenuButton("More ...");
-        this.add(overflow);
-        this.set({
-            spacing: 5,
-            overflowIndicator: overflow,
-            overflowHandling: true
-        });
-
-        var overflowMenu = this.__overflowMenu = new qx.ui.menu.Menu();
-        overflow.setMenu(overflowMenu);
+        this.addOverflow();
         this.add(new qx.ui.toolbar.Separator());
         this.add(partLast);
         var menu    = dbtoria.module.database.TableSelection.getInstance();
@@ -87,33 +78,15 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
     members : {
         __rpc:          null,
         __partTables:   null,
-        __overflowMenu: null,
+        _overflowMenu: null,
         __username:     null,
 
         setUsername: function(username) {
             this.__username.setValue(username);
         },
 
-        __showItem: function(item) {
-            item.show();
-            item.getUserData('menuBtn').exclude();
-        },
-
-        __hideItem: function(item) {
-            item.exclude();
-            item.getUserData('menuBtn').show();
-        },
-
         __getTablesHandler:  function(tables) {
             var that = this;
-            // handler for showing and hiding toolbar items
-            this.addListener("showItem", function(e) {
-                this.__showItem(e.getData());
-            }, this);
-
-            this.addListener("hideItem", function(e) {
-                this.__hideItem(e.getData());
-            }, this);
 
             var prio = 0;
             var lastButton;
@@ -135,7 +108,7 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
                     that.setRemovePriority(btn, prio++);
                     btn.setUserData('menuBtn', btnO);
                     that.__partTables.add(btn);
-                    that.__overflowMenu.add(btnO);
+                    that._overflowMenu.add(btnO);
                 }
             );
             // force the overflow to be recalculate when all the buttons are there
