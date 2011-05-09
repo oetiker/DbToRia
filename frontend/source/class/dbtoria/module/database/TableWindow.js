@@ -261,7 +261,8 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
                     if (columns[i].type == 'boolean') {
-                        var cellrenderer = new dbtoria.ui.table.cellrenderer.BooleanString();
+//                        var cellrenderer = new dbtoria.ui.table.cellrenderer.BooleanString();
+                        var cellrenderer = new qx.ui.table.cellrenderer.Boolean();
                         tcm.setDataCellRenderer(i, cellrenderer);
                     }
                 }
