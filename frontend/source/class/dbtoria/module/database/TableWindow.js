@@ -211,7 +211,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
             var printButton = new qx.ui.toolbar.Button(this.tr("Print"), "icon/16/actions/document-print.png").set({enabled: false});
-            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
+            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Filter"), "icon/16/actions/system-search.png");
 
             if (readOnly) {
                 editButton.setLabel(this.tr("Show"));
