@@ -369,7 +369,7 @@ qx.Class.define("dbtoria.ui.table.columnmodel.resizebehavior.Enhanced", {
                                 this.debug('column='+this.__tableModel.getColumnId(i)+', typeof(value)='+typeof(value));
                             }
                             if ((typeof (value) == "string") || (typeof (value) == "number")) {
-                                var label = new qx.ui.basic.Label(value);
+                                var label = new qx.ui.basic.Label(String(value));
                                 var width = (label.getSizeHint(true).width < 400) ? (label.getSizeHint(true).width) + 20 : 400;
 
                                 max = Math.max(max, width);
