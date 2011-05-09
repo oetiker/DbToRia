@@ -1,4 +1,3 @@
-
 package DbToRia::Meta::GedafeSQL;
 
 =head1 NAME
@@ -37,34 +36,17 @@ their comments if they exist.
 
 sub prepare {
     my $self = shift;
-
-    my $runtime;
-    my $start = time();
-
-    # build a name cache for Gedafe from table column column
-    # comments (not from views)
     my $tables = $self->DBI->getAllTables();
-    $runtime = time()-$start; print STDERR "getAllTables() after $runtime secs\n";
     my %colHash;
     for my $table (keys %$tables) {
         next unless $tables->{$table}{type} eq 'TABLE';
-        my $structure = $self->DBI->getTableStructure($table);
-
+        my $structure = $self->DBI->getTableStructureRaw($table);
         my $columns   = $structure->{columns};
         for my $col (@$columns) {
             $colHash{$col->{id}} = $col->{remark} if $col->{remark};
         }
     }
     $self->{colHash} = \%colHash;
-    $runtime = time()-$start; print STDERR "colHash() after $runtime secs\n";
-#    use Data::Dumper; print STDERR Dumper "colHash=", \%colHash;
-
-    # replace column names with remarks or cached table column names
-    for my $table (keys %$tables) {
-        my $structure = $self->DBI->getTableStructure($table);
-        $self->massageTableColumns($structure);
-    }
-    $runtime = time()-$start; print STDERR "prepare finished after $runtime secs\n";
 }
 
 =head2 massageDatabaseName(tablelist)
@@ -94,18 +76,14 @@ regex supplied in DbToRia config on table name.
 sub massageTables {
     my $self = shift;
     my $tables = shift;
+    my $tablenamesReplacer = exists $self->{cfg}{tablenamesReplace} ? eval 'sub { $_[0] =~ '.$self->{cfg}{tablenamesReplace}.'}' : sub {};
     for my $table (keys %$tables) {
         if ($tables->{$table}{type} eq 'VIEW' and $table =~ /_(list|combo)$/ ){
             delete $tables->{$table};
             next;
         }
-        next unless exists $tables->{$table}{remark};
-        $tables->{$table}{name} = $tables->{$table}{remark};
-        delete $tables->{$table}{remark};
-        if (exists $self->{cfg}{tablenamesReplace} ) {
-            my ($match, $replace) = split /,/, $self->{cfg}{tablenamesReplace};
-            $tables->{$table}{name} =~ s/$match/$replace/;
-        }
+        $tables->{$table}{name} = $tables->{$table}{remark} if exists $tables->{$table}{remark};
+        $tablenamesReplacer->( $tables->{$table}{name} );
     }
 }
 
@@ -120,20 +98,14 @@ from the DbToRia config file to filter the table list.
 sub massageToolbarTables {
     my $self = shift;
     my $tables = shift;
-
-#    use Data::Dumper; print STDERR Dumper "cfg=", $self->{cfg};
-    return $tables unless exists $self->{cfg}{toolbarTables};
-    my $regex = $self->{cfg}{toolbarTables};
+    my $toolbarTables = exists $self->{cfg}{toolbarTables} ? eval 'sub { $_[0] =~ '.$self->{cfg}{toolbarTables}.' }' : sub { 1 };
     my @tbTables;
     for my $table (@$tables) {
-        next unless $table->{name} =~ m/$regex/;
+        $table->{name} = $table->{remark} if defined $table->{remark};
+        next unless $toolbarTables->( $table->{name} );
         push @tbTables, $table;
     }
-    my @sortedTables = sort { $a->{name} cmp $b->{name} }  @tbTables;
-    if (scalar @sortedTables) {
-        $tables = \@sortedTables;
-    }
-    return $tables;
+    @$tables = sort { $a->{name} cmp $b->{name} }  @tbTables;
 }
 
 
@@ -148,33 +120,15 @@ sub massageTableStructure {
     my $self      = shift;
     my $tableId   = shift;
     my $structure = shift;
-
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
         $structure->{columns}[0]{hidden}  = 1;
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
-        for my $col (@{$structure->{columns}}) {
-            $col->{hidden} = 1 if $col->{id} eq 'meta_sort';
-        }
-        return;
     }
-}
-
-=head2 massageTableColumns(tableStructure, colHash)
-
-Replace colum names with remarks or cached table column names in views
-if they exist. Based on tableStructure initially created by
-L<DbToRia::DBI::base::getTableStructure>.
-
-=cut
-
-sub massageTableColumns {
-    my $self      = shift;
-    my $structure = shift;
-
     my $colHash   = $self->{colHash};
     for my $col (@{$structure->{columns}}) {
         my $id = $col->{id};
+        $col->{hidden} = 1 if $id eq 'meta_sort';
         if ( $col->{remark} ) {
             $col->{name} = $col->{remark};
         }
