@@ -252,6 +252,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var columnLabels = {};
                 var i, nCols = columns.length;
                 for (i=0; i<nCols; i++){
+                    qx.dev.Debug.debugObject(columns[i]);
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
                 }
@@ -272,14 +273,18 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __contextMenuHandler: function(col, row, table, dataModel, contextMenu) {
             var editEntry   = new qx.ui.menu.Button(this.tr("Edit"));
             editEntry.addListener("execute", this.__editRecord, this);
-            var deleteEntry = new qx.ui.menu.Button(this.tr("Delete"));
-            deleteEntry.addListener("execute", this.__deleteRecord, this);
-            var cloneEntry = new qx.ui.menu.Button(this.tr("Clone"));
-            cloneEntry.addListener("execute", this.__cloneRecord, this);
+            if (this.__readOnly) {
+                editEntry.setLabel(this.tr('Show'));
+            }
             contextMenu.add(editEntry);
-            contextMenu.add(deleteEntry);
-            contextMenu.add(cloneEntry);
-
+            if (!this.__readOnly) {
+                var deleteEntry = new qx.ui.menu.Button(this.tr("Delete"));
+                deleteEntry.addListener("execute", this.__deleteRecord, this);
+                var cloneEntry = new qx.ui.menu.Button(this.tr("Clone"));
+                cloneEntry.addListener("execute", this.__cloneRecord, this);
+                contextMenu.add(deleteEntry);
+                contextMenu.add(cloneEntry);
+            }
             return true;
         },
 
