@@ -97,6 +97,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __dataChangedHandler:    null,
         __viewMode: null,
         __readOnly: null,
+        __filter: null,
 
         close: function() {
             if (this.__viewMode || this.__readOnly ||
@@ -363,12 +364,19 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __filterTable : function(e) {
             var that = this;
-            new dbtoria.module.database.TableFilter(this.tr("Filter: %1", this.__tableName),
-                                                    this.__columns,
-                                                    function(filter) {
-                                                        that.__table.getTableModel().setFilter(filter);
-                                                    }
-                                                   );
+            if (this.__filter) {
+                this.__filter.open();
+            }
+            else {
+                this.__filter =
+                    new dbtoria.module.database.TableFilter(this.tr("Filter: %1",
+                                                                    this.__tableName),
+                                                            this.__columns,
+                                                            function(filter) {
+                                                                that.__table.getTableModel().setFilter(filter);
+                                                            }
+                                                           );
+            }
         },
 
         __switchRecord : function(e) {
