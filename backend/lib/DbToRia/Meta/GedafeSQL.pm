@@ -29,8 +29,9 @@ use Time::HiRes qw(time);
 
 =head2 prepare()
 
-Pull in information needed prior to using this engine. This function
-is called right after the database has been connected.
+This function is called right after the database has been connected.
+It gets all tables and their structure and replaces column names with
+their comments if they exist.
 
 =cut
 
@@ -66,7 +67,7 @@ sub prepare {
     $runtime = time()-$start; print STDERR "prepare finished after $runtime secs\n";
 }
 
-=head2 massageTables(tablelist)
+=head2 massageDatabaseName(tablelist)
 
 Update the database name created by L<DbToRia::DBI::Pg::getDatabaseName>.
 Replace table name with database comment if it exists.
@@ -85,7 +86,8 @@ sub massageDatabaseName {
 =head2 massageTables(tablelist)
 
 Updates the table list created by L<DbToRia::DBI::base::getTables>.
-Replace table name with table comment if it exists.
+Replace table name with table comment if it exists. Applies optional
+regex supplied in DbToRia config on table name.
 
 =cut
 
@@ -110,7 +112,8 @@ sub massageTables {
 =head2 massageToolbarTables(tablelist)
 
 Updates the table toolbar list created by
-L<DbToRia::DBI::base::getToolbarTables>.
+L<DbToRia::DBI::base::getToolbarTables>. It uses an optional regex
+from the DbToRia config file to filter the table list.
 
 =cut
 
@@ -118,12 +121,10 @@ sub massageToolbarTables {
     my $self = shift;
     my $tables = shift;
 
-    use Data::Dumper; print STDERR Dumper "cfg=", $self->{cfg};
+#    use Data::Dumper; print STDERR Dumper "cfg=", $self->{cfg};
     return $tables unless exists $self->{cfg}{toolbarTables};
-    my $i;
     my $regex = $self->{cfg}{toolbarTables};
     my @tbTables;
-#    for ($i=0; $i < scalar @$tables; $i++) {
     for my $table (@$tables) {
         next unless $table->{name} =~ m/$regex/;
         push @tbTables, $table;
