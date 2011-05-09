@@ -256,8 +256,16 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
                 }
-                var model = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
+                var model    = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.ui.table.Table(model);
+                var tcm      = that.__table.getTableColumnModel();
+                for (i=0; i<nCols; i++){
+                    if (columns[i].type == 'boolean') {
+                        var cellrenderer = new dbtoria.ui.table.cellrenderer.BooleanString();
+                        tcm.setDataCellRenderer(i, cellrenderer);
+                    }
+                }
+
                 if (!viewMode) {
                     that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
                     that.__table.addListener("cellDblclick", that.__editRecord, that);
