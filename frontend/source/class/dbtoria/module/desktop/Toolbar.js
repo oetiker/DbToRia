@@ -50,13 +50,6 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         logoutBtn.set({
             show: 'icon'
         });
-        var username = new qx.ui.basic.Label();
-        username.set({
-            alignY: 'middle',
-            padding: 5
-        });
-        this.__username = username;
-        partLast.add(username);
         partLast.add(logoutBtn);
 
         // call logout on the backend to destroy session
@@ -67,29 +60,16 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
         },
         this);
 
-        this.__rpc = dbtoria.data.Rpc.getInstance();
-        this.__rpc.callAsyncSmart(
-            qx.lang.Function.bind(function(ret) {
-                this.__username.setValue(ret);
-            }, this), 'getUsername');
-
     },
 
     members : {
-        __rpc:          null,
         __partTables:   null,
-        _overflowMenu: null,
-        __username:     null,
-
-        setUsername: function(username) {
-            this.__username.setValue(username);
-        },
-
         __getTablesHandler:  function(tables) {
             var that = this;
 
             var prio = 0;
             var lastButton;
+            var menu = this.getOverflowMenu();
             tables.map(
                 function(table) {
                     var handler = function() {
@@ -108,17 +88,12 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
                     that.setRemovePriority(btn, prio++);
                     btn.setUserData('menuBtn', btnO);
                     that.__partTables.add(btn);
-                    that._overflowMenu.add(btnO);
+                    menu.add(btnO);
                 }
             );
             // force the overflow to be recalculate when all the buttons are there
             // naive me would expect this not to be neccessary
             lastButton.addListenerOnce('appear',function(){
-                var pane = this.getLayoutParent();
-                this.fireDataEvent('resize', pane.getBounds());
-            },this);
-            // nor this
-            this.getOverflowIndicator().addListener('appear',function(){
                 var pane = this.getLayoutParent();
                 this.fireDataEvent('resize', pane.getBounds());
             },this);

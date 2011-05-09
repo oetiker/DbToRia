@@ -25,33 +25,24 @@ qx.Class.define("dbtoria.module.desktop.Taskbar", {
         this.base(arguments);
 
         var partInfo    = new qx.ui.toolbar.Part();
-        this.__partDock = new qx.ui.toolbar.Part();
-        var partLink    = new qx.ui.toolbar.Part();
-        this.__databaseName = new qx.ui.basic.Label();
-        this.__databaseName.set({
-            alignY: 'middle',
-            padding: 5
-        });
-
-        var link = new qx.ui.basic.Atom();
-        link.set({
-            rich:  true,
-            label: "Created with <a target=\"_blank\" href=\"http://www.dbtoria.org\">DbToRia</a>"
-                 });
-
-        partLink.add(link);
         this.add(partInfo);
+        dbtoria.data.Rpc.getInstance().callAsyncSmart( function(name){
+            var databaseName = new qx.ui.basic.Label().set({
+                alignY: 'middle',
+                value: name,
+                padding: 5
+            });
+            partInfo.add(databaseName);
+        },'getConnectionInfo');
+
         this.add(new qx.ui.toolbar.Separator());
+
+        this.__partDock = new qx.ui.toolbar.Part();       
         this.add(this.__partDock);
+
         this.addSpacer();
+
         this.addOverflow();
-        this.add(new qx.ui.toolbar.Separator());
-        this.add(partLink);
-        partInfo.add(this.__databaseName);
-
-        this.__rpc = dbtoria.data.Rpc.getInstance();
-        this.__rpc.callAsyncSmart(qx.lang.Function.bind(this.__setDatabaseName, this), 'getDatabaseName');
-
     },
 
     members: {
@@ -59,16 +50,14 @@ qx.Class.define("dbtoria.module.desktop.Taskbar", {
         __databaseName: null,
         __partDock:     null,
         __priority: 0,
-        _overflowMenu: null,
 
         __setDatabaseName: function(name) {
-//            this.debug('name='+name);
             this.__databaseName.setValue(name);
         },
 
         dock: function(btn, btnO) {
             this.__partDock.add(btn);
-            this._overflowMenu.add(btnO);
+            this.getOverflowMenu().add(btnO);
             this.setRemovePriority(btn, this.__priority++);
             btn.setUserData('menuBtn', btnO);
             btn.addListener('appear', function() {

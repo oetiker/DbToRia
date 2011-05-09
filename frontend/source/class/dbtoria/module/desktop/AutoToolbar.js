@@ -30,22 +30,25 @@ qx.Class.define("dbtoria.module.desktop.AutoToolbar", {
                 this.__hideItem(e.getData());
             }, this);
     },
-
+    properties: {
+        overflowMenu: {}
+    },
     members : {
-        _overflowMenu: null,
-
         addOverflow: function() {
-            var overflow = new qx.ui.toolbar.MenuButton("More ...");
-            this.add(overflow);
+            this.setOverflowMenu( new qx.ui.menu.Menu() );
+            var overflowBtn = new qx.ui.toolbar.MenuButton("More ...").set({
+                menu: this.getOverflowMenu()
+            });
+            this.add(overflowBtn);
             this.set({
-                spacing: 5,
-                overflowIndicator: overflow,
+                overflowIndicator: overflowBtn,
                 overflowHandling: true
             });
 
-            var overflowMenu = this._overflowMenu = new qx.ui.menu.Menu();
-            overflow.setMenu(overflowMenu);
-            return overflow;
+            overflowBtn.addListener('appear',function(){
+                var pane = this.getLayoutParent();
+                this.fireDataEvent('resize', pane.getBounds());
+            },this);
         },
 
         __showItem: function(item) {
