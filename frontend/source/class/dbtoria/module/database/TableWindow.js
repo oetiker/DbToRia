@@ -97,6 +97,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __dataChangedHandler:    null,
         __viewMode: null,
         __readOnly: null,
+        __filter: null,
 
         close: function() {
             if (this.__viewMode || this.__readOnly ||
@@ -210,7 +211,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var refreshButton = new qx.ui.toolbar.Button(this.tr("Refresh"), "icon/16/actions/view-refresh.png");
             var exportButton = new qx.ui.toolbar.Button(this.tr("Export"), "icon/16/actions/document-save-as.png").set({enabled: false});
             var printButton = new qx.ui.toolbar.Button(this.tr("Print"), "icon/16/actions/document-print.png").set({enabled: false});
-            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Search"), "icon/16/actions/system-search.png");
+            var filterButton = new qx.ui.toolbar.CheckBox(this.tr("Filter"), "icon/16/actions/system-search.png");
 
             if (readOnly) {
                 editButton.setLabel(this.tr("Show"));
@@ -251,11 +252,21 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var columnLabels = {};
                 var i, nCols = columns.length;
                 for (i=0; i<nCols; i++){
+                    qx.dev.Debug.debugObject(columns[i]);
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
                 }
-                var model = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
+                var model    = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.ui.table.Table(model);
+                var tcm      = that.__table.getTableColumnModel();
+                for (i=0; i<nCols; i++){
+                    if (columns[i].type == 'boolean') {
+//                        var cellrenderer = new dbtoria.ui.table.cellrenderer.BooleanString();
+                        var cellrenderer = new qx.ui.table.cellrenderer.Boolean();
+                        tcm.setDataCellRenderer(i, cellrenderer);
+                    }
+                }
+
                 if (!viewMode) {
                     that.__table.getSelectionModel().addListener('changeSelection',that.__switchRecord, that);
                     that.__table.addListener("cellDblclick", that.__editRecord, that);
@@ -271,14 +282,18 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __contextMenuHandler: function(col, row, table, dataModel, contextMenu) {
             var editEntry   = new qx.ui.menu.Button(this.tr("Edit"));
             editEntry.addListener("execute", this.__editRecord, this);
-            var deleteEntry = new qx.ui.menu.Button(this.tr("Delete"));
-            deleteEntry.addListener("execute", this.__deleteRecord, this);
-            var cloneEntry = new qx.ui.menu.Button(this.tr("Clone"));
-            cloneEntry.addListener("execute", this.__cloneRecord, this);
+            if (this.__readOnly) {
+                editEntry.setLabel(this.tr('Show'));
+            }
             contextMenu.add(editEntry);
-            contextMenu.add(deleteEntry);
-            contextMenu.add(cloneEntry);
-
+            if (!this.__readOnly) {
+                var deleteEntry = new qx.ui.menu.Button(this.tr("Delete"));
+                deleteEntry.addListener("execute", this.__deleteRecord, this);
+                var cloneEntry = new qx.ui.menu.Button(this.tr("Clone"));
+                cloneEntry.addListener("execute", this.__cloneRecord, this);
+                contextMenu.add(deleteEntry);
+                contextMenu.add(cloneEntry);
+            }
             return true;
         },
 
@@ -363,12 +378,19 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         __filterTable : function(e) {
             var that = this;
-            new dbtoria.module.database.TableFilter(this.tr("Filter: %1", this.__tableName),
-                                                    this.__columns,
-                                                    function(filter) {
-                                                        that.__table.getTableModel().setFilter(filter);
-                                                    }
-                                                   );
+            if (this.__filter) {
+                this.__filter.open();
+            }
+            else {
+                this.__filter =
+                    new dbtoria.module.database.TableFilter(this.tr("Filter: %1",
+                                                                    this.__tableName),
+                                                            this.__columns,
+                                                            function(filter) {
+                                                                that.__table.getTableModel().setFilter(filter);
+                                                            }
+                                                           );
+            }
         },
 
         __switchRecord : function(e) {
