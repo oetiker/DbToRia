@@ -108,6 +108,25 @@ sub massageTables {
     }
 }
 
+=head2 massageToolbarTables(tablelist)
+
+Updates the table toolbar list created by L<DbToRia::DBI::base::getToolbarTables>.
+
+=cut
+
+sub massageToolbarTables {
+    my $self = shift;
+    my $tables = shift;
+    my $mt = $self->metaTables;
+    my @tbTables;    
+    for my $table (@$tables) {
+        if ($table->{tableId} !~ /^meta_(fields|tables)$/ and not defined $mt->{$table}{hide} ){
+            push @tbTables, $table;
+        }
+    }
+    @$tables = @tbTables;
+}
+
 =head2 massageTableStructure(tableId,tableStructure)
 
 Updates the tableStructure initially created by L<DbToRia::DBI::base::getTableStructure>.

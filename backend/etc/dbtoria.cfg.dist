@@ -9,8 +9,8 @@ encoding = latin1
 *** MetaEngines ***
 +GedafeSQL
   # substitute regex to be applied on tablenames
-  tablenamesReplace=^. ,
+  tablenamesReplace=s/^[A-Z]\S?\s+//
   # regex to filter list of tables for display in toolbar
-  toolbarTables=Work Log|Expense Log|^Contracts$|Invoices
+  toolbarTables=s/^[A-Z]\S?\s+(Work Log|Expense Log|Contracts|Invoices)/$1/
 +GedafeMeta
 

@@ -152,7 +152,7 @@ sub getDbh {
     my $driver = (DBI->parse_dsn($self->dsn))[1];
     my $key = ($self->username||'???').($self->password||'???');
     my $dbh = $self->dbhCache->{$key};
-    if (not defined $dbh or $dbh->ping){
+    if (not defined $dbh){
         $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
             RaiseError => 0,
             PrintError => 0,
@@ -163,6 +163,7 @@ sub getDbh {
                 $code =~ s/[^a-z0-9]//g;
                 $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
                 $code += 70000000;
+                delete $self->dbhCache->{$key};
                 die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
             },
             AutoCommit => 1,
@@ -194,25 +195,37 @@ Returns an array of tables to display in toolbar.
 
 sub getToolbarTables {
     my $self = shift;
-
-    my $tables = $self->getTables();
+    my $tables = $self->getAllTables();
     my @tableArray;
-
     for my $table (keys %$tables) {
         next unless $tables->{$table}{type} eq 'TABLE';
-        $tables->{$table}{tableId} = $table;
-        delete $tables->{$table}{type};
-        push @tableArray, $tables->{$table};
+        my $item = {
+            tableId => $table,
+            name => $tables->{$table}{name},
+            remark => $tables->{$table}{remark},
+            readOnly => $tables->{$table}{readOnly},
+        };
+        push @tableArray, $item;
     }
     my $ta = \@tableArray;
     for my $engine (@{$self->metaEngines}){
-        $ta = $engine->massageToolbarTables($ta);
-    }
-    $self->{toolbarTableList} = $ta;
+        $engine->massageToolbarTables($ta);
+    }    
+    return $ta;
+}
 
-#    use Data::Dumper;
-#    print STDERR Dumper "toolbarTables=", $ta;
-    return $self->{toolbarTableList};
+=head2 getTableStructureRaw(table)
+
+Returns meta information about the table structure directly from he database
+This uses the map_type methode from the database driver to map the internal
+datatypes to DbToRia compatible datatypes.
+
+=cut
+
+sub getTableStructureRaw {
+    my $self = shift;
+    my $tableId = shift;
+    die "Override in Driver";
 }
 
 =head2 getTableStructure(table)
@@ -226,7 +239,11 @@ datatypes to DbToRia compatible datatypes.
 sub getTableStructure {
     my $self = shift;
     my $tableId = shift;
-    die "Override in Driver";
+    my $struct = dclone($self->getTableStructureRaw($tableId));
+    for my $engine (@{$self->metaEngines}){
+        $engine->massageTableStructure($tableId, $struct);
+    }
+    return $struct;
 }
 
 
@@ -283,7 +300,6 @@ sub getRecordDeref {
             $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
         }
     }
-#    use Data::Dumper; print STDERR Dumper "rec=", $rec;
     return $rec;
 }
 

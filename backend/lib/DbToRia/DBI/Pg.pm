@@ -171,7 +171,7 @@ sub getFilterOpsArray {
            ];
 }
 
-=head2 getTableStructure(table)
+=head2 getTableStructureRaw(table)
 
 Returns meta information about the table structure directly from he
 database. This uses the mapType methode from the database driver to map
@@ -179,7 +179,7 @@ the internal datatypes to DbToRia compatible datatypes.
 
 =cut
 
-sub getTableStructure {
+sub getTableStructureRaw {
     my $self  = shift;
     my $table = shift;
 
@@ -325,8 +325,7 @@ sub getTablePrivileges {
         my $dbh = $self->getDbh();
         my $sth = $dbh->prepare(<<'SQL');
 SELECT privilege_type 
-  FROM information_schema.table_privileges
- WHERE table_name = ? AND grantee IN ( SELECT role_name FROM information_schema.enabled_roles )
+  FROM information_schema.table_privileges WHERE table_name = ?
 SQL
         $sth->execute($tableId);
         my $row;
