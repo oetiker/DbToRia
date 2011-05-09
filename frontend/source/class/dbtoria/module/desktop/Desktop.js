@@ -31,6 +31,7 @@ qx.Class.define("dbtoria.module.desktop.Desktop", {
             alignY: 'middle',
             textAlign: 'center',
             allowGrowX: true,
+            allowShrinkX: true,
             cursor: 'pointer'
         });
         logo.addListener('mouseover',function(){logo.setTextColor('#aaa')});
