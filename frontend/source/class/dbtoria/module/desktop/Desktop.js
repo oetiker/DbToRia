@@ -14,6 +14,7 @@
    Authors:
     * David Angleitner
     * Fritz Zaucker
+    * Tobi Oetiker (oetiker) <tobi@oetiker.ch>
 
 ************************************************************************ */
 
@@ -23,6 +24,20 @@ qx.Class.define("dbtoria.module.desktop.Desktop", {
 
     construct : function() {
         this.base(arguments, new qx.ui.window.Manager());
+        var logo = new qx.ui.basic.Label('dBtoria').set({
+            font: new qx.bom.Font(200,['Amaranth','sans-serif']),
+            textColor: '#ddd',
+            alignX: 'center',
+            alignY: 'middle',
+            textAlign: 'center',
+            allowGrowX: true,
+            allowShrinkX: true,
+            cursor: 'pointer'
+        });
+        logo.addListener('mouseover',function(){logo.setTextColor('#aaa')});
+        logo.addListener('mouseout',function(){logo.setTextColor('#ddd')});
+        logo.addListener('click',function(){  qx.bom.Window.open('http://dbtoria.org/', '_blank');});        
+        this.add(logo,{left: 0, right: 0,  top: '10%'});
     }
 
 });
