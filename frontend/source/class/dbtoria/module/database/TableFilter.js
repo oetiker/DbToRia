@@ -273,7 +273,12 @@ qx.Class.define("dbtoria.module.database.TableFilter", {
             }
 
             //qx.dev.Debug.debugObject(filter);
-            return filter;
+            if (filter.length) {
+                return filter;
+            }
+            else {
+                return null;
+            }
         }
     }
 });
