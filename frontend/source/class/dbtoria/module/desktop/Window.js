@@ -39,16 +39,24 @@ qx.Class.define("dbtoria.module.desktop.Window", {
         dbtoria.module.desktop.Desktop.getInstance().add(this);
 
         var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
-        var taskbarButton = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
+        var taskbarButton  = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
+        var taskbarButtonO = new qx.ui.menu.Button(null, "icon/16/mimetypes/text-plain.png");
         taskbarButton.exclude();
-        taskbar.dock(taskbarButton);
+        taskbarButtonO.exclude();
+        taskbar.dock(taskbarButton, taskbarButtonO);
+        var handler = function() {
+            this.open();
+            taskbarButton.exclude();
+            taskbarButtonO.exclude();
+        };
         this.addListener("minimize", function(e) {
+            taskbarButton.addListener("execute", qx.lang.Function.bind(handler, this));
+            taskbarButtonO.addListener("execute", qx.lang.Function.bind(handler, this));
+            taskbarButtonO.addListener("execute", handler, this );
             taskbarButton.setLabel(this.getCaption());
             taskbarButton.show();
-            taskbarButton.addListener("execute", function(e) {
-                this.open();
-                  taskbarButton.exclude();
-            }, this );
+            taskbarButtonO.setLabel(this.getCaption());
+//            taskbarButtonO.show();
         },
         this);
 
