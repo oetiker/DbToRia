@@ -64,6 +64,14 @@ iframes and have support for printing.
 Status: available,
 Effort: 6h
 
+=head3 M:N Widget
+
+Widget to handle M:N relationships between tables directly instead of
+having to edit a separate table.
+
+Status: available,
+Effort: ?
+
 
 =head2 Additional Features
 

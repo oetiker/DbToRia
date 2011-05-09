@@ -83,7 +83,7 @@ qx.Class.define("dbtoria.module.database.TableFilter", {
 
 
         /**
-         * Add another filter critera
+         * Add another filter criteria
          *
          *  This function generates another row in the filter panel.
          *  It contains a checkbox to activate/deactivate a filter,
@@ -273,7 +273,12 @@ qx.Class.define("dbtoria.module.database.TableFilter", {
             }
 
             //qx.dev.Debug.debugObject(filter);
-            return filter;
+            if (filter.length) {
+                return filter;
+            }
+            else {
+                return null;
+            }
         }
     }
 });
