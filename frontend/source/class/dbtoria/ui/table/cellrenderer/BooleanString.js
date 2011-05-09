@@ -6,6 +6,7 @@
 
    Copyright:
     2009 David Angleitner, Switzerland
+    2011 Oetiker+Partner AG, Olten, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
