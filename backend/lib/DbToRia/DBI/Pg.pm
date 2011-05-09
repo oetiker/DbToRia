@@ -310,7 +310,7 @@ sub getDefaults {
 }
 
 
-=head2 getTablePrivileged(table)
+=head2 getTablePrivileges(table)
 
 Returns permission information about the table directly from he
 database.
@@ -325,7 +325,7 @@ sub getTablePrivileges {
         my $dbh = $self->getDbh();
         my $sth = $dbh->prepare(<<'SQL');
 SELECT privilege_type 
-  FROM information_schema.table_privileges 
+  FROM information_schema.table_privileges
  WHERE table_name = ? AND grantee IN ( SELECT role_name FROM information_schema.enabled_roles )
 SQL
         $sth->execute($tableId);
