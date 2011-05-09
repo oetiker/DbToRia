@@ -252,7 +252,6 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var columnLabels = {};
                 var i, nCols = columns.length;
                 for (i=0; i<nCols; i++){
-                    qx.dev.Debug.debugObject(columns[i]);
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
                 }
