@@ -112,7 +112,7 @@ qx.Class.define("dbtoria.ui.table.columnmodel.resizebehavior.Enhanced", {
          * @return {void}
          */
         onAppear : function(event, forceRefresh) {
-            this.debug('Enhanced.onAppear()');
+//            this.debug('Enhanced.onAppear()');
             var tableColumnModel = this.getTableColumnModel();
             // set references for easy access
             this.__table = tableColumnModel.getTable();
@@ -143,6 +143,7 @@ qx.Class.define("dbtoria.ui.table.columnmodel.resizebehavior.Enhanced", {
          */
         onTableWidthChanged : function(tableColumnModel, event) {
             this.__tableWidth = this._getAvailableWidth(this.__tableColumnModel);
+            this._calculateColumnPercentage();
             this._revalidate();
         },
 
@@ -366,7 +367,7 @@ qx.Class.define("dbtoria.ui.table.columnmodel.resizebehavior.Enhanced", {
                         for (var j=0; j<numSamples; j++) {
                             value = rowData[j][this.__tableModel.getColumnId(i)];
                             if (j==0) {
-                                this.debug('column='+this.__tableModel.getColumnId(i)+', typeof(value)='+typeof(value));
+//                                this.debug('column='+this.__tableModel.getColumnId(i)+', typeof(value)='+typeof(value));
                             }
                             if ((typeof (value) == "string") || (typeof (value) == "number")) {
                                 var label = new qx.ui.basic.Label(String(value));
