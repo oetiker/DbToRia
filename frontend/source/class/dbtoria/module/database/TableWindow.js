@@ -122,23 +122,30 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             // FIX ME: it would be nicer to actually figure out which row to select.
             var sm        = this.__table.getSelectionModel();
             var selection = sm.getSelectedRanges()[0];
-            if (selection == undefined || selection == null) {
-                return;
-            }
-            var row = selection.minIndex;
+            var row = null;
             var that=this;
-            this.__dataChangedHandler = function(e) {
-                var id, rowData = tm.getRowData(row);
-                if (rowData) { // we found the row
+            if (selection) {
+                row = selection.minIndex;
+                this.__dataChangedHandler = function(e) {
+                    var id, rowData = tm.getRowData(row);
+                    if (rowData) { // we found the row
+                        tm.removeListener('dataChanged', this.__dataChangedHandler, this);
+                        this.__dataChangedHandler = null;
+                        that.setLoading(false);
+                        id = rowData['ROWINFO'][0];
+                        if (id != this.__currentId) {
+                            sm.resetSelection();
+                        }
+                    }
+                };
+            }
+            else {
+                this.__dataChangedHandler = function(e) {
                     tm.removeListener('dataChanged', this.__dataChangedHandler, this);
                     this.__dataChangedHandler = null;
                     that.setLoading(false);
-                    id = rowData['ROWINFO'][0];
-                    if (id != this.__currentId) {
-                        sm.resetSelection();
-                    }
-                }
-            };
+                };
+            }
 
             tm.addListener('dataChanged', this.__dataChangedHandler, this);
             this.setLoading(true);
