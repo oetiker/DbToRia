@@ -25,6 +25,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
         if (columnLabelMap){
             this.setColumnNamesById(columnLabelMap);
         }
+        this.__filterOp = this.__getBestFilterOp();
         this.__rpc = dbtoria.data.Rpc.getInstance();
     },
 
@@ -44,6 +45,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
 
     members : {
         __rpc: null,
+        __filterType: null,
         __tableId: null,
         __columnIdList: null,
 
@@ -60,7 +62,16 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
                 that._onRowCountLoaded(ret);
             }, 'getRowCount', this.__tableId,this.getFilter());
         },
-
+        __getBestFilterOp: function(){
+            var gotILIKE = false;
+            var ops = dbtoria.data.Config.getInstance().getFilterOps();
+            ops.map(function(filter){
+                if (filter.op == 'ILIKE'){
+                    gotILIKE = true;
+                }
+            }
+            return gotILIKE ? 'ILIKE' : 'LIKE';
+        },
         _applySearchString: function (newString,oldString){
             if (oldString == newString){
                 return;
@@ -69,7 +80,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
 
             filter.push({
                 field: String(this.__columnIdList[1]),
-                op: 'LIKE',
+                op: this.__filterOp,
                 value1: '%' + newString + '%'
             });
             this.setFilter(filter);
