@@ -122,8 +122,10 @@ sub massageTableStructure {
     my $structure = shift;
     if ($tableId =~ /_(combo|list)$/){
         $structure->{columns}[0]{primary} = 1;
-        $structure->{columns}[0]{hidden}  = 1;
         $structure->{meta}{primary} = [ $structure->{columns}[0]{id} ];
+        if ($tableId =~ /_list$/ and $structure->{columns}[1]{id} =~ /_hid$/){
+            $structure->{columns}[0]{hidden}  = 1;
+        }
     }
     my $colHash   = $self->{colHash};
     for my $col (@{$structure->{columns}}) {
