@@ -69,7 +69,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
                 if (filter.op == 'ILIKE'){
                     gotILIKE = true;
                 }
-            }
+            });
             return gotILIKE ? 'ILIKE' : 'LIKE';
         },
         _applySearchString: function (newString,oldString){
