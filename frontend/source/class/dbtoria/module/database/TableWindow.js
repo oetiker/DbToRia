@@ -315,6 +315,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             var tm  = this.__table.getTableModel();
             var row = sm.getSelectedRanges()[0].minIndex;
             tm.removeRow(row);
+            sm.resetSelection();
             var rowInfo = tm.getRowData(row);
             this.__currentId = rowInfo['ROWINFO'][0];
         },
