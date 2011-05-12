@@ -71,6 +71,7 @@ qx.Class.define("dbtoria.module.desktop.Window", {
     },
 
     members : {
+        __runningTimer: null,
         _createChildControlImpl : function(id, hash){
             var control;
             switch(id) {
@@ -109,8 +110,20 @@ qx.Class.define("dbtoria.module.desktop.Window", {
             if (newValue == oldValue){
                 return;
             }
-            this.getChildControl('loader').setVisibility(newValue ? 'visible' : 'hidden' );
-//            this.debug('Loader ' + this.getChildControl('loader').getVisibility());
+            if (newValue){                                
+                this.__runningTimer = qx.event.Timer.once(function(){
+                    this.__runningTimer = null;
+                    this.getChildControl('loader').show();
+                },this,200);
+//              this.__runningTimer.start();
+            }
+            else {
+                if (this.__runningTimer){
+                    this.__runningTimer.stop();
+                    this.__runningTimer = null;
+                }
+                this.getChildControl('loader').hide();
+            }
         }
     }
 
