@@ -37,6 +37,7 @@ qx.Class.define("dbtoria.ui.table.Table", {
 
     members: {
         __tooltip: null,
+        __cache:   null, // cache for referenced data
 
         __createTooltip: function() {
             this.__tooltip = new qx.ui.tooltip.ToolTip();
@@ -92,6 +93,7 @@ qx.Class.define("dbtoria.ui.table.Table", {
     /*** DESTRUCTOR ***/
     destruct : function() {
         // Dispose fields/objects
+        this.__cache   = null;
         this.__tooltip = null;
     }
 
