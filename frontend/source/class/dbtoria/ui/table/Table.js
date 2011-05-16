@@ -15,7 +15,7 @@
  */
 qx.Class.define("dbtoria.ui.table.Table", {
     extend  : qx.ui.table.Table,
-    include : [ qx.ui.table.MTableContextMenu ],
+    include : [ qx.ui.table.MTableContextMenu, dbtoria.ui.table.MTableCellChange ],
 
     construct : function(tm) {
 
