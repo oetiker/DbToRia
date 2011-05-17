@@ -47,62 +47,28 @@ qx.Class.define("dbtoria.ui.table.Table", {
                 hideTimeout : 100000000,
                 rich        : true
             });
-
-            this.addListener('cellChange', this.__cellChange,   this);
         },
+
+        updateTooltip: function(text) {
+            this.__tooltip.setLabel(text);
+            this.showTooltip();
+        },
+
+        showTooltip: function() {
+            this.setToolTip(this.__tooltip);
+            this.__tooltip.show(); // show
+        },
+
+        hideTooltip: function() {
+            this.setToolTip(null);
+            qx.ui.tooltip.Manager.getInstance().setCurrent(null);
+            this.__tooltip.hide();
+        }
 
         /* we can't rely on the table showing/hiding tooltip as we
          * don't want the tooltip to be open if we are outside a
          * regular row and a column with reference.
          */
-        __cellChange: function(e) {
-            var data = e.getData();
-            var row   = data.row;
-            var col   = data.col;
-            var mouse = data.mouse; // mouse event
-            this.debug('__cellChange(): row='+row+', col='+col);
-
-            // close and remove tooltip if not over a table cell
-            if (row == null || row == -1) {
-                this.setToolTip(null); // remove
-                // force tooltip off
-                qx.ui.tooltip.Manager.getInstance().setCurrent(null);
-                return;
-            }
-            var tm       = this.getTableModel();
-            var colId    = tm.getColumnId(col);
-//            var tableId  = tm.getTableId();
-            var tableId  = this.__tableId;
-            var rowInfo  = tm.getRowData(row);
-            var recordId;
-            if (rowInfo) {
-                recordId = rowInfo['ROWINFO'][0];
-            }
-
-            var params = {
-                tableId:  tableId,
-                recordId: recordId,
-                columnId: colId
-            };
-            qx.dev.Debug.debugObject(params);
-            // check if we are in a column referencing another table
-//           if (true) {
-//                return;
-//           }
-
-            this.__tooltip.placeToMouse(mouse);
-            var rpc = dbtoria.data.Rpc.getInstance();
-            // Get appropriate row from referenced table
-            rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, this),
-                               'getReferencedRecord', params);
-        },
-
-        __referenceHandler: function(ret) {
-            return;
-            this.__tooltip.setLabel(ret);
-            this.setToolTip(this.__tooltip); // set
-            this.__tooltip.show();           // show
-        }
 
     },
 

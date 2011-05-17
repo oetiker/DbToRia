@@ -99,6 +99,58 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __readOnly: null,
         __filter: null,
 
+
+        __cellChange: function(e) {
+            var data = e.getData();
+            var row   = data.row;
+            var col   = data.col;
+            var mouse = data.mouse; // mouse event
+            this.debug('__cellChange(): row='+row+', col='+col);
+
+            // close and remove tooltip if not over a table cell
+            if (row == null || row == -1) {
+                this.__table.hideTooltip();
+                return;
+            }
+
+            var tm       = this.__table.getTableModel();
+            var colId    = tm.getColumnId(col);
+            var tableId  = this.__tableId;
+            var rowInfo  = tm.getRowData(row);
+            var recordId;
+            if (rowInfo) {
+                recordId = rowInfo['ROWINFO'][0];
+            }
+
+            var params = {
+                tableId:  tableId,
+                recordId: recordId,
+                columnId: colId
+            };
+            qx.dev.Debug.debugObject(params);
+            // check if we are in a column referencing another table
+//           if (true) {
+//                return;
+//           }
+
+//            this.__tooltip.placeToMouse(mouse);
+            var rpc = dbtoria.data.Rpc.getInstance();
+            // Get appropriate row from referenced table
+            rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, this),
+                               'getReferencedRecord', params);
+        },
+
+        __referenceHandler: function(data) {
+            var key, val;
+            var label = '<table>';
+            for (key in data) {
+                val = data[key];
+                label += '<tr><td>'+key+':</td><td>'+val+'</td></tr>';
+            }
+            label += '</table>';
+            this.__table.updateTooltip(label);
+        },
+
         close: function() {
             if (this.__viewMode || this.__readOnly ||
                 !this.__recordEdit.isVisible()) {
@@ -264,6 +316,8 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 }
                 var model    = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
+                that.__table.addListener('cellChange', that.__cellChange, that);
+
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
                     if (columns[i].type == 'boolean') {

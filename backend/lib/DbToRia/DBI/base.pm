@@ -319,29 +319,41 @@ sub getReferencedRecord {
     my $recordId = $params->{recordId};
     my $columnId = $params->{columnId};
 
-    $tableId  =~ s/_list$//;
-    $columnId =~ s/_hid$/_id/;
     warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
 
     my $rec  = $self->getRecord($tableId, $recordId);
     use Data::Dumper;
-    print STDERR Dumper "rec=", $rec;
-    my $fKey = $rec->{$recordId};
+#    print STDERR Dumper "rec=", $rec;
+    my $fTableId='?';
+    my $fKeyId='?';
+    my $fKeyVal = $rec->{$columnId};
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
-    print STDERR Dumper "view=", $view;
-    my $fTableId;
+#    print STDERR Dumper "view=", $view;
     for my $field (@$view){
         if ($field->{name} eq $columnId) {
             $fTableId = $field->{tableId};
             last;
         }
     }
-    warn "fTable=$fTableId, fKey=$fKey";
-    my $fRec;
-#    my $fRec = $self->getRecordDeref($fTableId, $fKey);
+    $fTableId =~ s/_combo//;
+    $fKeyId   = $fTableId . '_id';
+#    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
 
-   return $fRec;
+    my $dbh = $self->getDbh();
+	my $query = "SELECT * FROM $fTableId ";
+    $query .= ' '.$self->buildWhere([{field  => $fKeyId,
+                                      value1 => $fKeyVal,
+                                      op     => '=',
+                                     }]);
+
+#    warn "query=$query";
+    my $sth = $dbh->prepare($query);
+    $sth->execute;
+
+    my $fRec = $sth->fetchrow_hashref();
+    print STDERR Dumper "fRec=", $fRec;
+    return $fRec;
 }
 
 
