@@ -322,7 +322,7 @@ sub getReferencedRecord {
     warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
 
     my $rec  = $self->getRecord($tableId, $recordId);
-    use Data::Dumper;
+#    use Data::Dumper;
 #    print STDERR Dumper "rec=", $rec;
     my $fTableId='?';
     my $fKeyId='?';
@@ -352,7 +352,7 @@ sub getReferencedRecord {
     $sth->execute;
 
     my $fRec = $sth->fetchrow_hashref();
-    print STDERR Dumper "fRec=", $fRec;
+#    print STDERR Dumper "fRec=", $fRec;
     return $fRec;
 }
 
