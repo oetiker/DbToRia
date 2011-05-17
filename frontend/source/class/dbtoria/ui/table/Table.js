@@ -17,8 +17,8 @@ qx.Class.define("dbtoria.ui.table.Table", {
     extend  : qx.ui.table.Table,
     include : [ qx.ui.table.MTableContextMenu, dbtoria.ui.table.MTableCellChange ],
 
-    construct : function(tm) {
-
+    construct : function(tm, tableId) {
+        this.__tableId = tableId;
         var tableOpts = {
             tableColumnModel : function(obj) {
                 return new qx.ui.table.columnmodel.Resize(obj);
@@ -38,6 +38,7 @@ qx.Class.define("dbtoria.ui.table.Table", {
     members: {
         __tooltip: null,
         __cache:   null, // cache for referenced data
+        __tableId: null,
 
         __createTooltip: function() {
             this.__tooltip = new qx.ui.tooltip.ToolTip();
@@ -68,21 +69,36 @@ qx.Class.define("dbtoria.ui.table.Table", {
                 qx.ui.tooltip.Manager.getInstance().setCurrent(null);
                 return;
             }
-
-            // check if we are in a column referencing another table
-            if (true) {
-                return;
+            var tm       = this.getTableModel();
+            var colId    = tm.getColumnId(col);
+//            var tableId  = tm.getTableId();
+            var tableId  = this.__tableId;
+            var rowInfo  = tm.getRowData(row);
+            var recordId;
+            if (rowInfo) {
+                recordId = rowInfo['ROWINFO'][0];
             }
+
+            var params = {
+                tableId:  tableId,
+                recordId: recordId,
+                columnId: colId
+            };
+            qx.dev.Debug.debugObject(params);
+            // check if we are in a column referencing another table
+//           if (true) {
+//                return;
+//           }
 
             this.__tooltip.placeToMouse(mouse);
             var rpc = dbtoria.data.Rpc.getInstance();
-            var params = {};
             // Get appropriate row from referenced table
             rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, this),
-                               'getReference', params);
+                               'getReferencedRecord', params);
         },
 
         __referenceHandler: function(ret) {
+            return;
             this.__tooltip.setLabel(ret);
             this.setToolTip(this.__tooltip); // set
             this.__tooltip.show();           // show

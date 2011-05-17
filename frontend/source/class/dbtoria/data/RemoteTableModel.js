@@ -19,6 +19,7 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
      */
     construct : function(tableId,columnIdList,columnLabelMap) {
         this.__tableId = tableId;
+        this.setTableId(tableId);
         this.__columnIdList = columnIdList;
         this.base(arguments);
         this.setColumnIds(columnIdList);
@@ -40,7 +41,13 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
         filter : {
             nullable : true,
             apply    : '_applyFilter'
+        },
+
+        tableId : {
+            nullable : true,
+            check    : "String"
         }
+
     },
 
     members : {

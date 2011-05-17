@@ -65,6 +65,7 @@ our %allow_access = (
     getEditView         => 2,
     getRecord           => 2,
     getRecordDeref      => 2,
+    getReferencedRecord => 2,
     getDefaults         => 2,
     getDefaultsDeref    => 2,
     getForm             => 2,
@@ -162,6 +163,11 @@ sub getRecord {
 sub getRecordDeref {
     my $self = shift;
     return $self->DBI->getRecordDeref(@_);
+}
+
+sub getReferencedRecord {
+    my $self = shift;
+    return $self->DBI->getReferencedRecord(@_);
 }
 
 sub getDefaults {

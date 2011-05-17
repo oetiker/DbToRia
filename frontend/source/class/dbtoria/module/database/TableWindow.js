@@ -263,11 +263,10 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                     columnLabels[columns[i].id] = columns[i].name;
                 }
                 var model    = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
-                that.__table = new dbtoria.ui.table.Table(model);
+                that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
                     if (columns[i].type == 'boolean') {
-//                        var cellrenderer = new dbtoria.ui.table.cellrenderer.BooleanString();
                         var cellrenderer = new qx.ui.table.cellrenderer.Boolean();
                         tcm.setDataCellRenderer(i, cellrenderer);
                     }

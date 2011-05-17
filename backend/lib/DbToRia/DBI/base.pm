@@ -304,6 +304,47 @@ sub getRecordDeref {
 }
 
 
+=head2 getReferencedRecord (tableId, recordId, columnId)
+
+Returns hash of data for the dataset referenced by the record matching
+the indicated record and column keys with foreign key references
+resolved.
+
+=cut
+
+sub getReferencedRecord {
+    my $self     = shift;
+    my $params   = shift;
+    my $tableId  = $params->{tableId};
+    my $recordId = $params->{recordId};
+    my $columnId = $params->{columnId};
+
+    $tableId  =~ s/_list$//;
+    $columnId =~ s/_hid$/_id/;
+    warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
+
+    my $rec  = $self->getRecord($tableId, $recordId);
+    use Data::Dumper;
+    print STDERR Dumper "rec=", $rec;
+    my $fKey = $rec->{$recordId};
+    # resolve foreign key references
+    my $view = $self->getEditView($tableId);
+    print STDERR Dumper "view=", $view;
+    my $fTableId;
+    for my $field (@$view){
+        if ($field->{name} eq $columnId) {
+            $fTableId = $field->{tableId};
+            last;
+        }
+    }
+    warn "fTable=$fTableId, fKey=$fKey";
+    my $fRec;
+#    my $fRec = $self->getRecordDeref($fTableId, $fKey);
+
+   return $fRec;
+}
+
+
 =head2 getDefaults (table)
 
 Returns hash of columns with default values.
