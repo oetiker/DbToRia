@@ -318,26 +318,22 @@ sub getReferencedRecord {
     my $tableId  = $params->{tableId};
     my $recordId = $params->{recordId};
     my $columnId = $params->{columnId};
+ #   warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
 
-    warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
-
-    my $rec  = $self->getRecord($tableId, $recordId);
-#    use Data::Dumper;
-#    print STDERR Dumper "rec=", $rec;
-    my $fTableId='?';
-    my $fKeyId='?';
-    my $fKeyVal = $rec->{$columnId};
+    my $fTableId;
+    my $fKeyId;
     # resolve foreign key references
-    my $view = $self->getEditView($tableId);
-#    print STDERR Dumper "view=", $view;
-    for my $field (@$view){
-        if ($field->{name} eq $columnId) {
-            $fTableId = $field->{tableId};
+    my $ts = $self->getTableStructure($tableId);
+    for my $col (@{$ts->{columns}}) {
+        if ($col->{id} eq $columnId) {
+            $fTableId = $col->{references}{table};
+            $fKeyId   = $col->{references}{column};
             last;
         }
     }
-    $fTableId =~ s/_combo//;
-    $fKeyId   = $fTableId . '_id';
+    return undef unless defined $fTableId;
+
+    my $fKeyVal  = $self->getRecord($tableId, $recordId)->{$columnId};
 #    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
 
     my $dbh = $self->getDbh();
@@ -346,13 +342,10 @@ sub getReferencedRecord {
                                       value1 => $fKeyVal,
                                       op     => '=',
                                      }]);
-
-#    warn "query=$query";
     my $sth = $dbh->prepare($query);
     $sth->execute;
 
     my $fRec = $sth->fetchrow_hashref();
-#    print STDERR Dumper "fRec=", $fRec;
     return $fRec;
 }
 
