@@ -336,16 +336,23 @@ sub getReferencedRecord {
     my $fKeyVal  = $self->getRecord($tableId, $recordId)->{$columnId};
 #    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
 
+    my $fts = $self->getTableStructure($fTableId);
+    my $fPkId = $fts->{meta}{primary}[0];
+#    use Data::Dumper; print STDERR Dumper $fts;
+
     my $dbh = $self->getDbh();
-	my $query = "SELECT * FROM $fTableId ";
+    my $query = "SELECT $fPkId FROM $fTableId ";
     $query .= ' '.$self->buildWhere([{field  => $fKeyId,
                                       value1 => $fKeyVal,
                                       op     => '=',
                                      }]);
     my $sth = $dbh->prepare($query);
     $sth->execute;
-
-    my $fRec = $sth->fetchrow_hashref();
+    
+    my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
+    warn "fPkVal=$fPkVal";
+    my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
+    use Data::Dumper; print STDERR Dumper $fRec;
     return $fRec;
 }
 
@@ -419,8 +426,8 @@ sub getTables {
 
 =head2 getListView(table)
 
-returns information on how to display the table content in a tabular
-format
+Returns information on how to display the table content in a tabular
+format.
 
 =cut
 
@@ -428,11 +435,16 @@ sub prepListView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
+#    use Data::Dumper; print STDERR Dumper $tableId, $structure;
     my @return;
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
-        push @return, { map { $_ => $row->{$_} } qw (id type name size) };
+#	print STDERR Dumper "row=", $row;
+	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+	$row->{fk} = $fk;
+        push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
+#    use Data::Dumper; print STDERR Dumper \@return;
     return {
         tableId => $tableId,
         columns => \@return

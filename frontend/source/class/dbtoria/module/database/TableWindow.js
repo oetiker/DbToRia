@@ -122,17 +122,20 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 recordId = rowInfo['ROWINFO'][0];
             }
 
+            // check if we are in a column referencing another table
+	    var references = this.__table.getTableModel().getColumnReferences();
+//	    qx.dev.Debug.debugObject(references);
+            if (references[colId]) {
+                this.__table.hideTooltip();
+                return;
+            }
+
             var params = {
                 tableId:  tableId,
                 recordId: recordId,
                 columnId: colId
             };
             qx.dev.Debug.debugObject(params);
-            // check if we are in a column referencing another table
-//           if (true) {
-//                return;
-//           }
-
 //            this.__tooltip.placeToMouse(mouse);
             var rpc = dbtoria.data.Rpc.getInstance();
             // Get appropriate row from referenced table
@@ -308,13 +311,18 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 that.__columns = columns;
                 var tableId = ret.tableId;
                 var columnIds = [];
+                var columnReferences = [];
                 var columnLabels = {};
                 var i, nCols = columns.length;
                 for (i=0; i<nCols; i++){
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
+		    columnReferences.push(columns[i].fk);
                 }
-                var model    = new dbtoria.data.RemoteTableModel(tableId,columnIds,columnLabels);
+                var model = 
+		    new dbtoria.data.RemoteTableModel(tableId, columnIds, 
+						      columnLabels,
+						      columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
                 that.__table.addListener('cellChange', that.__cellChange, that);
 

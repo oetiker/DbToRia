@@ -9,7 +9,7 @@
 
 /**
  * An {@link qx.ui.table.model.Remote} implementation for accessing
- * accessing Messreihen on the server.
+ * data on the server.
  */
 qx.Class.define('dbtoria.data.RemoteTableModel', {
     extend : qx.ui.table.model.Remote,
@@ -17,10 +17,13 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
     /**
      * Create an instance of Rpc.
      */
-    construct : function(tableId,columnIdList,columnLabelMap) {
+    construct : function(tableId,columnIdList,columnLabelMap, columnReferences) {
         this.__tableId = tableId;
         this.setTableId(tableId);
         this.__columnIdList = columnIdList;
+        if (columnReferences) {
+	    this.setColumnReferences(columnReferences);
+	}
         this.base(arguments);
         this.setColumnIds(columnIdList);
         if (columnLabelMap){
@@ -46,7 +49,11 @@ qx.Class.define('dbtoria.data.RemoteTableModel', {
         tableId : {
             nullable : true,
             check    : "String"
-        }
+        },
+
+	columnReferences : {
+	    nullable: true
+	}
 
     },
 
