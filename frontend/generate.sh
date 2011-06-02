@@ -5,7 +5,7 @@ if [ -d "./qooxdoo/tool/bin" ]; then
    QOOXDOO_PATH=`ls -d ./qooxdoo`
 fi
 if [ -d "$1/tool/bin" ]; then
-   QOOXDOO_PATH=`$1`
+   QOOXDOO_PATH="$1"
    shift
 fi
 if [ x$QOOXDOO_PATH = x ]; then
