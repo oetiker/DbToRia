@@ -352,7 +352,7 @@ sub getReferencedRecord {
     my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
     warn "fPkVal=$fPkVal";
     my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
-    use Data::Dumper; print STDERR Dumper $fRec;
+#   use Data::Dumper; print STDERR Dumper $fRec;
     return $fRec;
 }
 
