@@ -348,11 +348,20 @@ sub getReferencedRecord {
                                      }]);
     my $sth = $dbh->prepare($query);
     $sth->execute;
-    
+
     my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
-    warn "fPkVal=$fPkVal";
+#    warn "fPkVal=$fPkVal";
     my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
-    use Data::Dumper; print STDERR Dumper $fRec;
+    use Data::Dumper; print STDERR Dumper "fRec=", $fRec;
+    my $view = $self->getEditView($fTableId);
+    print STDERR Dumper "view=", $view;
+    for my $field (@$view){
+	if (exists $fRec->{$field->{name}}) {
+	    $fRec->{$field->{label}} = $fRec->{$field->{name}};
+	    delete $fRec->{$field->{name}};
+	}
+    }
+    use Data::Dumper; print STDERR Dumper "fRec2=", $fRec;
     return $fRec;
 }
 
@@ -440,8 +449,7 @@ sub prepListView {
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
 #	print STDERR Dumper "row=", $row;
-#	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
-	my $fk = defined $row->{references};
+	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
 	$row->{fk} = $fk;
         push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
@@ -459,7 +467,7 @@ sub getListView {
     for my $engine (@{$self->metaEngines}){
         $engine->massageListView($view);
     }
-    print STDERR Dumper "view2=", $view;
+#    print STDERR Dumper "view2=", $view;
     return $view;
 }
 
