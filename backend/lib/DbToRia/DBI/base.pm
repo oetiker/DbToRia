@@ -440,11 +440,11 @@ sub prepListView {
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
 #	print STDERR Dumper "row=", $row;
-	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+#	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+	my $fk = defined $row->{references};
 	$row->{fk} = $fk;
         push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
-#    use Data::Dumper; print STDERR Dumper \@return;
     return {
         tableId => $tableId,
         columns => \@return
@@ -455,9 +455,11 @@ sub getListView {
     my $self = shift;
     my $tableId = shift;
     my $view = $self->prepListView($tableId);
+    use Data::Dumper; print STDERR Dumper "view=", $view;
     for my $engine (@{$self->metaEngines}){
         $engine->massageListView($view);
     }
+    print STDERR Dumper "view2=", $view;
     return $view;
 }
 

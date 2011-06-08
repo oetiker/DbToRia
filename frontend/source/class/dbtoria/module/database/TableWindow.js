@@ -64,6 +64,9 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             loading        : true
         });
 
+	this.__refDelay = dbtoria.data.Config.getInstance().getRefDelay();
+	this.debug('refDelay='+this.__refDelay);
+
         this.__rpc = dbtoria.data.Rpc.getInstance();
         this.__buildUi(tableId, viewMode, readOnly);
         if (viewMode) {
@@ -98,20 +101,22 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __viewMode: null,
         __readOnly: null,
         __filter: null,
-
+	__refDelay: null,
+	__refTimer: null,
 
         __cellChange: function(e) {
             var data = e.getData();
             var row   = data.row;
             var col   = data.col;
             var mouse = data.mouse; // mouse event
-            this.debug('__cellChange(): row='+row+', col='+col);
 
             // close and remove tooltip if not over a table cell
             if (row == null || row == -1) {
                 this.__table.hideTooltip();
+		this.__refTimer.stop();
                 return;
             }
+            this.debug('__cellChange(): row='+row+', col='+col);
 
             var tm       = this.__table.getTableModel();
             var colId    = tm.getColumnId(col);
@@ -124,9 +129,12 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
             // check if we are in a column referencing another table
 	    var references = this.__table.getTableModel().getColumnReferences();
+//	    this.debug('references=');
 //	    qx.dev.Debug.debugObject(references);
-            if (references[colId]) {
+//	    this.debug('colId='+colId+', col=',+col);
+            if (!references[col]) {
                 this.__table.hideTooltip();
+		this.__refTimer.stop();
                 return;
             }
 
@@ -137,10 +145,19 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             };
             qx.dev.Debug.debugObject(params);
 //            this.__tooltip.placeToMouse(mouse);
-            var rpc = dbtoria.data.Rpc.getInstance();
+
+            this.__refTimer.addListener('interval', function(e) {
+                this.debug('timer fired');
+                this.__refTimer.stop();
+
+                var rpc = dbtoria.data.Rpc.getInstance();
             // Get appropriate row from referenced table
-            rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, this),
-                               'getReferencedRecord', params);
+                rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, 
+							 this),
+				   'getReferencedRecord', params);
+            }, this);
+            this.debug('starting timer');
+	    this.__refTimer.start();
         },
 
         __referenceHandler: function(data) {
@@ -306,7 +323,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
             this.add(toolbar);
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret){
+            this.__rpc.callAsyncSmart(function(ret) {
                 var columns = ret.columns;
                 that.__columns = columns;
                 var tableId = ret.tableId;
@@ -314,18 +331,27 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var columnReferences = [];
                 var columnLabels = {};
                 var i, nCols = columns.length;
-                for (i=0; i<nCols; i++){
+                for (i=0; i<nCols; i++) {
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
 		    columnReferences.push(columns[i].fk);
+//		    that.debug('columns: i='+i);
+//		    qx.dev.Debug.debugObject(columns[i]);
                 }
+		
                 var model = 
 		    new dbtoria.data.RemoteTableModel(tableId, columnIds, 
 						      columnLabels,
 						      columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
-                that.__table.addListener('cellChange', that.__cellChange, that);
-
+		if (that.__refDelay > 0) { 
+		    that.debug('Creating timer');
+		    that.__refTimer = new qx.event.Timer(that.__refDelay);
+                    that.__table.addListener('cellChange', that.__cellChange, that);
+		}
+		else {
+		    that.debug('Not creating timer');
+		}
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
                     if (columns[i].type == 'boolean') {

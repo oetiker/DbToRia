@@ -217,7 +217,10 @@ sub getTableStructure {
 
 sub getConfig {
     my $self = shift;
-    return { filterOps => $self->DBI->getFilterOpsArray(@_) };
+    my $gcfg = $self->cfg->{General};
+    return { filterOps => $self->DBI->getFilterOpsArray(@_),
+	     refDelay  => $gcfg->{ref_delay},
+	   };
 }
 
 
