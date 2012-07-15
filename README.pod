@@ -14,21 +14,26 @@ interface can be further optimized.
 =head2 Backend
 
 Mojo:
+
  cpanm  Mojolicious
  cpanm  MojoX::Dispatcher::Qooxdoo::Jsonrpc
 
 Json:
+
  cpanm  JSON::XS
  cpanm  Mojo::JSON::Any
 
 DB:
+
  cpanm  DBI
  cpanm  DBD::(put-your-driver-here)
 
 For I<quick results> use testing-db (which is a SQLite):
+
  cpanm  DBD::SQLite
 
 Other modules needed:
+
  cpanm  Config::Grammar
  cpanm  Try::Tiny
 
@@ -36,6 +41,7 @@ Edit the F<backend/etc/dbtoria.cfg> file to point to the database of
 your choice.
 
 For I<quick results> put this in your F<backend/etc/dbtoria.cfg>:
+
  dsn = DBI:SQLite:dbname=backend/t/sqlite_db/dbtoria_test_db
 
  mojo_secret = MyCookieSecret
@@ -70,9 +76,11 @@ by calling
 
 Run DbToRia with its built-in webserver
 for testing:
+
  ./backend/bin/dbtoria.pl daemon
 
 And point your browser at
+
  L<http://localhost:3000>
 
 =head1 BACKGROUND
