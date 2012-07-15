@@ -13,44 +13,81 @@ interface can be further optimized.
 
 =head2 Backend
 
-We assume you have DBI and the respektive DBD module for your database
-already installed.  Now get Mojo and the Mojo Qooxdoo dispatcher and
-the config grammar module:
+Mojo:
 
- cd ./setup
- ./make_thirdparty.sh
+ cpanm  Mojolicious
+ cpanm  MojoX::Dispatcher::Qooxdoo::Jsonrpc
+
+Json:
+
+ cpanm  JSON::XS
+ cpanm  Mojo::JSON::Any
+
+DB:
+
+ cpanm  DBI
+ cpanm  DBD::(put-your-driver-here)
+
+For I<quick results> use testing-db (which is a SQLite):
+
+ cpanm  DBD::SQLite
+
+Other modules needed:
+
+ cpanm  Config::Grammar
+ cpanm  Try::Tiny
 
 Edit the F<backend/etc/dbtoria.cfg> file to point to the database of
 your choice.
 
-With this set you are ready to run DbToRia with its built-in webserver
-for testing:
+For I<quick results> put this in your F<backend/etc/dbtoria.cfg>:
 
- ./backend/bin/dbtoria.pl daemon
+ dsn = DBI:SQLite:dbname=backend/t/sqlite_db/dbtoria_test_db
+
+ mojo_secret = MyCookieSecret
+ log_file = /tmp/dbtoria.log
+ schema = public
+ encoding = latin
+
 
 =head2 Frontend
 
-The DbToRia frontend is written in JavaScript, using the qooxdoo library.
+Get Qooxdoo SDK:
 
-To rebuild, download a copy of the Qooxdoo SDK:
+ wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-2.0.1-sdk.zip
+ unzip qooxdoo-2.0.1-sdk.zip
 
- wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-1.4-sdk.zip
- unzip qooxdoo-1.4-sdk.zip
  cd frontend
 
-Now if you just want to build the production ready version of the
-frontend
+If you just want to build the production ready version of the
+frontend:
 
- ./generate.sh ../qooxdoo-1.4-sdk build
+ ./generate.sh ../qooxdoo-2.0.1-sdk build
 
-it is now accessible on L<http://localhost:3000>
 
 If you want start hacking and debuging the frontend, build the source version
 by calling
 
- ./generate.sh ../qooxdoo-1.4-sdk source
+ ./generate.sh ../qooxdoo-2.0.1-sdk source
 
-you can call this one on L<http://localhost:3000/source> (don't forget
-to edit the dbtoria.cfg file first and to start the backend as
-described above).
+ cd ..
+
+=head2 Have Fun(tm) 
+
+Run DbToRia with its built-in webserver
+for testing:
+
+ ./backend/bin/dbtoria.pl daemon
+
+And point your browser at
+
+ L<http://localhost:3000>
+
+=head1 BACKGROUND
+
+DbToRia contains of two parts. 
+One is the backend which uses Perls Mojo Web Framework, its Jsonrpc-Dispatcher and some Perl code to interact with the database.
+The other is the frontend which uses the JavaScript Qooxdoo Framework for Rich Internet Applications and some JavaScript code to build the website you interact with.
+
+The frontend sends json rpc requests which are handled by the backend. After the requested information is sent back using json, too, the view is updated.
 
