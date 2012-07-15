@@ -304,6 +304,59 @@ sub getRecordDeref {
 }
 
 
+=head2 getReferencedRecord (tableId, recordId, columnId)
+
+Returns hash of data for the dataset referenced by the record matching
+the indicated record and column keys with foreign key references
+resolved.
+
+=cut
+
+sub getReferencedRecord {
+    my $self     = shift;
+    my $params   = shift;
+    my $tableId  = $params->{tableId};
+    my $recordId = $params->{recordId};
+    my $columnId = $params->{columnId};
+ #   warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
+
+    my $fTableId;
+    my $fKeyId;
+    # resolve foreign key references
+    my $ts = $self->getTableStructure($tableId);
+    for my $col (@{$ts->{columns}}) {
+        if ($col->{id} eq $columnId) {
+            $fTableId = $col->{references}{table};
+            $fKeyId   = $col->{references}{column};
+            last;
+        }
+    }
+    return undef unless defined $fTableId;
+
+    my $fKeyVal  = $self->getRecord($tableId, $recordId)->{$columnId};
+#    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
+
+    my $fts = $self->getTableStructure($fTableId);
+    my $fPkId = $fts->{meta}{primary}[0];
+#    use Data::Dumper; print STDERR Dumper $fts;
+
+    my $dbh = $self->getDbh();
+    my $query = "SELECT $fPkId FROM $fTableId ";
+    $query .= ' '.$self->buildWhere([{field  => $fKeyId,
+                                      value1 => $fKeyVal,
+                                      op     => '=',
+                                     }]);
+    my $sth = $dbh->prepare($query);
+    $sth->execute;
+    
+    my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
+    warn "fPkVal=$fPkVal";
+    my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
+#   use Data::Dumper; print STDERR Dumper $fRec;
+    return $fRec;
+}
+
+
 =head2 getDefaults (table)
 
 Returns hash of columns with default values.
@@ -373,8 +426,8 @@ sub getTables {
 
 =head2 getListView(table)
 
-returns information on how to display the table content in a tabular
-format
+Returns information on how to display the table content in a tabular
+format.
 
 =cut
 
@@ -382,11 +435,16 @@ sub prepListView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
+#    use Data::Dumper; print STDERR Dumper $tableId, $structure;
     my @return;
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
-        push @return, { map { $_ => $row->{$_} } qw (id type name size) };
+#	print STDERR Dumper "row=", $row;
+	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+	$row->{fk} = $fk;
+        push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
+#    use Data::Dumper; print STDERR Dumper \@return;
     return {
         tableId => $tableId,
         columns => \@return

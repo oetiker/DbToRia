@@ -52,8 +52,9 @@
      },
     "libraries" : {
        "library" : [{
-         "manifest"   : "contrib://ComboTable/trunk/Manifest.json"
-//       "manifest"   : "/usr/pack/qooxdoo-1.4.0-za/qooxdoo-contrib/ComboTable/trunk/Manifest.json"
+       "manifest"   : "contrib://ComboTable/trunk/Manifest.json"
+//       "manifest"   : "/usr/pack/qooxdoo-1.4.1-za/qooxdoo-contrib/ComboTable/trunk/Manifest.json"
+//       "manifest"   : "/usr/pack/qooxdoo-trunk/qooxdoo-contrib/ComboTable/trunk/Manifest.json"
        }]
      },
      "pretty" :

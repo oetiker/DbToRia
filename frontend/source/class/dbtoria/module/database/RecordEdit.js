@@ -221,12 +221,12 @@ qx.Class.define("dbtoria.module.database.RecordEdit", {
          * @param record {var} TODOC
          * @return {void}
          */
-        setRecord : function(recordId) {
-            this.debug("setRecord(): recordId="+recordId);
-            if (recordId == this.__recordId) { // nothing changed
-                return;
-            }
-        },
+        // setRecord : function(recordId) {
+        //     this.debug("setRecord(): recordId="+recordId);
+        //     if (recordId == this.__recordId) { // nothing changed
+        //         return;
+        //     }
+        // },
 
         editRecord : function(recordId) {
             this.debug("editRecord(): recordId="+recordId);
