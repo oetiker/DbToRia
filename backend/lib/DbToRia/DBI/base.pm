@@ -356,12 +356,12 @@ sub getReferencedRecord {
     my $view = $self->getEditView($fTableId);
     print STDERR Dumper "view=", $view;
     for my $field (@$view){
-	if (exists $fRec->{$field->{name}}) {
-	    $fRec->{$field->{label}} = $fRec->{$field->{name}};
-	    delete $fRec->{$field->{name}};
-	}
+        if (exists $fRec->{$field->{name}}) {
+            $fRec->{$field->{label}} = $fRec->{$field->{name}};
+            delete $fRec->{$field->{name}};
+        }
     }
-    use Data::Dumper; print STDERR Dumper "fRec2=", $fRec;
+#    use Data::Dumper; print STDERR Dumper "fRec2=", $fRec;
     return $fRec;
 }
 

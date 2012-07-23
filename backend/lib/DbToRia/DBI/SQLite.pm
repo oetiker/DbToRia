@@ -73,6 +73,25 @@ sub getAllTables {
 
 }
 
+=head2 getDatabaseName
+
+Return name of the database connected to.
+
+=cut
+
+sub getDatabaseName {
+    my $self = shift;
+    my $dsn = $self->{dsn};
+    
+    # in sqlite the database name is the name of the file.. (?)
+    (my $databaseName = $dsn ) =~ s/.*=//;
+    
+    # ..only the file, no directories
+    $databaseName =~ s|.*/||g;
+
+    return $databaseName;
+}
+
 =head2 getFilterOpsArray()
 
 Return an array of DBMS specific comparison operators to be used in
@@ -126,7 +145,7 @@ sub getTableStructure {
 
     my %primaryKeys;
     my @primaryKey;
-	if ( my $pksth = $dbh->primary_key_info(undef, undef, $table) ){
+    if ( my $pksth = $dbh->primary_key_info(undef, undef, $table) ){
         while ( my $pk = $pksth->fetchrow_hashref ) {
             $primaryKeys{$pk->{COLUMN_NAME}} = 1;
             push @primaryKey, $pk->{COLUMN_NAME};
@@ -134,11 +153,11 @@ sub getTableStructure {
     }
 
     # call column_info for metadata on columns
-	my $sth = $dbh->column_info(undef, undef, $table, undef);
+    my $sth = $dbh->column_info(undef, undef, $table, undef);
 
     my @columns;
     my %typeMap;
-	while( my $col = $sth->fetchrow_hashref ) {
+    while( my $col = $sth->fetchrow_hashref ) {
         my $id = $col->{COLUMN_NAME};
         # return structure
         push @columns, {
@@ -256,7 +275,7 @@ Return format:
 =cut
 
 sub getTableDataChunk {
-    my $self	  = shift;
+    my $self      = shift;
     my $table     = shift;
     my $firstRow  = shift;
     my $lastRow   = shift;
@@ -307,7 +326,7 @@ sub getRowCount {
     my $filter = shift;
 
     my $dbh = $self->getDbh();
-	my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
+    my $query = "SELECT COUNT(*) FROM ". $dbh->quote_identifier($table);
 
     $query .= $self->buildWhere($filter);
     return ($dbh->selectrow_array($query))[0];
@@ -320,10 +339,10 @@ Update the record with the given recId using the data.
 =cut
 
 sub updateTableData {
-    my $self	  = shift;
+    my $self      = shift;
     my $table     = shift;
     my $recId     = shift;
-    my $data	  = shift;
+    my $data      = shift;
 
     my $dbh = $self->getDbh();
 
@@ -358,9 +377,9 @@ Insert and return key of new entry
 =cut
 
 sub insertTableData {
-    my $self	  = shift;
-    my $table	  = shift;
-    my $data	  = shift;
+    my $self      = shift;
+    my $table     = shift;
+    my $data      = shift;
 
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);

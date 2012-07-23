@@ -15,7 +15,6 @@ to the database.
 There will also be sample applications and software packages for
 simple installation and testing.
 
-
 The current project leader (PL) of DbToRia is Tobi Oetiker.
 
 =head2 Implementation Approach
@@ -41,6 +40,31 @@ Document, implement, test. Send pull request to PL.
 
 =head1 WORK PACKAGES
 
+=head2 Road to the first beta
+
+There following items have to be taken care of before publishing a first beta of dBtoria:
+
+=over
+
+=item Pearl Plugin Support
+
+Pearls are reporting plugins that ask the user for input prior to displaying
+the report. Gedafe Pearls should work with minimal changes. Effort B<2
+days>.
+
+=item Frontend Layout Update
+
+Update the Frontend Layout to work with fixed screen components and the
+option to pop out windows. Similar to Extopus. Effort B<1 day>.
+
+=item Incremental Search Update
+
+Make incremental Search Combo Boxes aware of the number of hits and only do
+incremental loading for realy long lists. Add a refresh button to invalidate
+local cache. Effort B<2 days>.
+
+=back
+
 =head2 Missing Features
 
 While the basic functionality is already available, the feature set is
@@ -54,15 +78,8 @@ reflected in the browser URL such that bookmarking will allow to
 re-open the view directly.
 
 Status: available,
-Effort: 3h
-
-=head3 Pearl Reports Integration
-
-Gedafe Pearl can be used within DbToRia. Pearl reports show up in
-iframes and have support for printing.
-
-Status: available,
 Effort: 6h
+
 
 =head3 M:N Widget
 
@@ -70,15 +87,7 @@ Widget to handle M:N relationships between tables directly instead of
 having to edit a separate table.
 
 Status: available,
-Effort: ?
-
-
-=head2 Additional Features
-
-The following feature extend the functionality of Gedafe.
-
-None right now ...
-
+Effort: 2 days
 
 =head2 Installation
 
