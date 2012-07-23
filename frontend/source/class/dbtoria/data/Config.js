@@ -32,7 +32,6 @@ qx.Class.define( 'dbtoria.data.Config',
     */
     construct: function () {
         this.base(arguments);
-	this.refresh();
     }, // construct
 
 
