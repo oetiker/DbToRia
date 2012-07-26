@@ -29,6 +29,7 @@ use Storable qw(dclone);
 use Mojo::Base -base;
 
 has 'dsn';
+has 'encoding';
 has 'username';
 has 'password';
 has 'schema';
@@ -150,8 +151,9 @@ returns a database handle. The method reconnects as required.
 sub getDbh {
     my $self = shift;
     my $driver = (DBI->parse_dsn($self->dsn))[1];
-    my $key = ($self->username||'???').($self->password||'???');
-    my $dbh = $self->dbhCache->{$key};
+    my $key    = ($self->username||'???').($self->password||'???');
+    my $dbh    = $self->dbhCache->{$key};
+    my $utf8   = ($self->encoding eq 'utf8');
     if (not defined $dbh){
         $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
             RaiseError => 0,
@@ -352,9 +354,9 @@ sub getReferencedRecord {
     my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
 #    warn "fPkVal=$fPkVal";
     my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
-    use Data::Dumper; print STDERR Dumper "fRec=", $fRec;
+#    use Data::Dumper; print STDERR Dumper "fRec=", $fRec;
     my $view = $self->getEditView($fTableId);
-    print STDERR Dumper "view=", $view;
+#    print STDERR Dumper "view=", $view;
     for my $field (@$view){
         if (exists $fRec->{$field->{name}}) {
             $fRec->{$field->{label}} = $fRec->{$field->{name}};

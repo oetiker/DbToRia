@@ -32,15 +32,17 @@ setup a new service
 =cut
 
 sub new {
-    my $self    = shift->SUPER::new(@_);
-    my $dsn     = $self->cfg->{General}{dsn};
-    my $driver  = (DBI->parse_dsn($dsn))[1];
+    my $self     = shift->SUPER::new(@_);
+    my $dsn      = $self->cfg->{General}{dsn};
+    my $encoding = $self->cfg->{General}{encoding};
+    my $driver   = (DBI->parse_dsn($dsn))[1];
     require 'DbToRia/DBI/'.$driver.'.pm';
     do {
         no strict 'refs';
         $self->DBI("DbToRia::DBI::$driver"->new(
             schema          => $self->cfg->{General}{schema},
             dsn             => $dsn,
+	    encoding        => $encoding,
             metaEnginesCfg  => $self->cfg->{MetaEngines}
         ));
     };
