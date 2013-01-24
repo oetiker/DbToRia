@@ -465,7 +465,7 @@ sub getListView {
     my $self = shift;
     my $tableId = shift;
     my $view = $self->prepListView($tableId);
-    use Data::Dumper; print STDERR Dumper "view=", $view;
+#    use Data::Dumper; print STDERR Dumper "view=", $view;
     for my $engine (@{$self->metaEngines}){
         $engine->massageListView($view);
     }
