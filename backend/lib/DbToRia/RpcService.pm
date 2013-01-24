@@ -1,12 +1,12 @@
-package DbToRia::JsonRpcService;
+package DbToRia::RpcService;
 
 =head1 NAME
 
-DbToRia::JsonRpcService - RPC Service for DbToRia
+DbToRia::RpcService - RPC Service for DbToRia
 
 =head1 SYNOPSYS
 
-This is used by L<DbToRia::MojoApp> to provide access to DbToRia
+This is used by L<DbToRia> to provide access to DbToRia
 server functions
 
 =head1 DESCRIPTION
