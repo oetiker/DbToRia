@@ -10,4 +10,4 @@ use DbToRia::MojoApp;
 $ENV{MOJO_APP} = DbToRia::MojoApp->new;
 
 # Start commands
-Mojolicious::Commands->start;
+Mojolicious::Commands->start_app('DbToRia::MojoApp');
