@@ -55,8 +55,8 @@ For I<quick results> put this in your F<backend/etc/dbtoria.cfg>:
 
 Get Qooxdoo SDK:
 
- wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-2.0.1-sdk.zip
- unzip qooxdoo-2.0.1-sdk.zip
+ wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-3.5-sdk.zip
+ unzip qooxdoo-3.5-sdk.zip
 
  cd frontend
 
