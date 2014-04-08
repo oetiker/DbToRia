@@ -63,13 +63,13 @@ Get Qooxdoo SDK:
 If you just want to build the production ready version of the
 frontend:
 
- ./generate.sh ../qooxdoo-2.0.1-sdk build
+ ./generate.sh ../qooxdoo-3.5-sdk build
 
 
 If you want start hacking and debuging the frontend, build the source version
 by calling
 
- ./generate.sh ../qooxdoo-2.0.1-sdk source
+ ./generate.sh ../qooxdoo-3.5-sdk source
 
  cd ..
 
