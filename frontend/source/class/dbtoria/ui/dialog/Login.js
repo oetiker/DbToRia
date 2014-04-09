@@ -39,8 +39,9 @@ qx.Class.define("dbtoria.ui.dialog.Login", {
         this.getChildControl('captionbar').exclude();
 
         this.getChildControl('pane').set({
-            decorator       : new qx.ui.decoration.Single(1, 'solid', '#777'),
-            backgroundColor : '#f8f8f8'
+                // TODO bug with qx 3.5, at least.
+                //decorator       : new qx.ui.decoration.Single(1, 'solid', '#777'),
+                backgroundColor : '#f8f8f8'
         });
 
         var grid = new qx.ui.layout.Grid(10, 10);
