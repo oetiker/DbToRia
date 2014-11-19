@@ -13,41 +13,44 @@ server functions
 
 =cut
 
-use Mojo::Base -base;
+use Mojo::Base qw(Mojolicious::Plugin::Qooxdoo::JsonRpcController);
 
-has 'cfg';
-has 'mojo_stash';
-has 'log';
-has 'DBI';
+has service => sub { 'DbToRia' };
+
+has 'cfg' => sub {
+    my $self = shift;
+    return $self->app->cfg;
+};
+has 'log' => sub {
+    my $self = shift;
+    return $self->app->log;
+};
+
+has 'DBI' => sub {
+    my $self     = shift;
+    my $dsn      = $self->cfg->{General}{dsn};
+    my $encoding = $self->cfg->{General}{encoding};
+    my $driver   = (DBI->parse_dsn($dsn))[1];
+    my $dbi;
+    require 'DbToRia/DBI/'.$driver.'.pm';
+    do {
+        no strict 'refs';
+        $dbi = "DbToRia::DBI::$driver"->new(
+            schema          => $self->cfg->{General}{schema},
+            dsn             => $dsn,
+            encoding        => $encoding,
+            metaEnginesCfg  => $self->cfg->{MetaEngines},
+            session => $self->session,
+        );
+    };
+    return $dbi;
+};
 
 use strict;
 
 use DBI;
 use Try::Tiny;
 
-=head2 new(cfg=>DbToRia::Config)
-
-setup a new service
-
-=cut
-
-sub new {
-    my $self     = shift->SUPER::new(@_);
-    my $dsn      = $self->cfg->{General}{dsn};
-    my $encoding = $self->cfg->{General}{encoding};
-    my $driver   = (DBI->parse_dsn($dsn))[1];
-    require 'DbToRia/DBI/'.$driver.'.pm';
-    do {
-        no strict 'refs';
-        $self->DBI("DbToRia::DBI::$driver"->new(
-            schema          => $self->cfg->{General}{schema},
-            dsn             => $dsn,
-	    encoding        => $encoding,
-            metaEnginesCfg  => $self->cfg->{MetaEngines}
-        ));
-    };
-    return $self;
-}
 
 =head2 allow_rpc_access(method)
 
@@ -81,10 +84,9 @@ our %allow_access = (
 
 sub connect_db {
     my $self    = shift;
-    my $session = $self->mojo_stash->{'dbtoria.session'};
     my $dbi     = $self->DBI;
-    $dbi->username($session->param('username'));
-    $dbi->password($session->param('password'));
+    $dbi->username($self->session('username'));
+    $dbi->password($self->session('password'));
     return try {
         $dbi->getDbh->ping;
         for my $engine (@{$self->DBI->metaEngines}){
@@ -116,24 +118,23 @@ sub login {
     my $param    = shift;
     my $username = $param->{username};
     my $password = $param->{password};
-    my $session  = $self->mojo_stash->{'dbtoria.session'};
-    $session->param('username',$username);
-    $session->param('password',$password);
+    $self->session('username',$username);
+    $self->session('password',$password);
     my $connect = $self->connect_db;
     return $connect;
 }
 
 sub logout{
     my $self = shift;
-    $self->mojo_stash->{'dbtoria.session'}->delete();
+    $self->session('username', undef);
+    $self->session('password', undef);
     return 1;
 }
 
 sub getConnectionInfo {
     my $self = shift;
-    my $session  = $self->mojo_stash->{'dbtoria.session'};
-    my $user = $session->param('username') || '';
-    $user .= '@' if $user;    
+    my $user = $self->session('username') || '';
+    $user .= '@' if $user;
     return $user.$self->DBI->getDatabaseName(@_);
 }
 

@@ -36,14 +36,12 @@ sub startup {
         $self->stash->{'dbtoria.session'} = $session;
     });
 
-    $self->plugin('qooxdoo_jsonrpc',{
-        services => {
-            DbToRia  => new DbToRia::RpcService(
-                cfg => $self->cfg,
-                log => $self->app->log,
-           )
-        }
+    $self->plugin('qooxdoo',{
+        prefix => '/',
+        path => 'jsonrpc',
+        controller => 'RpcService'
     });
+
 }
 
 1;
