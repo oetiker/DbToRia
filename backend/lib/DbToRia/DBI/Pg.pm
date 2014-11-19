@@ -55,34 +55,37 @@ UTF8 handling if encoding=utf8 in cfg file.
 
 =cut
 
-sub getDbh {
+sub db_error_handler {
+    die error(99999, "Database error:\n" . DBI->errstr);
+}
+
+
+has 'getDbh' => sub {
     my $self = shift;
     my $driver = (DBI->parse_dsn($self->dsn))[1];
     my $key    = ($self->username||'???').($self->password||'???');
-    my $dbh    = $self->dbhCache->{$key};
     my $utf8   = ($self->encoding eq 'utf8');
-    if (not defined $dbh){
-        $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
+    my $dbh = DBI->connect_cached($self->dsn, $self->username, $self->password, {
             RaiseError => 0,
             PrintError => 0,
-            HandleError => sub {
-                my ($msg,$h,$ret) = @_;
-                my $state = $h->state || 9999;
-                my $code = lc($state);
-                $code =~ s/[^a-z0-9]//g;
-                $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
-                $code += 70000000;
-                delete $self->dbhCache->{$key};
-                die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
-            },
+            HandleError        => \&db_error_handler,
+            # HandleError => sub {
+            #     my ($msg,$h,$ret) = @_;
+            #     my $state = $h->state || 9999;
+            #     my $code = lc($state);
+            #     $code =~ s/[^a-z0-9]//g;
+            #     $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
+            #     $code += 70000000;
+            #     delete $self->dbhCache->{$key};
+            #     die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
+            # },
             AutoCommit => 1,
             ShowErrorStatement => 1,
             LongReadLen=> 5*1024*1024,
             pg_enable_utf8 => $utf8,
-        });
-    }
+    });
     return $dbh;
-}
+};
 
 =head2 getDatabaseName
 
