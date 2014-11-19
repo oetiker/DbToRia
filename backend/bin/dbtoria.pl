@@ -24,4 +24,4 @@ else {
 $ENV{MOJO_APP} = DbToRia->new;
 
 # Start commands
-Mojolicious::Commands->start;
+Mojolicious::Commands->start_app('DbToRia::MojoApp');

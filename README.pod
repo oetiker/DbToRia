@@ -42,7 +42,8 @@ your choice.
 
 For I<quick results> put this in your F<backend/etc/dbtoria.cfg>:
 
- dsn = DBI:SQLite:dbname=backend/t/sqlite_db/dbtoria_test_db
+ *** General ***
+ dsn = DBI:SQLite:dbname=../backend/t/sqlite_db/dbtoria_test_db
 
  mojo_secret = MyCookieSecret
  log_file = /tmp/dbtoria.log
@@ -54,25 +55,25 @@ For I<quick results> put this in your F<backend/etc/dbtoria.cfg>:
 
 Get Qooxdoo SDK:
 
- wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-2.0.1-sdk.zip
- unzip qooxdoo-2.0.1-sdk.zip
+ wget http://downloads.sourceforge.net/qooxdoo/qooxdoo-3.5-sdk.zip
+ unzip qooxdoo-3.5-sdk.zip
 
  cd frontend
 
 If you just want to build the production ready version of the
 frontend:
 
- ./generate.sh ../qooxdoo-2.0.1-sdk build
+ ./generate.sh ../qooxdoo-3.5-sdk build
 
 
 If you want start hacking and debuging the frontend, build the source version
 by calling
 
- ./generate.sh ../qooxdoo-2.0.1-sdk source
+ ./generate.sh ../qooxdoo-3.5-sdk source
 
  cd ..
 
-=head2 Have Fun(tm) 
+=head2 Have Fun(tm)
 
 Run DbToRia with its built-in webserver
 for testing:
@@ -85,7 +86,7 @@ And point your browser at
 
 =head1 BACKGROUND
 
-DbToRia contains of two parts. 
+DbToRia contains of two parts.
 One is the backend which uses Perls Mojo Web Framework, its Jsonrpc-Dispatcher and some Perl code to interact with the database.
 The other is the frontend which uses the JavaScript Qooxdoo Framework for Rich Internet Applications and some JavaScript code to build the website you interact with.
 

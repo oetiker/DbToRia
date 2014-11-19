@@ -10,7 +10,7 @@ use Mojo::Base 'Mojolicious';
 
 has 'cfg' => sub {
     my $self = shift;
-    my $conf = DbToRia::Config->new( 
+    my $conf = DbToRia::Config->new(
         file=> $ENV{DBTORIA_CONF} || $self->home->rel_file('etc/dbtoria.cfg')
     );
     return $conf->parse_config();
@@ -19,7 +19,7 @@ has 'cfg' => sub {
 sub startup {
     my $self = shift;
     my $gcfg = $self->cfg->{General};
-    $self->secret($gcfg->{mojo_secret});
+    $self->secrets([$gcfg->{mojo_secret}]);
     if ($self->app->mode ne 'development' and $gcfg->{log_file}){
         $self->log->path($gcfg->{log_file});
     }
