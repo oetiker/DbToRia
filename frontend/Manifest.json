@@ -16,8 +16,12 @@
         "email" :  "david.angleitner@tet.htwchur.ch"
       },
       {
+        "name" : "Fritz Zaucker",
+        "email" :  "fritz.zaucker@oetiker.ch"
+      },
+      {
         "name" : "Matthias Bloch",
-        "email" :  "matthias@puffin.ch"
+        "email" :  "matthias.bloch@oetiker.ch"
       },
       {
         "name" : "Tobias Oetiker",
@@ -26,7 +30,7 @@
     ],
 
     "version" : "trunk",
-    "qooxdoo-versions": ["1.4.0"]
+    "qooxdoo-versions": ["3.5.1"]
   },
   
   "provides" : 
