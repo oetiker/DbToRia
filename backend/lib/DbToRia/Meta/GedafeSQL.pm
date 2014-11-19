@@ -150,10 +150,19 @@ tabular format.
 sub massageListView {
     my $self = shift;
     my $view = shift;
+    my $vColumns = $view->{columns};
     my $tables = $self->DBI->getAllTables();
     if ($tables->{$view->{tableId}.'_list'}){
         my $newView = $self->DBI->prepListView($view->{tableId}.'_list');
         map { $view->{$_} = $newView->{$_} } keys %$newView;
+    }
+    use Data::Dumper; print STDERR Dumper "viewCols=", $vColumns;
+    for my $col (@{$view->{columns}}) {
+	for my $vCol (@$vColumns) {
+	    if ($col->{id} eq $vCol->{id}) {
+		$col->{fk} = $vCol->{fk};
+	    }
+	}
     }
 }
 
@@ -170,11 +179,10 @@ sub massageEditView {
     my $tables = $self->DBI->getAllTables();
     for my $row (@$editView){
         next unless $row->{type} eq 'ComboTable';
-        if (exists $tables->{$row->{tableId}.'_combo'}){
-            $row->{tableId} .= '_combo';
-            $row->{idCol} = 'id';
-            $row->{valueCol} = 'text';
-        }
+	die error(90732,"ComboTable view $row->{tableId}_combo not found.") unless exists $tables->{$row->{tableId}.'_combo'};
+	$row->{tableId} .= '_combo';
+	$row->{idCol} = 'id';
+	$row->{valueCol} = 'text';
     }
     for (my $i=0; $i<scalar @$editView; $i++) {
         my $row = $editView->[$i];

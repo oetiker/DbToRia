@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/sepp/bin/perl-5.12.3
 
 
 # some tests to ensure functionality of db driver.

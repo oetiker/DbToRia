@@ -141,13 +141,14 @@ sub _make_parser {
         _mandatory => [qw(General)],
         General => {
             _doc => 'Global configuration settings for DbToRia',
-            _vars => [ qw(dsn mojo_secret log_file log_level schema encoding) ],
+            _vars => [ qw(dsn mojo_secret log_file log_level schema encoding ref_delay) ],
             _mandatory => [ qw(dsn mojo_secret) ],
             dsn => { _doc => 'DBI connect string', _example=>'dbi:Pg:dbname=testdb' },
             mojo_secret => { _doc => 'secret for signing mojo cookies' },
             schema => { _doc => 'which schema should we prowl for data?' },
             log_file => { _doc => 'write a log file to this location'},
             log_level => { _doc => 'mojo log level'},
+	    ref_delay => { _doc => 'delay for reference popup' },
         },
         MetaEngines => {
             _doc => 'Modules for adding meta information to the database',

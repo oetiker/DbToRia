@@ -1,7 +1,10 @@
 dbtoria.cfg
+dbtoria-stadler.cfg
+dbtoria-opptp2.cfg
 frontend/source/script/
 thirdparty/
 trunk_sync
+johan_sync
 *~
 backend/public/
 frontend/qooxdoo

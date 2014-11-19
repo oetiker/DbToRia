@@ -38,22 +38,23 @@ qx.Class.define("dbtoria.module.Main", {
         var containerLayout = new qx.ui.layout.VBox();
         containerLayout.setSeparator("separator-vertical");
         this.base(arguments, containerLayout);
-//        // the desktop area is the largest part of dbtoria, make sure it is
-//        // scrollable
-//        var desktopContainer = new qx.ui.container.Scroll();
+        // the desktop area is the largest part of dbtoria, make sure it is
+        // scrollable
+        var desktopContainer = new qx.ui.container.Scroll();
 
-        // the table tabview
-        var tabview = dbtoria.module.desktop.Desktop.getInstance();
-//        desktopContainer.add(tabview, {
-//             width  : '100%',
-//             height : '100%'
-//        });
+        // the desktop holds all other windows
+        var desktop = dbtoria.module.desktop.Desktop.getInstance();
 
+        desktopContainer.add(desktop, {
+            width  : '100%',
+            height : '100%'
+        });
         var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
-
         this.add(toolbar);
-  //      this.add(desktopContainer, { flex : 1 });
-	this.add(tabview, {flex:1});
+        this.add(desktopContainer, { flex : 1 });
+
+        var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
+        this.add(taskbar);
 
     }
 });

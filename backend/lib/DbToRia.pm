@@ -1,8 +1,8 @@
-package DbToRia::MojoApp;
+package DbToRia;
 use strict;
 use warnings;
 
-use DbToRia::JsonRpcService;
+use DbToRia::RpcService;
 use DbToRia::Config;
 use DbToRia::Session;
 
@@ -38,7 +38,7 @@ sub startup {
 
     $self->plugin('qooxdoo_jsonrpc',{
         services => {
-            DbToRia  => new DbToRia::JsonRpcService(
+            DbToRia  => new DbToRia::RpcService(
                 cfg => $self->cfg,
                 log => $self->app->log,
            )
