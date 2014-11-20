@@ -1,9 +1,10 @@
-dbtoria.cfg
-dbtoria-stadler.cfg
-dbtoria-opptp2.cfg
-frontend/source/script/
-thirdparty/
-trunk_sync
-johan_sync
 *~
+backend/etc/*.cfg
 backend/public/
+frontend/cache/
+frontend/source/script/
+backend/thirdparty/
+Makefile
+config.log
+config.status
+autom4te.cache
