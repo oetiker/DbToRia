@@ -178,10 +178,10 @@ sub massageEditView {
     my $tables = $self->DBI->getAllTables();
     for my $row (@$editView){
         next unless $row->{type} eq 'ComboTable';
-	die error(90732,"ComboTable view $row->{tableId}_combo not found.") unless exists $tables->{$row->{tableId}.'_combo'};
-	$row->{tableId} .= '_combo';
-	$row->{idCol} = 'id';
-	$row->{valueCol} = 'text';
+        die error(90732,"ComboTable view $row->{tableId}_combo not found.") unless exists $tables->{$row->{tableId}.'_combo'};
+        $row->{tableId}  .= '_combo';
+        $row->{idCol}    = 'id';
+        $row->{valueCol} = 'text';
     }
     for (my $i=0; $i<scalar @$editView; $i++) {
         my $row = $editView->[$i];
