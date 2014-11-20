@@ -58,13 +58,12 @@ qx.Class.define("dbtoria.module.database.TablePage", {
         this.base(arguments);
         this.set({
             layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
-//            width          : 800,
-//            height         : 500,
+	        showCloseButton: true,
             loading        : true
         });
 
-	this.__refDelay = dbtoria.data.Config.getInstance().getRefDelay();
-	var filterOps   = dbtoria.data.Config.getInstance().getFilterOps();
+	    this.__refDelay = dbtoria.data.Config.getInstance().getRefDelay();
+	    var filterOps   = dbtoria.data.Config.getInstance().getFilterOps();
 //	this.debug('filterOps='+filterOps);
 	
         this.__rpc = dbtoria.data.Rpc.getInstance();
@@ -80,8 +79,8 @@ qx.Class.define("dbtoria.module.database.TablePage", {
         this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
-	var root = this.getApplicationRoot();
-	this.debug('root='+root);
+	    var root = this.getApplicationRoot();
+	    this.debug('root='+root);
 //	root.add(this.__recordEdit);
 //        this.addListener('close', function() {
 //            this.__recordEdit.cancel();
@@ -101,15 +100,15 @@ qx.Class.define("dbtoria.module.database.TablePage", {
         __columns:    null,
         __recordEdit: null,
         __rpc:        null,
+        __viewMode:   null,
+        __readOnly:   null,
+        __filter:     null,
+	    __refDelay:   null,
+	    __refTimer:   null,
         __dataChangedHandler:    null,
-        __viewMode: null,
-        __readOnly: null,
-        __filter: null,
-	__refDelay: null,
-	__refTimer: null,
 
         __cellChange: function(e) {
-	    this.__refTimer.stop();
+	        this.__refTimer.stop();
             var data = e.getData();
             var row   = data.row;
             var col   = data.col;
@@ -132,7 +131,7 @@ qx.Class.define("dbtoria.module.database.TablePage", {
             }
 
             // check if we are in a column referencing another table
-	    var references = this.__table.getTableModel().getColumnReferences();
+	        var references = this.__table.getTableModel().getColumnReferences();
 //	    this.debug('references=');
 //	    qx.dev.Debug.debugObject(references);
 //	    this.debug('colId='+colId+', col=',+col);
@@ -160,7 +159,7 @@ qx.Class.define("dbtoria.module.database.TablePage", {
 				   'getReferencedRecord', params);
             }, this);
 //            this.debug('starting timer');
-	    this.__refTimer.start();
+	        this.__refTimer.start();
         },
 
         __referenceHandler: function(data) {
@@ -337,21 +336,20 @@ qx.Class.define("dbtoria.module.database.TablePage", {
                 for (i=0; i<nCols; i++) {
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
-		    columnReferences.push(columns[i].fk);
+		            columnReferences.push(columns[i].fk);
 //		    that.debug('columns: i='+i);
 //		    qx.dev.Debug.debugObject(columns[i]);
                 }
 		
-                var model = 
-		    new dbtoria.data.RemoteTableModel(tableId, columnIds, 
-						      columnLabels,
-						      columnReferences);
+                var model = new dbtoria.data.RemoteTableModel(tableId, columnIds, 
+						                                  columnLabels,
+						                                  columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
-		if (that.__refDelay > 0) { 
+		        if (that.__refDelay > 0) { 
 //		    that.debug('Creating timer');
-		    that.__refTimer = new qx.event.Timer(that.__refDelay);
+		            that.__refTimer = new qx.event.Timer(that.__refDelay);
                     that.__table.addListener('cellChange', that.__cellChange, that);
-		}
+		        }
 
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
