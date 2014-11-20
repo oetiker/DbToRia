@@ -1,4 +1,4 @@
-#!/usr/sepp/bin/perl-5.12.3
+#!/usr/bin/env perl
 
 
 # some tests to ensure functionality of db driver.
@@ -8,6 +8,7 @@
 # this requires DBD:Pg to be installed an the respective DB being in place.
 # otherwise some tests will fail.
 
+use warnings;
 use strict;
 
 use FindBin;
