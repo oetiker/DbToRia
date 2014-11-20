@@ -5,14 +5,12 @@
   http://www.dbtoria.org
 
    Copyright:
-    2009 David Angleitner, Switzerland
     2011 Oetiker+Partner AG, Olten, Switzerland
 
    License:
     GPL: http://www.gnu.org/licenses/gpl-2.0.html
 
    Authors:
-    * David Angleitner
     * Fritz Zaucker
 
 ************************************************************************ */
@@ -28,8 +26,8 @@
 /**
  * This class provides the main window for dbtoria.
  *
- * The main window consists of a menu bar, a desktop where the windows are
- * located and a taskbar where minimized windows are held.
+ * The main window consists of a menu bar and a tabview on which the
+ * tables are placed.
  */
 qx.Class.define("dbtoria.module.Main", {
     extend : qx.ui.container.Composite,
@@ -38,22 +36,12 @@ qx.Class.define("dbtoria.module.Main", {
         var containerLayout = new qx.ui.layout.VBox();
         containerLayout.setSeparator("separator-vertical");
         this.base(arguments, containerLayout);
-//        // the desktop area is the largest part of dbtoria, make sure it is
-//        // scrollable
-//        var desktopContainer = new qx.ui.container.Scroll();
 
         // the table tabview
         var tabview = dbtoria.module.desktop.Desktop.getInstance();
-//        desktopContainer.add(tabview, {
-//             width  : '100%',
-//             height : '100%'
-//        });
-
         var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
 
         this.add(toolbar);
-  //      this.add(desktopContainer, { flex : 1 });
-	this.add(tabview, {flex:1});
-
+	    this.add(tabview, {flex:1});
     }
 });
