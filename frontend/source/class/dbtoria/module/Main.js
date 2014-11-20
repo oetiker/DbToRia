@@ -37,11 +37,10 @@ qx.Class.define("dbtoria.module.Main", {
         containerLayout.setSeparator("separator-vertical");
         this.base(arguments, containerLayout);
 
-        // the table tabview
         var tabview = dbtoria.module.desktop.Desktop.getInstance();
         var toolbar = dbtoria.module.desktop.Toolbar.getInstance();
 
         this.add(toolbar);
-	    this.add(tabview, {flex:1});
+        this.add(tabview, {flex:1});
     }
 });
