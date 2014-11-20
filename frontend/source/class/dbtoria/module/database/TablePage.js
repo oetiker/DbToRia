@@ -58,34 +58,24 @@ qx.Class.define("dbtoria.module.database.TablePage", {
         this.base(arguments);
         this.set({
             layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
-	        showCloseButton: true,
+            showCloseButton: true,
             loading        : true
         });
 
 	    this.__refDelay = dbtoria.data.Config.getInstance().getRefDelay();
 	    var filterOps   = dbtoria.data.Config.getInstance().getFilterOps();
-//	this.debug('filterOps='+filterOps);
 	
         this.__rpc = dbtoria.data.Rpc.getInstance();
         this.__buildUi(tableId, viewMode, readOnly);
         if (viewMode) {
-//            this.setCaption(this.tr('View: %1', this.__tableName));
             this.setLabel(this.tr('View: %1', this.__tableName));
         }
         else {
-//            this.setCaption(this.tr('Table: %1', this.__tableName));
             this.setLabel(this.tr('Table: %1', this.__tableName));
         }
         this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
-	    var root = this.getApplicationRoot();
-	    this.debug('root='+root);
-//	root.add(this.__recordEdit);
-//        this.addListener('close', function() {
-//            this.__recordEdit.cancel();
-//        }, this);
-//        this.open();
     },
 
     members : {
@@ -132,9 +122,6 @@ qx.Class.define("dbtoria.module.database.TablePage", {
 
             // check if we are in a column referencing another table
 	        var references = this.__table.getTableModel().getColumnReferences();
-//	    this.debug('references=');
-//	    qx.dev.Debug.debugObject(references);
-//	    this.debug('colId='+colId+', col=',+col);
             if (!references[col]) {
                 this.__table.hideTooltip();
                 return;
@@ -145,20 +132,16 @@ qx.Class.define("dbtoria.module.database.TablePage", {
                 recordId: recordId,
                 columnId: colId
             };
-//            qx.dev.Debug.debugObject(params);
-//            this.__tooltip.placeToMouse(mouse);
 
             this.__refTimer.addListener('interval', function(e) {
-//                this.debug('timer fired');
                 this.__refTimer.stop();
 
                 var rpc = dbtoria.data.Rpc.getInstance();
-            // Get appropriate row from referenced table
+                // Get appropriate row from referenced table
                 rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, 
 							 this),
 				   'getReferencedRecord', params);
             }, this);
-//            this.debug('starting timer');
 	        this.__refTimer.start();
         },
 
@@ -337,8 +320,6 @@ qx.Class.define("dbtoria.module.database.TablePage", {
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
 		            columnReferences.push(columns[i].fk);
-//		    that.debug('columns: i='+i);
-//		    qx.dev.Debug.debugObject(columns[i]);
                 }
 		
                 var model = new dbtoria.data.RemoteTableModel(tableId, columnIds, 
@@ -346,7 +327,6 @@ qx.Class.define("dbtoria.module.database.TablePage", {
 						                                  columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
 		        if (that.__refDelay > 0) { 
-//		    that.debug('Creating timer');
 		            that.__refTimer = new qx.event.Timer(that.__refDelay);
                     that.__table.addListener('cellChange', that.__cellChange, that);
 		        }
