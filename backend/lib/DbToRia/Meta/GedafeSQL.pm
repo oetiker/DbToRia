@@ -156,13 +156,12 @@ sub massageListView {
         my $newView = $self->DBI->prepListView($view->{tableId}.'_list');
         map { $view->{$_} = $newView->{$_} } keys %$newView;
     }
-    use Data::Dumper; print STDERR Dumper "viewCols=", $vColumns;
     for my $col (@{$view->{columns}}) {
-	for my $vCol (@$vColumns) {
-	    if ($col->{id} eq $vCol->{id}) {
-		$col->{fk} = $vCol->{fk};
-	    }
-	}
+        for my $vCol (@$vColumns) {
+            if ($col->{id} eq $vCol->{id}) {
+                $col->{fk} = $vCol->{fk};
+            }
+        }
     }
 }
 

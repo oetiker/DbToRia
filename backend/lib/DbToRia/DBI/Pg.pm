@@ -324,7 +324,6 @@ Returns hash of columns with default values.
 sub getDefaults {
     my $self     = shift;
     my $tableId  = shift;
-    # print STDERR "getDefaults($tableId)\n";
     my $dbh        = $self->getDbh();
     my $structure  = $self->getTableStructure($tableId);
     my $columns    = $structure->{columns};
@@ -340,7 +339,6 @@ sub getDefaults {
         $sth->execute();
         my $row = $sth->fetchrow_arrayref;
         $defaults{$id} = $self->dbToFe($row->[0], $typeMap->{$id});
-        # print STDERR "default($id)=", $defaults{$id}, "\n";
     }
 #    for my $engine (@{$self->metaEngines}){
 #        $engine->massageRecord($tableId, $recordId, \%newRow);
@@ -428,7 +426,6 @@ sub getTableDataChunk {
     $query .= ' '.$self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
-#    warn $query,"\n";
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;
@@ -473,8 +470,6 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
-#    use Data::Dumper;
-#    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
@@ -485,7 +480,7 @@ sub updateTableData {
     my @set;
     for my $key (keys %$data) {
         if ($key eq $primaryKey){
-            warn "someone is trying to write back the primary ($primaryKey) key in $table. Skipping.\n";
+            $self->app->log->warn("Someone is trying to write back the primary ($primaryKey) key in $table, skipping.");
             next;
         }
         push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
@@ -516,8 +511,6 @@ sub insertTableData {
     my $table	  = shift;
     my $data	  = shift;
 
-#    use Data::Dumper;
-#    print STDERR Dumper "insertTableData(): table=$table, data=", $data;
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 

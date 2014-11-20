@@ -299,7 +299,6 @@ sub getTableDataChunk {
     $query .= ' '.$self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
-    warn $query,"\n";
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;

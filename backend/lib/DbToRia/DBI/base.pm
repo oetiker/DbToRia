@@ -320,7 +320,6 @@ sub getReferencedRecord {
     my $tableId  = $params->{tableId};
     my $recordId = $params->{recordId};
     my $columnId = $params->{columnId};
- #   warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
 
     my $fTableId;
     my $fKeyId;
@@ -336,11 +335,9 @@ sub getReferencedRecord {
     return undef unless defined $fTableId;
 
     my $fKeyVal  = $self->getRecord($tableId, $recordId)->{$columnId};
-#    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
 
     my $fts = $self->getTableStructure($fTableId);
     my $fPkId = $fts->{meta}{primary}[0];
-#    use Data::Dumper; print STDERR Dumper $fts;
 
     my $dbh = $self->getDbh();
     my $query = "SELECT $fPkId FROM $fTableId ";
@@ -352,18 +349,14 @@ sub getReferencedRecord {
     $sth->execute;
 
     my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
-#    warn "fPkVal=$fPkVal";
     my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
-#    use Data::Dumper; print STDERR Dumper "fRec=", $fRec;
     my $view = $self->getEditView($fTableId);
-#    print STDERR Dumper "view=", $view;
     for my $field (@$view){
         if (exists $fRec->{$field->{name}}) {
             $fRec->{$field->{label}} = $fRec->{$field->{name}};
             delete $fRec->{$field->{name}};
         }
     }
-#    use Data::Dumper; print STDERR Dumper "fRec2=", $fRec;
     return $fRec;
 }
 
@@ -392,7 +385,6 @@ sub getDefaultsDeref {
     my $tableId  = shift;
 
     my $rec  = $self->getDefaults($tableId);
-    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
     for my $field (@$view){
@@ -402,7 +394,6 @@ sub getDefaultsDeref {
             $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
         }
     }
-    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     return $rec;
 }
 
@@ -446,11 +437,9 @@ sub prepListView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
-#    use Data::Dumper; print STDERR Dumper $tableId, $structure;
     my @return;
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
-#	print STDERR Dumper "row=", $row;
 	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
 	$row->{fk} = $fk;
         push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
@@ -465,11 +454,9 @@ sub getListView {
     my $self = shift;
     my $tableId = shift;
     my $view = $self->prepListView($tableId);
-#    use Data::Dumper; print STDERR Dumper "view=", $view;
     for my $engine (@{$self->metaEngines}){
         $engine->massageListView($view);
     }
-#    print STDERR Dumper "view2=", $view;
     return $view;
 }
 
