@@ -36,7 +36,6 @@ qx.Class.define("dbtoria.module.desktop.Window", {
     extend : qx.ui.window.Window,
     construct : function() {
         this.base(arguments);
-	this.getApplicationRoot().add(this);
 
         var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
         var taskbarButton  = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
