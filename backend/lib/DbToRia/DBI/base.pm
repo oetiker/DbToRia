@@ -27,8 +27,10 @@ use warnings;
 use DbToRia::Exception qw(error);
 use Storable qw(dclone);
 use Mojo::Base -base;
+use Mojo::JSON;
 
 has 'dsn';
+has 'encoding';
 has 'username';
 has 'password';
 has 'schema';
@@ -83,7 +85,7 @@ sub getTableDataChunk {
     my $lastRow   = shift;
     my $columns   = shift;
     my $opts = shift || {};
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getRowCount(table,filter)
@@ -96,7 +98,7 @@ sub getRowCount {
     my $self = shift;
     my $table = shift;
     my $filter = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 updateTableData(table,selection,data)
@@ -110,7 +112,7 @@ sub updateTableData {
     my $tableId     = shift;
     my $recordId     = shift;
     my $data	  = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 insertTableData(table,data)
@@ -123,7 +125,7 @@ sub insertTableData {
     my $self	  = shift;
     my $tableId	  = shift;
     my $data	  = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 deleteTableData(table,selection)
@@ -136,7 +138,7 @@ sub deleteTableData {
     my $self	  = shift;
     my $tableId	  = shift;
     my $recordId     = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head1 CORE METHODS
@@ -150,8 +152,9 @@ returns a database handle. The method reconnects as required.
 sub getDbh {
     my $self = shift;
     my $driver = (DBI->parse_dsn($self->dsn))[1];
-    my $key = ($self->username||'???').($self->password||'???');
-    my $dbh = $self->dbhCache->{$key};
+    my $key    = ($self->username||'???').($self->password||'???');
+    my $dbh    = $self->dbhCache->{$key};
+    my $utf8   = ($self->encoding eq 'utf8');
     if (not defined $dbh){
         $self->dbhCache->{$key} = $dbh = DBI->connect($self->dsn,$self->username,$self->password,{
             RaiseError => 0,
@@ -183,7 +186,7 @@ Returns a map of tables with associated meta information.
 
 sub getAllTables {
     my $self = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
     return $self->{tableList};
 }
 
@@ -225,7 +228,7 @@ datatypes to DbToRia compatible datatypes.
 sub getTableStructureRaw {
     my $self = shift;
     my $tableId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getTableStructure(table)
@@ -275,7 +278,7 @@ sub getRecord {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getRecordDeref (table,recordId)
@@ -318,7 +321,6 @@ sub getReferencedRecord {
     my $tableId  = $params->{tableId};
     my $recordId = $params->{recordId};
     my $columnId = $params->{columnId};
- #   warn "tableId=$tableId, recordId=$recordId, columnId=$columnId";
 
     my $fTableId;
     my $fKeyId;
@@ -334,11 +336,9 @@ sub getReferencedRecord {
     return undef unless defined $fTableId;
 
     my $fKeyVal  = $self->getRecord($tableId, $recordId)->{$columnId};
-#    warn "fTableId=$fTableId, fKeyId=$fKeyId, fKeyVal=$fKeyVal";
 
     my $fts = $self->getTableStructure($fTableId);
     my $fPkId = $fts->{meta}{primary}[0];
-#    use Data::Dumper; print STDERR Dumper $fts;
 
     my $dbh = $self->getDbh();
     my $query = "SELECT $fPkId FROM $fTableId ";
@@ -348,11 +348,16 @@ sub getReferencedRecord {
                                      }]);
     my $sth = $dbh->prepare($query);
     $sth->execute;
-    
+
     my $fPkVal = $sth->fetchrow_hashref()->{$fPkId};
-    warn "fPkVal=$fPkVal";
     my $fRec = $self->getRecordDeref($fTableId, $fPkVal);
-#   use Data::Dumper; print STDERR Dumper $fRec;
+    my $view = $self->getEditView($fTableId);
+    for my $field (@$view){
+        if (exists $fRec->{$field->{name}}) {
+            $fRec->{$field->{label}} = $fRec->{$field->{name}};
+            delete $fRec->{$field->{name}};
+        }
+    }
     return $fRec;
 }
 
@@ -366,7 +371,7 @@ Returns hash of columns with default values.
 sub getDefaults {
     my $self = shift;
     my $tableId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getDefaultsDeref (table)
@@ -381,7 +386,6 @@ sub getDefaultsDeref {
     my $tableId  = shift;
 
     my $rec  = $self->getDefaults($tableId);
-    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     # resolve foreign key references
     my $view = $self->getEditView($tableId);
     for my $field (@$view){
@@ -391,7 +395,6 @@ sub getDefaultsDeref {
             $rec->{$key} = $self->getRecord($field->{tableId}, $rec->{$key});
         }
     }
-    # use Data::Dumper; print STDERR Dumper "defaults=", $rec;
     return $rec;
 }
 
@@ -406,7 +409,7 @@ Return name of the database connected to.
 
 sub getDatabaseName {
     my $self = shift;
-    die "Must be overwritten.";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getTables
@@ -435,16 +438,13 @@ sub prepListView {
     my $self = shift;
     my $tableId = shift;
     my $structure = $self->getTableStructure($tableId);
-#    use Data::Dumper; print STDERR Dumper $tableId, $structure;
     my @return;
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
-#	print STDERR Dumper "row=", $row;
-	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+	my $fk = defined $row->{references} ? Mojo::JSON->true : Mojo::JSON->false;
 	$row->{fk} = $fk;
         push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
-#    use Data::Dumper; print STDERR Dumper \@return;
     return {
         tableId => $tableId,
         columns => \@return
@@ -488,9 +488,9 @@ sub getEditView {
            label => $col->{name},
         };
         # can never edit a primary key
-        $c->{readOnly} = $Mojo::JSON::TRUE if $col->{primary};
+        $c->{readOnly} = Mojo::JSON->true if $col->{primary};
         # tell the FE we have a primary key
-        $c->{primaryKey} = $col->{primary} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+        $c->{primaryKey} = $col->{primary} ? Mojo::JSON->true : Mojo::JSON->false;
         $c->{required} = $col->{required};
         $c->{check} = $col->{check};
         if ($col->{references}){
@@ -663,7 +663,7 @@ sub dbToFe {
     my $type  = shift;
     my $ourtype = $self->mapType($type);
     if ($ourtype eq 'boolean' and defined $value){
-        $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+        $value = int($value) ? Mojo::JSON->true : Mojo::JSON->false;
     }
     return $value;
 }

@@ -19,25 +19,12 @@
 ************************************************************************ */
 
 qx.Class.define("dbtoria.module.desktop.Desktop", {
-    extend : qx.ui.window.Desktop,
+    extend : qx.ui.tabview.TabView,
     type : "singleton",
 
     construct : function() {
-        this.base(arguments, new qx.ui.window.Manager());
-        var logo = new qx.ui.basic.Label('made with dBtoria').set({
-            font: new qx.bom.Font(60,['Amaranth','sans-serif']),
-            textColor: '#eee',
-//          alignX: 'center',
-//          alignY: 'middle',
-//          textAlign: 'center',
-//          allowGrowX: true,
-//          allowShrinkX: true,
-            cursor: 'pointer'
-        });
-        logo.addListener('mouseover',function(){logo.setTextColor('#ddd')});
-        logo.addListener('mouseout',function(){logo.setTextColor('#eee')});
-        logo.addListener('click',function(){  qx.bom.Window.open('http://dbtoria.org/', '_blank');});        
-        this.add(logo,{right: 40, bottom: 20 });
+        this.base(arguments);
+        this.setContentPadding(0,0,0,0);
     }
 
 });

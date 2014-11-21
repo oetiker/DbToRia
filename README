@@ -1,0 +1,73 @@
+Dbtoria
+===========
+Version: #VERSION#
+Date: #DATE#
+
+DbToRia is generic sql database frontend. Just point it to your
+database and get a user friendly web interface.
+
+By providing DbToRia with additional information about the nature of
+your database the userinterface can be further optimized.
+
+For more information see the README.pod file, the DbToRia website at
+www.dbtoria.org or the Github repository.
+
+
+You are looking at a template for creating a Qooxdoo application with
+a Mojolicious backend. It is a classic "configure - make - install" setup.
+
+Prerequisite
+------------
+
+Get a copy of the Qooxdoo sdk from www.qooxdoo.org.  If you followed the
+"Quickstart" on https://github.com/oetiker/qx-mojo-app you are already set
+with a copy of the Qooxdoo sdk in $HOME/sdk/qooxdoo-4.0.1-sdk.  In this case
+immediately proceed with "Setup".
+
+Setup
+-----
+
+ ./configure --prefix=$HOME/opt/dbtoria --with-qooxdoo-sdk=$HOME/sdk/qooxdoo-4.0.1-sdk
+
+Configure will check if the necessary items are in place and give
+hints on how to fix the situation if something is missing.
+
+Development
+-----------
+
+While developing the application it is conveniant to NOT have to install it
+before runnning. You can actually serve the Qooxdoo source directly
+using the built-in Mojo webserver.
+
+  cd frontend && make source
+  cd backend/bin
+  ./dbtoria-source-mode.sh daemon
+
+You can now connect to the Mojolicious server with your web browser.
+
+Installation
+------------
+
+To install the application, just run
+
+   make install
+
+You can now run dbtoria.pl in reverse proxy mode.
+
+Packaging
+---------
+
+You can also package the application as a nice tar.gz file by running
+
+   make dist
+
+Learning
+--------
+
+To learn more about Qooxdoo, go to their website and read up on Qooxdoo desktop:
+
+  www.qooxdoo.org
+
+Enjoy!
+
+Fritz Zaucker <fritz.zaucker@oetiker.ch>

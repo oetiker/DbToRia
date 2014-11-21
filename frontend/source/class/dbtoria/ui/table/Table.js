@@ -50,6 +50,7 @@ qx.Class.define("dbtoria.ui.table.Table", {
         },
 
         updateTooltip: function(text) {
+	    text = '<b>'+this.__tableId+'</b><br/>'+text;
             this.__tooltip.setLabel(text);
             this.showTooltip();
         },

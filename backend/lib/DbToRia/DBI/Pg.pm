@@ -48,6 +48,45 @@ sub mapType {
     return $map->{$type} || die error(9844,'Unknown Database Type: "'.$type.'"');
 }
 
+=head2 getDbh
+
+returns a database handle. The method reconnects as required. Enables
+UTF8 handling if encoding=utf8 in cfg file.
+
+=cut
+
+sub db_error_handler {
+    die error(99999, "Database error:\n" . DBI->errstr);
+}
+
+
+has 'getDbh' => sub {
+    my $self = shift;
+    my $driver = (DBI->parse_dsn($self->dsn))[1];
+    my $key    = ($self->username||'???').($self->password||'???');
+    my $utf8   = ($self->encoding eq 'utf8');
+    my $dbh = DBI->connect_cached($self->dsn, $self->username, $self->password, {
+            RaiseError => 0,
+            PrintError => 0,
+            HandleError        => \&db_error_handler,
+            # HandleError => sub {
+            #     my ($msg,$h,$ret) = @_;
+            #     my $state = $h->state || 9999;
+            #     my $code = lc($state);
+            #     $code =~ s/[^a-z0-9]//g;
+            #     $code =~ s/([a-z])/sprintf("%02d",ord($1)-97)/eg;
+            #     $code += 70000000;
+            #     delete $self->dbhCache->{$key};
+            #     die error($code,$h->errstr. ( $h->{Statement} ? " (".$h->{Statement}.") ":'')." [${driver}-$state]");
+            # },
+            AutoCommit => 1,
+            ShowErrorStatement => 1,
+            LongReadLen=> 5*1024*1024,
+            pg_enable_utf8 => $utf8,
+    });
+    return $dbh;
+};
+
 =head2 getDatabaseName
 
 Return name of the database connected to.
@@ -68,15 +107,15 @@ sub getDatabaseName {
     my $dbh        = $self->getDbh();
     my $query = "SELECT oid FROM pg_database WHERE datname = '$databaseName'";
     my $sth = $dbh->prepare($query);
-    $sth->execute() or die $sth->errstr;
-    my $data = $sth->fetchrow_arrayref() or die $sth->errstr;
+    $sth->execute() or die error(235, $sth->errstr);
+    my $data = $sth->fetchrow_arrayref() or die error(236, $sth->errstr);
     my $oid = $data->[0];
     $sth->finish;
 
     # read database comment
     $query = "SELECT shobj_description($oid, 'pg_database')";
     $sth = $dbh->prepare($query);
-    $sth->execute() or die $sth->errstr;
+    $sth->execute() or die error(237, $sth->errstr);
     $data = $sth->fetchrow_arrayref();
     my $databaseRemark = $data->[0];
     $sth->finish;
@@ -115,7 +154,7 @@ sub getAllTables {
             type     => $tableType,
             name     => $tableName,
             remark   => $table->{REMARKS},
-            readOnly => $readOnly ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE,
+            readOnly => $readOnly ? Mojo::JSON->true : Mojo::JSON->false,
     	};
 
     }
@@ -259,7 +298,7 @@ sub getRecord {
     my $tableIdQ   = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
 
-    die "Primary key undefined for table $tableId" unless $primaryKey;
+    die error(453, "Primary key undefined for table $tableId") unless $primaryKey;
     my $sth        = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordIdQ");
     $sth->execute();
     my $row        = $sth->fetchrow_hashref;
@@ -285,7 +324,6 @@ Returns hash of columns with default values.
 sub getDefaults {
     my $self     = shift;
     my $tableId  = shift;
-    # print STDERR "getDefaults($tableId)\n";
     my $dbh        = $self->getDbh();
     my $structure  = $self->getTableStructure($tableId);
     my $columns    = $structure->{columns};
@@ -301,7 +339,6 @@ sub getDefaults {
         $sth->execute();
         my $row = $sth->fetchrow_arrayref;
         $defaults{$id} = $self->dbToFe($row->[0], $typeMap->{$id});
-        # print STDERR "default($id)=", $defaults{$id}, "\n";
     }
 #    for my $engine (@{$self->metaEngines}){
 #        $engine->massageRecord($tableId, $recordId, \%newRow);
@@ -389,13 +426,12 @@ sub getTableDataChunk {
     $query .= ' '.$self->buildWhere($filter);
     $query .= ' ORDER BY ' . $dbh->quote_identifier($sortColumn) . $sortDirection if $sortColumn;
     $query .= ' LIMIT ' . ($lastRow - $firstRow + 1) . ' OFFSET ' . $firstRow if defined $firstRow;
-#    warn $query,"\n";
     my $sth = $dbh->prepare($query);
     $sth->execute;
     my @data;
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
-        $new_row[0] = [ $row[0], $Mojo::JSON::TRUE, $Mojo::JSON::TRUE ];
+        $new_row[0] = [ $row[0], Mojo::JSON->true, Mojo::JSON->true ];
         for (my $i=1;$i<=$#row;$i++){
             $new_row[$i] = $self->dbToFe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }
@@ -434,8 +470,6 @@ sub updateTableData {
     my $recId     = shift;
     my $data	  = shift;
 
-#    use Data::Dumper;
-#    print STDERR Dumper "updateTableData():  table=$table, record=$recId, data=", $data;
     my $dbh = $self->getDbh();
 
     my $update = 'UPDATE '.$dbh->quote_identifier($table);
@@ -446,7 +480,7 @@ sub updateTableData {
     my @set;
     for my $key (keys %$data) {
         if ($key eq $primaryKey){
-            warn "someone is trying to write back the primary ($primaryKey) key in $table. Skipping.\n";
+            $self->app->log->warn("Someone is trying to write back the primary ($primaryKey) key in $table, skipping.");
             next;
         }
         push @set, $dbh->quote_identifier($key) . ' = ' . $dbh->quote($self->feToDb($data->{$key},$typeMap->{$key}));
@@ -477,8 +511,6 @@ sub insertTableData {
     my $table	  = shift;
     my $data	  = shift;
 
-#    use Data::Dumper;
-#    print STDERR Dumper "insertTableData(): table=$table, data=", $data;
     my $dbh = $self->getDbh();
     my $insert = 'INSERT INTO '. $dbh->quote_identifier($table);
 

@@ -179,14 +179,14 @@ sub massageEditView {
                 $row->{type} = 'TimeField';
             }
             elsif ($widget eq 'readonly') {
-                $row->{readOnly} = $Mojo::JSON::TRUE;
+                $row->{readOnly} = Mojo::JSON->true;
             }
         }
         for my $table (keys %{$self->{metaFields}}) {
             next unless exists $self->{metaFields}{$table}{$field}{copy};
             my $copy   = $self->{metaFields}{$table}{$field}{copy};
             if ($copy) {
-                $row->{copyForward} = $Mojo::JSON::TRUE;
+                $row->{copyForward} = Mojo::JSON->true;
             }
         }
     }

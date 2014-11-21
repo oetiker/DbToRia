@@ -73,7 +73,8 @@ qx.Class.define("dbtoria.module.desktop.Toolbar", {
             tables.map(
                 function(table) {
                     var handler = function() {
-                        new dbtoria.module.database.TableWindow(table.tableId, table.name, null, table.readOnly);
+                        var page = new dbtoria.module.database.TablePage(table.tableId, table.name, null, table.readOnly);
+			page.getChildControl('button').execute();
                     };
                     table.label = table.name;
                     if (table.readOnly) {

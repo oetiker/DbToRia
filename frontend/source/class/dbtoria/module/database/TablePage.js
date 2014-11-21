@@ -47,8 +47,8 @@
  * form for data editing. This window also allows for searching, creation and
  * deletion of entries.
  */
-qx.Class.define("dbtoria.module.database.TableWindow", {
-    extend : dbtoria.module.desktop.Window,
+qx.Class.define("dbtoria.module.database.TablePage", {
+    extend : dbtoria.module.desktop.Page,
     construct : function(tableId, tableName, viewMode, readOnly) {
         this.__tableName = tableName;
         this.__tableId   = tableId;
@@ -57,29 +57,24 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
         this.base(arguments);
         this.set({
-            contentPadding : 0,
             layout         : new qx.ui.layout.VBox().set({ separator: "separator-vertical"}),
-            width          : 800,
-            height         : 500,
+            showCloseButton: true,
             loading        : true
         });
 
+	    var filterOps   = dbtoria.data.Config.getInstance().getFilterOps();
+	
         this.__rpc = dbtoria.data.Rpc.getInstance();
         this.__buildUi(tableId, viewMode, readOnly);
         if (viewMode) {
-            this.setCaption(this.tr('View: %1', this.__tableName));
+            this.setLabel(this.tr('View: %1', this.__tableName));
         }
         else {
-            this.setCaption(this.tr('Table: %1', this.__tableName));
+            this.setLabel(this.tr('Table: %1', this.__tableName));
         }
         this.__recordEdit = new dbtoria.module.database.RecordEdit(tableId, tableName, readOnly);
         this.__recordEdit.addListener('navigation', this.__navigation, this);
         this.__recordEdit.addListener('refresh',    this.__refresh, this);
-
-//        this.addListener('close', function() {
-//            this.__recordEdit.cancel();
-//        }, this);
-        this.open();
     },
 
     members : {
@@ -94,24 +89,25 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
         __columns:    null,
         __recordEdit: null,
         __rpc:        null,
+        __viewMode:   null,
+        __readOnly:   null,
+        __filter:     null,
+	    __refTimer:   null,
         __dataChangedHandler:    null,
-        __viewMode: null,
-        __readOnly: null,
-        __filter: null,
-
 
         __cellChange: function(e) {
+	        this.__refTimer.stop();
             var data = e.getData();
             var row   = data.row;
             var col   = data.col;
             var mouse = data.mouse; // mouse event
-            this.debug('__cellChange(): row='+row+', col='+col);
 
             // close and remove tooltip if not over a table cell
             if (row == null || row == -1) {
                 this.__table.hideTooltip();
                 return;
             }
+            // this.debug('__cellChange(): row='+row+', col='+col);
 
             var tm       = this.__table.getTableModel();
             var colId    = tm.getColumnId(col);
@@ -123,9 +119,8 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             }
 
             // check if we are in a column referencing another table
-	    var references = this.__table.getTableModel().getColumnReferences();
-//	    qx.dev.Debug.debugObject(references);
-            if (references[colId]) {
+	        var references = this.__table.getTableModel().getColumnReferences();
+            if (!references[col]) {
                 this.__table.hideTooltip();
                 return;
             }
@@ -135,12 +130,17 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 recordId: recordId,
                 columnId: colId
             };
-            qx.dev.Debug.debugObject(params);
-//            this.__tooltip.placeToMouse(mouse);
-            var rpc = dbtoria.data.Rpc.getInstance();
-            // Get appropriate row from referenced table
-            rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, this),
-                               'getReferencedRecord', params);
+
+            this.__refTimer.addListener('interval', function(e) {
+                this.__refTimer.stop();
+
+                var rpc = dbtoria.data.Rpc.getInstance();
+                // Get appropriate row from referenced table
+                rpc.callAsyncSmart(qx.lang.Function.bind(this.__referenceHandler, 
+							 this),
+				   'getReferencedRecord', params);
+            }, this);
+	        this.__refTimer.start();
         },
 
         __referenceHandler: function(data) {
@@ -306,7 +306,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
 
             this.add(toolbar);
             var that = this;
-            this.__rpc.callAsyncSmart(function(ret){
+            this.__rpc.callAsyncSmart(function(ret) {
                 var columns = ret.columns;
                 that.__columns = columns;
                 var tableId = ret.tableId;
@@ -314,17 +314,21 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
                 var columnReferences = [];
                 var columnLabels = {};
                 var i, nCols = columns.length;
-                for (i=0; i<nCols; i++){
+                for (i=0; i<nCols; i++) {
                     columnIds.push(columns[i].id);
                     columnLabels[columns[i].id] = columns[i].name;
-		    columnReferences.push(columns[i].fk);
+		            columnReferences.push(columns[i].fk);
                 }
-                var model = 
-		    new dbtoria.data.RemoteTableModel(tableId, columnIds, 
-						      columnLabels,
-						      columnReferences);
+	            var refPopup = dbtoria.data.Config.getInstance().getRefPopup();
+		
+                var model = new dbtoria.data.RemoteTableModel(tableId, columnIds, 
+                                                              columnLabels,
+						                                      columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
-                that.__table.addListener('cellChange', that.__cellChange, that);
+		        if (refPopup.enabled) { 
+                    that.__refTimer = new qx.event.Timer(Number(refPopup.delay));
+                    that.__table.addListener('cellChange', that.__cellChange, that);
+		        }
 
                 var tcm      = that.__table.getTableColumnModel();
                 for (i=0; i<nCols; i++){
@@ -419,6 +423,7 @@ qx.Class.define("dbtoria.module.database.TableWindow", {
             this.__recordEdit.addListenerOnce('saveRecord',
                                               qx.lang.Function.bind(this.__editRecordHandler, this),
                                               this);
+	    this.__recordEdit.open();
             this.__recordEdit.saveRecord();
         },
 

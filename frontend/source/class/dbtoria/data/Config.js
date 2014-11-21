@@ -39,6 +39,9 @@ qx.Class.define( 'dbtoria.data.Config',
         filterOps: { init: [],
                      // check: "String",
                      nullable: true
+                   },
+        refPopup: { init: null,
+                    nullable: true
                   }
     },
 
@@ -75,6 +78,7 @@ qx.Class.define( 'dbtoria.data.Config',
         __refreshHandler:  function(data,exc,id) {
             if (exc == null) {
                 this.setFilterOps(data.filterOps);
+                this.setRefPopup(data.refPopup);
                 this.fireEvent('configUpdate');
                 this.__loaded = true;
             }

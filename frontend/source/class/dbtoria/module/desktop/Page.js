@@ -32,33 +32,12 @@
  * - Adding window to bookmark bar (not yet implemented)
  * - Loading indicator
  */
-qx.Class.define("dbtoria.module.desktop.Window", {
-    extend : qx.ui.window.Window,
+qx.Class.define("dbtoria.module.desktop.Page", {
+    extend : qx.ui.tabview.Page,
     construct : function() {
         this.base(arguments);
-
-        var taskbar = dbtoria.module.desktop.Taskbar.getInstance();
-        var taskbarButton  = new qx.ui.toolbar.Button(null, "icon/16/mimetypes/text-plain.png");
-        var taskbarButtonO = new qx.ui.menu.Button(null, "icon/16/mimetypes/text-plain.png");
-        taskbarButton.exclude();
-        taskbarButtonO.exclude();
-        taskbar.dock(taskbarButton, taskbarButtonO);
-        var handler = function() {
-            this.open();
-            taskbarButton.exclude();
-            taskbarButtonO.exclude();
-        };
-        this.addListener("minimize", function(e) {
-            taskbarButton.addListener("execute", qx.lang.Function.bind(handler, this));
-            taskbarButtonO.addListener("execute", qx.lang.Function.bind(handler, this));
-            taskbarButtonO.addListener("execute", handler, this );
-            taskbarButton.setLabel(this.getCaption());
-            taskbarButton.show();
-            taskbarButtonO.setLabel(this.getCaption());
-//            taskbarButtonO.show();
-        },
-        this);
-
+	this.setShowCloseButton(true);
+        dbtoria.module.desktop.Desktop.getInstance().add(this);
     },
 
     properties: {

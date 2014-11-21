@@ -1,0 +1,5 @@
+Mojolicious
+Mojolicious::Plugin::Qooxdoo
+DBI
+DBD::Pg
+Config::Grammar
