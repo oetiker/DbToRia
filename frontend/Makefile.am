@@ -6,17 +6,12 @@ EXTRA_DIST = config.json Manifest.json source/index.html $(shell find source/cla
 
 if BUILD_QOOXDOO_APP
 
-GENTARGETS := lint pretty migration translation api
+GENTARGETS := lint pretty migration translation api source source-hybrid
 
-.PHONY: $(GENTARGETS) source
-
-source: source/script/$(CLASS).js
+.PHONY: $(GENTARGETS)
 
 $(GENTARGETS):
 	$(QOOXDOO_PATH)/tool/bin/generator.py -m QOOXDOO_PATH:$(QOOXDOO_PATH) -m CACHE:./cache $@
-
-source/script/$(CLASS).js: $(shell find source/class/ -name "*.js")
-	$(QOOXDOO_PATH)/tool/bin/generator.py -m QOOXDOO_PATH:$(QOOXDOO_PATH) -m CACHE:./cache source
 
 endif
 
