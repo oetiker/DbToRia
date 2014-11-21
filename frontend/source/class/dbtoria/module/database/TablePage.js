@@ -323,8 +323,8 @@ qx.Class.define("dbtoria.module.database.TablePage", {
                 }
 		
                 var model = new dbtoria.data.RemoteTableModel(tableId, columnIds, 
-						                                  columnLabels,
-						                                  columnReferences);
+                                                              columnLabels,
+						                                      columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
 		        if (that.__refDelay > 0) { 
 		            that.__refTimer = new qx.event.Timer(that.__refDelay);
