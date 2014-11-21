@@ -304,7 +304,7 @@ sub getTableDataChunk {
     my @data;
     while ( my @row = $sth->fetchrow_array ) {
         my @new_row;
-        $new_row[0] = [ $row[0], $Mojo::JSON::TRUE, $Mojo::JSON::TRUE ];
+        $new_row[0] = [ $row[0], Mojo::JSON->true, Mojo::JSON->true ];
         for (my $i=1;$i<=$#row;$i++){
             $new_row[$i] = $self->dbToFe($row[$i],$typeMap->{$sth->{NAME}[$i]});
         }

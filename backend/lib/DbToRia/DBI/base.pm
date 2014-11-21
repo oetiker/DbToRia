@@ -27,6 +27,7 @@ use warnings;
 use DbToRia::Exception qw(error);
 use Storable qw(dclone);
 use Mojo::Base -base;
+use Mojo::JSON;
 
 has 'dsn';
 has 'encoding';
@@ -440,7 +441,7 @@ sub prepListView {
     my @return;
     for my $row (@{$structure->{columns}}){
         next if $row->{hidden};
-	my $fk = defined $row->{references} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+	my $fk = defined $row->{references} ? Mojo::JSON->true : Mojo::JSON->false;
 	$row->{fk} = $fk;
         push @return, { map { $_ => $row->{$_} } qw (id type name size fk) };
     };
@@ -487,9 +488,9 @@ sub getEditView {
            label => $col->{name},
         };
         # can never edit a primary key
-        $c->{readOnly} = $Mojo::JSON::TRUE if $col->{primary};
+        $c->{readOnly} = Mojo::JSON->true if $col->{primary};
         # tell the FE we have a primary key
-        $c->{primaryKey} = $col->{primary} ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+        $c->{primaryKey} = $col->{primary} ? Mojo::JSON->true : Mojo::JSON->false;
         $c->{required} = $col->{required};
         $c->{check} = $col->{check};
         if ($col->{references}){
@@ -662,7 +663,7 @@ sub dbToFe {
     my $type  = shift;
     my $ourtype = $self->mapType($type);
     if ($ourtype eq 'boolean' and defined $value){
-        $value = int($value) ? $Mojo::JSON::TRUE : $Mojo::JSON::FALSE;
+        $value = int($value) ? Mojo::JSON->true : Mojo::JSON->false;
     }
     return $value;
 }
