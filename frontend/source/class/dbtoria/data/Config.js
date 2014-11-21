@@ -40,8 +40,7 @@ qx.Class.define( 'dbtoria.data.Config',
                      // check: "String",
                      nullable: true
                    },
-        refDelay: { init: null,
-                    check: "Integer",
+        refPopup: { init: null,
                     nullable: true
                   }
     },
@@ -79,7 +78,7 @@ qx.Class.define( 'dbtoria.data.Config',
         __refreshHandler:  function(data,exc,id) {
             if (exc == null) {
                 this.setFilterOps(data.filterOps);
-                this.setRefDelay(Number(data.refDelay));
+                this.setRefPopup(data.refPopup);
                 this.fireEvent('configUpdate');
                 this.__loaded = true;
             }

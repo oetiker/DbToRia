@@ -62,7 +62,6 @@ qx.Class.define("dbtoria.module.database.TablePage", {
             loading        : true
         });
 
-	    this.__refDelay = dbtoria.data.Config.getInstance().getRefDelay();
 	    var filterOps   = dbtoria.data.Config.getInstance().getFilterOps();
 	
         this.__rpc = dbtoria.data.Rpc.getInstance();
@@ -93,7 +92,6 @@ qx.Class.define("dbtoria.module.database.TablePage", {
         __viewMode:   null,
         __readOnly:   null,
         __filter:     null,
-	    __refDelay:   null,
 	    __refTimer:   null,
         __dataChangedHandler:    null,
 
@@ -321,13 +319,14 @@ qx.Class.define("dbtoria.module.database.TablePage", {
                     columnLabels[columns[i].id] = columns[i].name;
 		            columnReferences.push(columns[i].fk);
                 }
+	            var refPopup = dbtoria.data.Config.getInstance().getRefPopup();
 		
                 var model = new dbtoria.data.RemoteTableModel(tableId, columnIds, 
                                                               columnLabels,
 						                                      columnReferences);
                 that.__table = new dbtoria.ui.table.Table(model, that.__tableId);
-		        if (that.__refDelay > 0) { 
-		            that.__refTimer = new qx.event.Timer(that.__refDelay);
+		        if (refPopup.enabled) { 
+                    that.__refTimer = new qx.event.Timer(Number(refPopup.delay));
                     that.__table.addListener('cellChange', that.__cellChange, that);
 		        }
 

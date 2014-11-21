@@ -14,6 +14,7 @@ server functions
 =cut
 
 use Mojo::Base qw(Mojolicious::Plugin::Qooxdoo::JsonRpcController);
+use Mojo::JSON;
 
 has service => sub { 'DbToRia' };
 
@@ -223,7 +224,9 @@ sub getConfig {
     my $gcfg = $self->cfg->{General};
     return {
         filterOps => $self->DBI->getFilterOpsArray(@_),
-        refDelay  => $gcfg->{ref_delay},
+        refPopup  => { enabled => $gcfg->{ref_popup_enabled} ? Mojo::JSON->true : Mojo::JSON->false,
+                       delay   => $gcfg->{ref_popup_delay},
+                     }
     };
 }
 
