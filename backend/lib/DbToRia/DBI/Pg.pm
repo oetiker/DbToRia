@@ -93,7 +93,7 @@ Return name of the database connected to.
 
 =cut
 
-sub getDatabaseName {
+sub getDatabaseName1 {
     my $self = shift;
     my $dsn = $self->{dsn};
 
@@ -107,15 +107,15 @@ sub getDatabaseName {
     my $dbh        = $self->getDbh();
     my $query = "SELECT oid FROM pg_database WHERE datname = '$databaseName'";
     my $sth = $dbh->prepare($query);
-    $sth->execute() or die $sth->errstr;
-    my $data = $sth->fetchrow_arrayref() or die $sth->errstr;
+    $sth->execute() or die error(235, $sth->errstr);
+    my $data = $sth->fetchrow_arrayref() or die error(236, $sth->errstr);
     my $oid = $data->[0];
     $sth->finish;
 
     # read database comment
     $query = "SELECT shobj_description($oid, 'pg_database')";
     $sth = $dbh->prepare($query);
-    $sth->execute() or die $sth->errstr;
+    $sth->execute() or die error(237, $sth->errstr);
     $data = $sth->fetchrow_arrayref();
     my $databaseRemark = $data->[0];
     $sth->finish;
@@ -298,7 +298,7 @@ sub getRecord {
     my $tableIdQ   = $dbh->quote_identifier($tableId);
     my $primaryKey = $dbh->quote_identifier($self->getTableStructure($tableId)->{meta}{primary}[0]);
 
-    die "Primary key undefined for table $tableId" unless $primaryKey;
+    die error(453, "Primary key undefined for table $tableId") unless $primaryKey;
     my $sth        = $dbh->prepare("SELECT * FROM $tableIdQ WHERE $primaryKey = $recordIdQ");
     $sth->execute();
     my $row        = $sth->fetchrow_hashref;

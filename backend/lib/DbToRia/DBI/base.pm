@@ -84,7 +84,7 @@ sub getTableDataChunk {
     my $lastRow   = shift;
     my $columns   = shift;
     my $opts = shift || {};
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getRowCount(table,filter)
@@ -97,7 +97,7 @@ sub getRowCount {
     my $self = shift;
     my $table = shift;
     my $filter = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 updateTableData(table,selection,data)
@@ -111,7 +111,7 @@ sub updateTableData {
     my $tableId     = shift;
     my $recordId     = shift;
     my $data	  = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 insertTableData(table,data)
@@ -124,7 +124,7 @@ sub insertTableData {
     my $self	  = shift;
     my $tableId	  = shift;
     my $data	  = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 deleteTableData(table,selection)
@@ -137,7 +137,7 @@ sub deleteTableData {
     my $self	  = shift;
     my $tableId	  = shift;
     my $recordId     = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head1 CORE METHODS
@@ -185,7 +185,7 @@ Returns a map of tables with associated meta information.
 
 sub getAllTables {
     my $self = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
     return $self->{tableList};
 }
 
@@ -227,7 +227,7 @@ datatypes to DbToRia compatible datatypes.
 sub getTableStructureRaw {
     my $self = shift;
     my $tableId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getTableStructure(table)
@@ -277,7 +277,7 @@ sub getRecord {
     my $self = shift;
     my $tableId = shift;
     my $recordId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getRecordDeref (table,recordId)
@@ -370,7 +370,7 @@ Returns hash of columns with default values.
 sub getDefaults {
     my $self = shift;
     my $tableId = shift;
-    die "Override in Driver";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getDefaultsDeref (table)
@@ -408,7 +408,7 @@ Return name of the database connected to.
 
 sub getDatabaseName {
     my $self = shift;
-    die "Must be overwritten.";
+    die error(654, (caller(0))[3] . ' must be overwritten in driver');
 }
 
 =head2 getTables
