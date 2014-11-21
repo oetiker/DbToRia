@@ -24,16 +24,21 @@ qx.Class.define("dbtoria.module.desktop.Taskbar", {
     construct : function() {
         this.base(arguments);
 
-        var partInfo    = new qx.ui.toolbar.Part();
+        var partInfo = new qx.ui.toolbar.Part();
         this.add(partInfo);
-        dbtoria.data.Rpc.getInstance().callAsyncSmart( function(name){
-            var databaseName = new qx.ui.basic.Label().set({
-                alignY: 'middle',
-                value: name,
-                padding: 5
-            });
-            partInfo.add(databaseName);
-        },'getConnectionInfo');
+        dbtoria.data.Rpc.getInstance().callAsyncSmart( function(name, exc){
+            if (exc) {
+                dbtoria.ui.dialog.MsgBox.getInstance().exc(exc);
+            }
+            else {
+                var databaseName = new qx.ui.basic.Label().set({
+                    alignY: 'middle',
+                    value: name,
+                    padding: 5
+                });
+                partInfo.add(databaseName);
+            }
+        }, 'getConnectionInfo');
 
         this.add(new qx.ui.toolbar.Separator());
 
