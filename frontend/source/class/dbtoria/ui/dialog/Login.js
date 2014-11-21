@@ -114,8 +114,7 @@ qx.Class.define("dbtoria.ui.dialog.Login", {
                 username : username.getValue(),
                 password : password.getValue()
             });
-        },
-        this);
+        }, this);
 
         this.addListener('appear', function() {
             password.setValue('');
