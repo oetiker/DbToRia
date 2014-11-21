@@ -93,7 +93,7 @@ Return name of the database connected to.
 
 =cut
 
-sub getDatabaseName1 {
+sub getDatabaseName {
     my $self = shift;
     my $dsn = $self->{dsn};
 
